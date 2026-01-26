@@ -80,7 +80,7 @@ You might find yourself in a situation where none of the provided containers con
 ```
 module use /appl/local/containers/ai-modules
 module load singularity-AI-bindings
-export SIF=/appl/local/containers/sif-images/lumi-pytorch-rocm-6.2.1-python-3.12-pytorch-20240918-vllm-4075b35.sif
+export SIF=/appl/local/containers/sif-images/lumi-pytorch-rocm-6.2.4-python-3.12-pytorch-v2.7.1.sif
 singularity shell $SIF
 Singularity> $WITH_CONDA
 (pytorch) Singularity> python -m venv h5-env --system-site-packages
