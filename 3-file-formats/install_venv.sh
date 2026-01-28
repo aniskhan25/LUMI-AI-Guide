@@ -3,7 +3,8 @@ set -euo pipefail
 module use /appl/local/containers/ai-modules
 module load singularity-AI-bindings
 
-CONTAINER=/appl/local/containers/sif-images/lumi-pytorch-rocm-6.2.4-python-3.12-pytorch-v2.7.1.sif
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/env.sh"
 
 if [ -d "venv-extension" ]; then echo 'Removing existing venv-extension'; rm -Rf venv-extension; fi
 

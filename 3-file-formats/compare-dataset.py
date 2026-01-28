@@ -1,3 +1,4 @@
+import os
 import sys
 from time import time
 
@@ -68,7 +69,10 @@ if __name__ == "__main__":
     DataLoaderDifference(sqsh_data, "SquashFS", num_workers=num_workers)
 
     print("")
-    lmdb = "/scratch/project_462000002/joachimsode/file-format-ai-benchmark/imagenet-object-localization-challenge.lmdb"
+    lmdb = os.environ.get(
+        "LMDB_LARGE",
+        "/scratch/project_462000002/joachimsode/file-format-ai-benchmark/imagenet-object-localization-challenge.lmdb",
+    )
     t3 = time()
     with LMDBDataset(lmdb, transform=transform) as lmdb_data:
         print(f"LMDB loading time: {time()-t3})")

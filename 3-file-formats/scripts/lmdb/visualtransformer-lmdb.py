@@ -1,3 +1,4 @@
+import os
 import torch
 import torchvision.transforms as transforms
 from torch.profiler import profile, record_function, ProfilerActivity, schedule
@@ -90,7 +91,10 @@ def train_model(
 @time("visualtransformer-lmdb-noprof")
 def main():
     # folder = 'data-formats/lmdb/train_images'
-    folder = "/scratch/project_462000002/joachimsode/file-format-ai-benchmark/imagenet-object-localization-challenge.lmdb"
+    folder = os.environ.get(
+        "LMDB_LARGE",
+        "/scratch/project_462000002/joachimsode/file-format-ai-benchmark/imagenet-object-localization-challenge.lmdb",
+    )
     with LMDBDataset(folder, transform=transform) as full_train_dataset:
         # Splitting the dataset into train and validation sets
         train_size = int(0.8 * len(full_train_dataset))
