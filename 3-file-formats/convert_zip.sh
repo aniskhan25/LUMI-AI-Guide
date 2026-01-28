@@ -12,7 +12,7 @@ module use /appl/local/training/modules/AI-20240529
 module load singularity-userfilesystems singularity-CPEbits
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/env.sh"
+source "$SCRIPT_DIR/../env.sh"
 
 OUT_FOLDER="$DATA_BENCH_DIR"
 mkdir -p "$OUT_FOLDER"
