@@ -1,4 +1,4 @@
-import sys, argparse
+import os, sys, argparse
 from time import time
 
 sys.path.append("scripts/lmdb")
@@ -91,7 +91,10 @@ if __name__ == "__main__":
             sqsh_data, "SquashFS", num_workers=num_workers, N_sample=N_sample
         )
     elif args.file_format == "lmdb":
-        lmdb = "/scratch/project_462000002/joachimsode/file-format-ai-benchmark/imagenet-object-localization-challenge.lmdb"
+        lmdb = os.environ.get(
+            "LMDB_LARGE",
+            "/scratch/project_462000002/joachimsode/file-format-ai-benchmark/imagenet-object-localization-challenge.lmdb",
+        )
         t3 = time()
         with LMDBDataset(lmdb, transform=transform) as lmdb_data:
             print(f"LMDB loading time: {time()-t3})")
