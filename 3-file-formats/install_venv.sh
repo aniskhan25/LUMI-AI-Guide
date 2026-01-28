@@ -4,7 +4,7 @@ module use /appl/local/containers/ai-modules
 module load singularity-AI-bindings
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/env.sh"
+source "$SCRIPT_DIR/../env.sh"
 
 if [ -d "venv-extension" ]; then echo 'Removing existing venv-extension'; rm -Rf venv-extension; fi
 
