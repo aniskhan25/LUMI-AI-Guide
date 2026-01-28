@@ -3,7 +3,7 @@
 # Shared configuration for 3-file-formats scripts.
 # Override any value by exporting it before sourcing this file.
 
-export PROJECT_ACCOUNT="${PROJECT_ACCOUNT:-project_362000131}"
+export PROJECT_ACCOUNT="${PROJECT_ACCOUNT:-project_462000131}"
 export CONTAINER="${CONTAINER:-/appl/local/laifs/containers/lumi-multitorch-u24r64f21m43t29-20260124_092648/lumi-multitorch-full-u24r64f21m43t29-20260124_092648.sif}"
 
 export PROJECT_ROOT="${PROJECT_ROOT:-/project/${PROJECT_ACCOUNT}}"
