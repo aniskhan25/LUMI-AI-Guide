@@ -1,21 +1,8 @@
 #!/bin/bash
 
 # Shared configuration for 3-file-formats scripts.
-# Override any value by exporting it before sourcing this file.
+# This file now sources the repo-level env.sh for cross-repo consistency.
 
-export PROJECT_ACCOUNT="${PROJECT_ACCOUNT:-project_462000131}"
-export CONTAINER="${CONTAINER:-/appl/local/laifs/containers/lumi-multitorch-u24r64f21m43t29-20260124_092648/lumi-multitorch-full-u24r64f21m43t29-20260124_092648.sif}"
-
-export PROJECT_ROOT="${PROJECT_ROOT:-/project/${PROJECT_ACCOUNT}}"
-export SCRATCH_ROOT="${SCRATCH_ROOT:-/scratch/${PROJECT_ACCOUNT}}"
-
-export DATA_PROJECT_DIR="${DATA_PROJECT_DIR:-${PROJECT_ROOT}/file-format-ai-benchmark}"
-export DATA_BENCH_DIR="${DATA_BENCH_DIR:-${SCRATCH_ROOT}/file-format-ai-benchmark}"
-
-export SQUASH_LARGE="${SQUASH_LARGE:-${DATA_BENCH_DIR}/imagenet-object-localization-challenge.squashfs}"
-export LMDB_LARGE="${LMDB_LARGE:-${DATA_BENCH_DIR}/imagenet-object-localization-challenge.lmdb}"
-
-export TINY_LMDB_PATH="${TINY_LMDB_PATH:-${DATA_PROJECT_DIR}/LUMI-AI-example/data-formats/lmdb-test/data.mdb}"
-export TINY_HDF5_PATH="${TINY_HDF5_PATH:-${DATA_PROJECT_DIR}/LUMI-AI-example/data-formats/hdf5/train_images.hdf5}"
-
-export IMAGENET_ZIP_DIR="${IMAGENET_ZIP_DIR:-${PROJECT_ROOT}/LUMI-AI-example/}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+source "$REPO_ROOT/env.sh"
