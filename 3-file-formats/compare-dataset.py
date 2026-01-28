@@ -71,7 +71,7 @@ if __name__ == "__main__":
     print("")
     lmdb = os.environ.get(
         "LMDB_LARGE",
-        "/scratch/project_462000002/joachimsode/file-format-ai-benchmark/imagenet-object-localization-challenge.lmdb",
+        "/scratch/project_462000131/anisrahm/file-format-ai-benchmark/imagenet-object-localization-challenge.lmdb",
     )
     t3 = time()
     with LMDBDataset(lmdb, transform=transform) as lmdb_data:

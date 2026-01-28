@@ -85,7 +85,7 @@ if __name__ == "__main__":
     elif args.file_format == "lmdb":
         lmdb = os.environ.get(
             "TINY_LMDB_PATH",
-            "/project/project_462000002/joachimsode/file-format-ai-benchmark/LUMI-AI-example/data-formats/lmdb-test/data.mdb",
+            "/project/project_462000131/anisrahm/file-format-ai-benchmark/LUMI-AI-example/data-formats/lmdb-test/data.mdb",
         )
         t3 = time()
         with LMDBDataset(lmdb, transform=transform) as lmdb_data:
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     elif args.file_format == "hdf5":
         hdf5 = os.environ.get(
             "TINY_HDF5_PATH",
-            "/project/project_462000002/joachimsode/file-format-ai-benchmark/LUMI-AI-example/data-formats/hdf5/train_images.hdf5",
+            "/project/project_462000131/anisrahm/file-format-ai-benchmark/LUMI-AI-example/data-formats/hdf5/train_images.hdf5",
         )
         t3 = time()
         with HDF5Dataset(hdf5, transform=transform) as hdf5_data:

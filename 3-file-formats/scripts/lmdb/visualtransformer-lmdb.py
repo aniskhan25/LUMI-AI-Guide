@@ -93,7 +93,7 @@ def main():
     # folder = 'data-formats/lmdb/train_images'
     folder = os.environ.get(
         "LMDB_LARGE",
-        "/scratch/project_462000002/joachimsode/file-format-ai-benchmark/imagenet-object-localization-challenge.lmdb",
+        "/scratch/project_462000131/anisrahm/file-format-ai-benchmark/imagenet-object-localization-challenge.lmdb",
     )
     with LMDBDataset(folder, transform=transform) as full_train_dataset:
         # Splitting the dataset into train and validation sets

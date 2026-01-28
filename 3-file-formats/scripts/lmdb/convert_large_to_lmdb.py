@@ -88,11 +88,11 @@ def main():
     # folder_out = 'data-formats/lmdb/train_images.lmdb'
     name = "imagenet-object-localization-challenge"
     folder_in = os.environ.get(
-        "IMAGENET_ZIP_DIR", "/project/project_462000002/LUMI-AI-example/"
+        "IMAGENET_ZIP_DIR", "/project/project_462000131/anisrahm/file-format-ai-benchmark/LUMI-AI-example/"
     )
     folder_out = os.environ.get(
         "DATA_BENCH_DIR",
-        "/scratch/project_462000002/joachimsode/file-format-ai-benchmark/",
+        "/scratch/project_462000131/anisrahm/file-format-ai-benchmark/",
     )
     parser = argparse.ArgumentParser()
     parser.add_argument(
