@@ -77,8 +77,13 @@ def folder2lmdb(image_folder, output_file, write_frequency=100):
 
 
 def main():
-    folder_in = "data-formats/raw/tiny-imagenet-200/"
-    folder_out = "data-formats/lmdb/"
+    base_dir = os.environ.get("DATA_PROJECT_DIR", "").strip()
+    if base_dir:
+        folder_in = os.path.join(base_dir, "data-formats/raw/tiny-imagenet-200/")
+        folder_out = os.path.join(base_dir, "data-formats/lmdb/")
+    else:
+        folder_in = "data-formats/raw/tiny-imagenet-200/"
+        folder_out = "data-formats/lmdb/"
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-i",
