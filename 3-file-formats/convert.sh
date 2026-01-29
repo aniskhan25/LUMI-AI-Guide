@@ -10,8 +10,17 @@ module use /appl/local/training/modules/AI-20240529
 module load singularity-userfilesystems singularity-CPEbits
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="${SLURM_SUBMIT_DIR:-$(cd -- "$SCRIPT_DIR/.." && pwd)}"
-source "$REPO_ROOT/env.sh"
+SUBMIT_DIR="${SLURM_SUBMIT_DIR:-$SCRIPT_DIR}"
+if [ -f "$SUBMIT_DIR/env.sh" ]; then
+    source "$SUBMIT_DIR/env.sh"
+elif [ -f "$SUBMIT_DIR/../env.sh" ]; then
+    source "$SUBMIT_DIR/../env.sh"
+elif [ -f "$SCRIPT_DIR/../env.sh" ]; then
+    source "$SCRIPT_DIR/../env.sh"
+else
+    echo "Error: env.sh not found (checked $SUBMIT_DIR and parent directories)." >&2
+    exit 1
+fi
 
 DATA_DIR="${DATA_PROJECT_DIR}/data-formats"
 SRUN="${SRUN:-srun --cpu-bind=none}"
