@@ -13,8 +13,6 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SUBMIT_DIR="${SLURM_SUBMIT_DIR:-$SCRIPT_DIR}"
 if [ -f "$SUBMIT_DIR/env.sh" ]; then
     source "$SUBMIT_DIR/env.sh"
-elif [ -f "$SUBMIT_DIR/../env.sh" ]; then
-    source "$SUBMIT_DIR/../env.sh"
 elif [ -f "$SCRIPT_DIR/../env.sh" ]; then
     source "$SCRIPT_DIR/../env.sh"
 else
