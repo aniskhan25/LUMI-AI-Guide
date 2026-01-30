@@ -3,7 +3,7 @@
 # Shared configuration for LUMI runs across the repo.
 # Override any value by exporting it before sourcing this file.
 
-export REPO_ROOT="${REPO_ROOT:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)}"
+export REPO_ROOT="/project/project_462000131/anisrahm/LUMI-AI-Guide"
 
 export PROJECT_ACCOUNT="${PROJECT_ACCOUNT:-project_462000131}"
 export LUMI_USER="${LUMI_USER:-${USER:-anisrahm}}"
