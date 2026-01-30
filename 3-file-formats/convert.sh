@@ -5,6 +5,7 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --mem-per-cpu=1750
 #SBATCH --time=0:10:00
+#SBATCH --output=slurm-%j.out
 
 module use /appl/local/training/modules/AI-20240529
 module load singularity-userfilesystems singularity-CPEbits
