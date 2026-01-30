@@ -1,7 +1,7 @@
 #!/bin/bash
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../env.sh"
+REPO_ROOT="/project/project_462000131/anisrahm/LUMI-AI-Guide"
+source "$REPO_ROOT/env.sh"
 
 DATA_DIR="${DATA_PROJECT_DIR}/data-formats"
 
