@@ -12,12 +12,25 @@ module load singularity-userfilesystems singularity-CPEbits
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SUBMIT_DIR="${SLURM_SUBMIT_DIR:-$SCRIPT_DIR}"
 
-if [ -f "$SUBMIT_DIR/env.sh" ]; then
-    source "$SUBMIT_DIR/env.sh"
-elif [ -f "$SCRIPT_DIR/../env.sh" ]; then
-    source "$SCRIPT_DIR/../env.sh"
+REPO_ROOT_CANDIDATES=(
+    "${REPO_ROOT:-}"
+    "$SUBMIT_DIR"
+    "$SUBMIT_DIR/.."
+    "$SCRIPT_DIR/.."
+)
+
+FOUND_ENV=""
+for candidate in "${REPO_ROOT_CANDIDATES[@]}"; do
+    if [ -n "$candidate" ] && [ -f "$candidate/env.sh" ]; then
+        FOUND_ENV="$candidate/env.sh"
+        break
+    fi
+done
+
+if [ -n "$FOUND_ENV" ]; then
+    source "$FOUND_ENV"
 else
-    echo "Error: env.sh not found (checked $SUBMIT_DIR and $SCRIPT_DIR/..)." >&2
+    echo "Error: env.sh not found. Set REPO_ROOT or submit from repo root." >&2
     exit 1
 fi
 
