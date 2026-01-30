@@ -9,30 +9,7 @@
 module use /appl/local/training/modules/AI-20240529
 module load singularity-userfilesystems singularity-CPEbits
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-SUBMIT_DIR="${SLURM_SUBMIT_DIR:-$SCRIPT_DIR}"
-
-REPO_ROOT_CANDIDATES=(
-    "${REPO_ROOT:-}"
-    "$SUBMIT_DIR"
-    "$SUBMIT_DIR/.."
-    "$SCRIPT_DIR/.."
-)
-
-FOUND_ENV=""
-for candidate in "${REPO_ROOT_CANDIDATES[@]}"; do
-    if [ -n "$candidate" ] && [ -f "$candidate/env.sh" ]; then
-        FOUND_ENV="$candidate/env.sh"
-        break
-    fi
-done
-
-if [ -n "$FOUND_ENV" ]; then
-    source "$FOUND_ENV"
-else
-    echo "Error: env.sh not found. Set REPO_ROOT or submit from repo root." >&2
-    exit 1
-fi
+source "/project/project_462000131/anisrahm/LUMI-AI-Guide/env.sh"
 
 DATA_DIR="${DATA_PROJECT_DIR}/data-formats"
 SRUN="${SRUN:-srun --cpu-bind=none}"
