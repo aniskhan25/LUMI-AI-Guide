@@ -11,23 +11,13 @@ module load singularity-userfilesystems singularity-CPEbits
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SUBMIT_DIR="${SLURM_SUBMIT_DIR:-$SCRIPT_DIR}"
-SUBMIT_DIR_REAL="$(readlink -f "$SUBMIT_DIR" 2>/dev/null || (cd -- "$SUBMIT_DIR" && pwd -P))"
-SCRIPT_DIR_REAL="$(readlink -f "$SCRIPT_DIR" 2>/dev/null || (cd -- "$SCRIPT_DIR" && pwd -P))"
 
-if [ -n "${REPO_ROOT:-}" ] && [ -f "$REPO_ROOT/env.sh" ]; then
-    source "$REPO_ROOT/env.sh"
-elif [ -f "$SUBMIT_DIR/env.sh" ]; then
+if [ -f "$SUBMIT_DIR/env.sh" ]; then
     source "$SUBMIT_DIR/env.sh"
-elif [ -f "$SUBMIT_DIR_REAL/env.sh" ]; then
-    source "$SUBMIT_DIR_REAL/env.sh"
-elif [ -f "$SUBMIT_DIR_REAL/../env.sh" ]; then
-    source "$SUBMIT_DIR_REAL/../env.sh"
 elif [ -f "$SCRIPT_DIR/../env.sh" ]; then
     source "$SCRIPT_DIR/../env.sh"
-elif [ -f "$SCRIPT_DIR_REAL/../env.sh" ]; then
-    source "$SCRIPT_DIR_REAL/../env.sh"
 else
-    echo "Error: env.sh not found (checked $SUBMIT_DIR and resolved paths)." >&2
+    echo "Error: env.sh not found (checked $SUBMIT_DIR and $SCRIPT_DIR/..)." >&2
     exit 1
 fi
 
