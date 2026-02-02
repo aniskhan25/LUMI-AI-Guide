@@ -22,6 +22,7 @@ DATA_DIR="${DATA_PROJECT_DIR}/data-formats"
 ZIP_DIR="${DATA_DIR}/zip"
 RAW_DIR="${DATA_DIR}/raw"
 ZIP_PATH="${ZIP_DIR}/tiny-imagenet-200.zip"
+TMP_ZIP="${TMPDIR:-/tmp}/tiny-imagenet-200.zip"
 URL="https://cs231n.stanford.edu/tiny-imagenet-200.zip"
 
 echo "DATA_PROJECT_DIR=${DATA_PROJECT_DIR}"
@@ -32,16 +33,16 @@ mkdir -p "${ZIP_DIR}" "${RAW_DIR}"
 
 # Download idempotently (avoid partial/corrupted files)
 if [[ ! -f "${ZIP_PATH}" ]]; then
-  echo "Downloading: ${URL}"
+  echo "Downloading to local tmp: ${TMP_ZIP}"
   if command -v wget >/dev/null 2>&1; then
-    wget -O "${ZIP_PATH}.part" "${URL}"
+    wget -c -O "${TMP_ZIP}" "${URL}"
   elif command -v curl >/dev/null 2>&1; then
-    curl -L -o "${ZIP_PATH}.part" "${URL}"
+    curl -L -o "${TMP_ZIP}" "${URL}"
   else
     echo "ERROR: Neither wget nor curl found in PATH." >&2
     exit 1
   fi
-  mv "${ZIP_PATH}.part" "${ZIP_PATH}"
+  mv "${TMP_ZIP}" "${ZIP_PATH}"
 else
   echo "Zip already exists: ${ZIP_PATH}"
 fi
