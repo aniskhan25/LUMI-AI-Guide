@@ -12,7 +12,7 @@ export CONTAINER="${CONTAINER:-/appl/local/laifs/containers/lumi-multitorch-u24r
 export PROJECT_ROOT="${PROJECT_ROOT:-/project/${PROJECT_ACCOUNT}/${LUMI_USER}}"
 export SCRATCH_ROOT="${SCRATCH_ROOT:-/scratch/${PROJECT_ACCOUNT}/${LUMI_USER}}"
 
-export DATA_PROJECT_DIR="${DATA_PROJECT_DIR:-${PROJECT_ROOT}/file-format-ai-benchmark}"
+export DATA_PROJECT_DIR="${DATA_PROJECT_DIR:-${SCRATCH_ROOT}/file-format-ai-benchmark}"
 export DATA_BENCH_DIR="${DATA_BENCH_DIR:-${SCRATCH_ROOT}/file-format-ai-benchmark}"
 
 export SQUASH_LARGE="${SQUASH_LARGE:-${DATA_BENCH_DIR}/imagenet-object-localization-challenge.squashfs}"
