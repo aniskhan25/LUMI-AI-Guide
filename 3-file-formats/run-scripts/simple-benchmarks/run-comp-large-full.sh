@@ -1,6 +1,5 @@
 #!/bin/bash
 #SBATCH --job-name=comp-full
-#SBATCH --output=./run-scripts/simple-benchmarks/comp-full-%j.out
 #SBATCH --account=project_462000131
 #SBATCH --partition=standard-g
 #SBATCH --nodes=1
@@ -8,6 +7,7 @@
 #SBATCH --cpus-per-task=7
 #SBATCH --mem-per-gpu=60G
 #SBATCH --time=08:00:00
+#SBATCH --output=/scratch/project_462000131/anisrahm/slurm/comp-full-%j.out
 
 set -euo pipefail
 

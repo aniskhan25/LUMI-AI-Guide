@@ -1,6 +1,5 @@
 #!/bin/bash
 #SBATCH --job-name=comp-tiny
-#SBATCH --output=./run-scripts/simple-benchmarks/comp-tiny-%j.out
 #SBATCH --account=project_462000131
 #SBATCH --partition=standard-g
 #SBATCH --nodes=1
@@ -8,6 +7,7 @@
 #SBATCH --cpus-per-task=7
 #SBATCH --mem-per-gpu=60G
 #SBATCH --time=00:10:00
+#SBATCH --output=/scratch/project_462000131/anisrahm/slurm/comp-tiny-%j.out
 
 set -euo pipefail
 
