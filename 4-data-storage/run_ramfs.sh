@@ -30,6 +30,8 @@ source "$REPO_ROOT/env.sh"
 : "${CONTAINER:?Set CONTAINER in env.sh}"
 : "${TINY_HDF5_PATH:?Set TINY_HDF5_PATH in env.sh}"
 [[ -f "$TINY_HDF5_PATH" ]] || { echo "ERROR: Missing HDF5 file: $TINY_HDF5_PATH" >&2; exit 1; }
+SQSH_PATH="$REPO_ROOT/resources/visiontransformer-env.sqsh"
+[[ -f "$SQSH_PATH" ]] || { echo "ERROR: Missing sqsh file: $SQSH_PATH" >&2; exit 1; }
 
 OUT_DIR="$DATA_BENCH_DIR/ramfs"
 mkdir -p "$OUT_DIR"
@@ -37,10 +39,12 @@ mkdir -p "$OUT_DIR"
 export SRC_HDF5="$TINY_HDF5_PATH"
 export APP_SCRIPT="$REPO_ROOT/4-data-storage/visiontransformer_ramfs.py"
 export DST_MODEL="$OUT_DIR/vit_b_16_imagenet.${SLURM_JOB_ID:-$$}.pth"
+export SINGULARITYENV_PREPEND_PATH="/user-software/bin"
 
-srun singularity exec "$CONTAINER" bash -c '
+srun singularity exec -B "$SQSH_PATH":/user-software:image-src=/ "$CONTAINER" bash -c '
   set -euo pipefail
   if [ -n "${WITH_CONDA:-}" ]; then eval "$WITH_CONDA"; fi
+  source /user-software/bin/activate
   time cp -a "$SRC_HDF5" /tmp/train_images.hdf5
   time python "$APP_SCRIPT"
   time /bin/cp -a /tmp/vit_b_16_imagenet.pth "$DST_MODEL"
