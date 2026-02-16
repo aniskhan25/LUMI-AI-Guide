@@ -29,4 +29,4 @@ post-large:
 	python run-scripts/simple-benchmarks/post-process.py -d 'large'
 
 post-large-full:
-	python run-scripts/simple-benchmarks/post-process.py -d 'large-full'
+	python run-scripts/simple-benchmarks/post-process.py -d 'full'
