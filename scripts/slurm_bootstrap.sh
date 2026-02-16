@@ -10,6 +10,7 @@ bootstrap_repo() {
   local submit_dir="${SLURM_SUBMIT_DIR:-$PWD}"
   local search_dir="$submit_dir"
   local found_root=""
+  local repo_root=""
 
   while [[ "$search_dir" != "/" ]]; do
     if [[ -f "$search_dir/env.sh" ]]; then
@@ -37,13 +38,15 @@ bootstrap_repo() {
     esac
   done
 
-  export REPO_ROOT="$found_root"
-  source "$REPO_ROOT/env.sh"
+  repo_root="$found_root"
+  source "$repo_root/env.sh"
+  # Keep runtime paths consistent with the location from which the job was submitted.
+  export REPO_ROOT="$repo_root"
 
   : "${CONTAINER:?Set CONTAINER in env.sh}"
 
   if [[ "$require_sqsh" -eq 1 ]]; then
-    export SQSH_PATH="$REPO_ROOT/resources/visiontransformer-env.sqsh"
+    export SQSH_PATH="$repo_root/resources/visiontransformer-env.sqsh"
     if [[ ! -f "$SQSH_PATH" ]]; then
       echo "ERROR: Missing sqsh file: $SQSH_PATH" >&2
       return 1
@@ -51,9 +54,9 @@ bootstrap_repo() {
     export SINGULARITYENV_PREPEND_PATH="/user-software/bin"
   fi
 
-  if [[ "$submit_dir" == "$REPO_ROOT"* ]]; then
+  if [[ "$submit_dir" == "$repo_root"* ]]; then
     cd "$submit_dir"
   else
-    cd "$REPO_ROOT"
+    cd "$repo_root"
   fi
 }
