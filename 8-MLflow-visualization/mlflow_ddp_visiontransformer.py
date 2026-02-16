@@ -13,6 +13,8 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from resources.hdf5_dataset import HDF5Dataset
 
+HDF5_PATH = os.environ.get("TINY_HDF5_PATH", "../resources/train_images.hdf5")
+
 
 # The performance of the CPU mapping needs to be tested
 def set_cpu_affinity(local_rank):
@@ -109,7 +111,7 @@ def train_model(model, criterion, optimizer, train_loader, val_loader, epochs=10
 
 
 with HDF5Dataset(
-    "../resources/train_images.hdf5", transform=transform
+    HDF5_PATH, transform=transform
 ) as full_train_dataset:
 
     # Splitting the dataset into train and validation sets
