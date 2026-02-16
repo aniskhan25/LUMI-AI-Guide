@@ -18,7 +18,7 @@ export DATA_BENCH_DIR="${DATA_BENCH_DIR:-${SCRATCH_ROOT}/file-format-ai-benchmar
 export SQUASH_LARGE="${SQUASH_LARGE:-${DATA_BENCH_DIR}/imagenet-object-localization-challenge.squashfs}"
 export LMDB_LARGE="${LMDB_LARGE:-${DATA_BENCH_DIR}/imagenet-object-localization-challenge.lmdb}"
 
-export TINY_LMDB_PATH="${TINY_LMDB_PATH:-${DATA_PROJECT_DIR}/LUMI-AI-example/data-formats/lmdb-test/data.mdb}"
-export TINY_HDF5_PATH="${TINY_HDF5_PATH:-${DATA_PROJECT_DIR}/LUMI-AI-example/data-formats/hdf5/train_images.hdf5}"
+export TINY_LMDB_PATH="${TINY_LMDB_PATH:-${DATA_PROJECT_DIR}/data-formats/lmdb/train_images}"
+export TINY_HDF5_PATH="${TINY_HDF5_PATH:-${DATA_PROJECT_DIR}/data-formats/hdf5/train_images.hdf5}"
 
-export IMAGENET_ZIP_DIR="${IMAGENET_ZIP_DIR:-${DATA_PROJECT_DIR}/LUMI-AI-example/}"
+export IMAGENET_ZIP_DIR="${IMAGENET_ZIP_DIR:-${DATA_BENCH_DIR}/}"
