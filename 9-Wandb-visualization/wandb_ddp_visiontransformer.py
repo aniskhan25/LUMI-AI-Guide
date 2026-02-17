@@ -4,7 +4,6 @@ import torchvision.transforms as transforms
 from torchvision.models import vit_b_16
 from torch.utils.data import DataLoader, random_split
 from torch.nn.parallel import DistributedDataParallel
-from hdf5_dataset import HDF5Dataset
 import torch.distributed as dist
 from torch.utils.data.distributed import DistributedSampler
 import psutil
