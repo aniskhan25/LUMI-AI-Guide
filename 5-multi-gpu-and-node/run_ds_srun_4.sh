@@ -20,11 +20,6 @@ module load singularity-AI-bindings
 source ../scripts/slurm_bootstrap.sh
 bootstrap_repo --require-sqsh
 
-export TORCH_EXTENSIONS_DIR="${SCRATCH_ROOT}/torch_extensions/${SLURM_JOB_ID}"
-mkdir -p "$TORCH_EXTENSIONS_DIR"
-export SINGULARITYENV_TORCH_EXTENSIONS_DIR="$TORCH_EXTENSIONS_DIR"
-export SINGULARITYENV_CXX=g++-12
-
 export NCCL_SOCKET_IFNAME=hsn0,hsn1,hsn2,hsn3
 export NCCL_NET_GDR_LEVEL=PHB
 
@@ -35,19 +30,10 @@ export LOCAL_WORLD_SIZE=$SLURM_GPUS_PER_NODE
 
 CPU_BIND_MASKS="0x00fe000000000000,0xfe00000000000000,0x0000000000fe0000,0x00000000fe000000,0x00000000000000fe,0x000000000000fe00,0x000000fe00000000,0x0000fe0000000000"
 
-srun --nodes=1 --ntasks=1 singularity exec -B "$SQSH_PATH":/user-software:image-src=/ "$CONTAINER" bash -c '
-  set -euo pipefail
-  if [ -n "${WITH_CONDA:-}" ]; then eval "$WITH_CONDA"; fi
-  source /user-software/bin/activate
-  export CXX=g++-12
-  python -c "import torch; from deepspeed.ops.adam import FusedAdam; p=torch.nn.Parameter(torch.zeros(1, device=\"cuda\")); FusedAdam([p], lr=1e-3); print(\"fused_adam extension ready\")"
-'
-
 srun --cpu-bind="v,mask_cpu=${CPU_BIND_MASKS}" singularity exec -B "$SQSH_PATH":/user-software:image-src=/ "$CONTAINER" bash -c '
   set -euo pipefail
   if [ -n "${WITH_CONDA:-}" ]; then eval "$WITH_CONDA"; fi
   source /user-software/bin/activate
-  export CXX=g++-12
   export RANK="$SLURM_PROCID"
   export LOCAL_RANK="$SLURM_LOCALID"
   python ds_visiontransformer.py --deepspeed --deepspeed_config ds_config.json
