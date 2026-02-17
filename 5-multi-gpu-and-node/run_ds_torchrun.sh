@@ -20,6 +20,11 @@ module load singularity-AI-bindings
 source ../scripts/slurm_bootstrap.sh
 bootstrap_repo --require-sqsh
 
+export TORCH_EXTENSIONS_DIR="${SCRATCH_ROOT}/torch_extensions"
+mkdir -p "$TORCH_EXTENSIONS_DIR"
+export SINGULARITYENV_TORCH_EXTENSIONS_DIR="$TORCH_EXTENSIONS_DIR"
+export SINGULARITYENV_CXX=g++-12
+
 export MASTER_ADDR=$(scontrol show hostnames $SLURM_JOB_NODELIST | head -n 1)
 export MASTER_PORT=29500
 

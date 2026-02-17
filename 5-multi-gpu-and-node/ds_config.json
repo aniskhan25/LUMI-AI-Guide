@@ -1,22 +1,19 @@
 {
   "train_batch_size": 32,
   "steps_per_print": 100,
-
   "zero_optimization": {
     "stage": 1
   },
-
   "optimizer": {
     "type": "Adam",
+    "params": {
+      "lr": 0.001
+    }
   },
-
   "fp16": {
-    "enabled": false,
+    "enabled": false
   },
-
   "gradient_clipping": 1.0,
   "prescale_gradients": false,
-  "wall_clock_breakdown" : false
+  "wall_clock_breakdown": false
 }
-
-
