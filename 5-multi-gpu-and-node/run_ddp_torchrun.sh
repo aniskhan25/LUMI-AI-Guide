@@ -24,7 +24,6 @@ bootstrap_repo --require-sqsh
 export NCCL_SOCKET_IFNAME=hsn0,hsn1,hsn2,hsn3
 export NCCL_NET_GDR_LEVEL=PHB
 
-export SINGULARITYENV_PREPEND_PATH=/user-software/bin
 srun singularity exec -B "$SQSH_PATH":/user-software:image-src=/ "$CONTAINER" bash -c '
   set -euo pipefail
   if [ -n "${WITH_CONDA:-}" ]; then eval "$WITH_CONDA"; fi
