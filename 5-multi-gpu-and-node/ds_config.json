@@ -6,6 +6,7 @@
   },
   "optimizer": {
     "type": "Adam",
+    "torch_adam": true,
     "params": {
       "lr": 0.001
     }
