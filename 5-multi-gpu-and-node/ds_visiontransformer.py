@@ -64,7 +64,10 @@ deepspeed.init_distributed()
 
 def train_model(args, model, criterion, optimizer, train_loader, val_loader, epochs=10):
     model_engine, optimizer, _, _ = deepspeed.initialize(
-        args=args, model=model, model_parameters=model.parameters()
+        args=args,
+        model=model,
+        optimizer=optimizer,
+        model_parameters=model.parameters(),
     )
 
     if rank == 0:
