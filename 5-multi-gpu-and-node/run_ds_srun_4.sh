@@ -20,6 +20,11 @@ module load singularity-AI-bindings
 source ../scripts/slurm_bootstrap.sh
 bootstrap_repo --require-sqsh
 
+export TORCH_EXTENSIONS_DIR="${SCRATCH_ROOT}/torch_extensions"
+mkdir -p "$TORCH_EXTENSIONS_DIR"
+export SINGULARITYENV_TORCH_EXTENSIONS_DIR="$TORCH_EXTENSIONS_DIR"
+export SINGULARITYENV_CXX=g++-12
+
 export NCCL_SOCKET_IFNAME=hsn0,hsn1,hsn2,hsn3
 export NCCL_NET_GDR_LEVEL=PHB
 
