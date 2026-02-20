@@ -117,7 +117,7 @@ Singularity> $WITH_CONDA
 (h5-env) (pytorch) Singularity> pip install h5py
 ```
 
-This will create an `h5-env` environment in the working directory. The `--system-site-packages` flag gives the virtual environment access to the packages from the container. Now one can execute a script with and import the `h5py` package. To execute a script called `my-script.py` within the container using the virtual environment, use the additional activation command:
+This will create an `h5-env` environment in the working directory. The `--system-site-packages` flag gives the virtual environment access to the packages from the container. You can now execute scripts that import the `h5py` package. To execute a script called `my-script.py` within the container using the virtual environment, use the additional activation command:
 
 ```
 singularity exec $SIF bash -c '$WITH_CONDA && source h5-env/bin/activate && python my-script.py'

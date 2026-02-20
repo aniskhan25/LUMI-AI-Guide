@@ -1,4 +1,4 @@
-# 9. Wandb visualization
+# 9. W&B visualization
 
 ## Goal
 
@@ -19,7 +19,7 @@ Integrate Weights & Biases (W&B) into your training workflow to track metrics, c
 [Weights & Biases](https://docs.wandb.ai/) is an AI developer platform consisting of three major components: [Models](https://docs.wandb.ai/guides/models/), [Weave](https://wandb.github.io/weave/) and [Core](https://docs.wandb.ai/guides/core/). These components provide features such as tracking your runs, models and datasets, visualizing data and hyperparameter sweeps.
 
 
-## Initializing Wandb
+## Initializing W&B
 
 The [W&B QuickStart](https://docs.wandb.ai/quickstart/) consists of 2 simple steps: registering an account and authenticating with the API key on LUMI.
 
@@ -84,21 +84,21 @@ wandb: 🚀 View run at https://wandb.ai/<organization>/LUMI-visiontransformer/r
 ```
 
 
-## Wandb Web Interface
+## W&B web interface
 
-Navigate to https://wandb.ai/home to inspect the logs. `LUMI-visionltransformer` (the project name we provided in the initialization) should be visible under `Your recent projects`. After selecting the project, you should be able to see the run that was just executed, which we named `Example run`. 
+Navigate to https://wandb.ai/home to inspect the logs. `LUMI-visiontransformer` (the project name we provided in the initialization) should be visible under `Your recent projects`. After selecting the project, you should be able to see the run that was just executed, which we named `Example run`. 
 
 Under `Overview` you will be able to find general statistics of the run, such as the parameters we specified in the configuration, GPU count, Python version, run duration and so on.
 
-![Wandb Overview](../assets/images/wandb_overview.png)
+![W&B Overview](../assets/images/wandb_overview.png)
 
 Under `Workspace`, the logs we collected (loss and accuracy in addition to system metrics) will be displayed.
 
-![Wandb Workspace](../assets/images/wandb_workspace.png)
+![W&B Workspace](../assets/images/wandb_workspace.png)
 
-Finally, the `Logs` tab will show the output of the run after the initialization of Wandb. 
+Finally, the `Logs` tab will show the output of the run after W&B initialization. 
 
-![Wandb Logs](../assets/images/wandb_logs.png)
+![W&B Logs](../assets/images/wandb_logs.png)
 
 ## Verify
 

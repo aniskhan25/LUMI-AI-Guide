@@ -38,7 +38,7 @@ After lesson `6`, the core path is complete. Continue with optional experiment-t
 
 - [7. TensorBoard visualization](../7-tensorboard-visualization/README.md)
 - [8. MLflow visualization](../8-mlflow-visualization/README.md)
-- [9. Wandb visualization](../9-wandb-visualization/README.md)
+- [9. W&B visualization](../9-wandb-visualization/README.md)
 
 ## Baseline conventions used across lessons
 

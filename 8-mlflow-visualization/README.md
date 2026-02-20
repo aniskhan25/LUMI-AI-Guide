@@ -91,4 +91,4 @@ Check these outcomes:
 ## Navigation
 
 - Previous: [7. TensorBoard visualization](../7-tensorboard-visualization/README.md)
-- Next: [9. Wandb visualization](../9-wandb-visualization/README.md)
+- Next: [9. W&B visualization](../9-wandb-visualization/README.md)
