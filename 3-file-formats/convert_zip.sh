@@ -15,8 +15,11 @@ module load singularity-userfilesystems singularity-CPEbits
 source ../env.sh
 : "${CONTAINER:?Set CONTAINER in ../env.sh}"
 : "${DATA_BENCH_DIR:?Set DATA_BENCH_DIR in ../env.sh}"
+SQSH_PATH="../resources/visiontransformer-env.sqsh"
+[[ -f "$SQSH_PATH" ]] || { echo "ERROR: Missing sqsh: $SQSH_PATH" >&2; exit 1; }
 
 mkdir -p "$DATA_BENCH_DIR"
 
 time srun --cpu-bind=none singularity exec "$CONTAINER" \
-  venv-extension/bin/python scripts/lmdb/convert_large_to_lmdb.py -o "$DATA_BENCH_DIR"
+  -B "$SQSH_PATH":/user-software:image-src=/ \
+  /user-software/bin/python scripts/lmdb/convert_large_to_lmdb.py -o "$DATA_BENCH_DIR"

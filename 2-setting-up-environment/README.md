@@ -38,7 +38,7 @@ Use these conventions in later lessons unless explicitly overridden:
 - Runtime launcher: `srun singularity exec ...` (not `singularity run`).
 - Container selection: `CONTAINER` from `../env.sh`.
 - Container bindings: `module load singularity-AI-bindings`.
-- Python environment extension: squashfs/venv pattern from QuickStart.
+- Python environment extension: QuickStart squashfs by default; optional local venv only for custom experiments.
 - Data path variables: use paths exported in `env.sh` (for example `TINY_HDF5_PATH`, `TINY_LMDB_PATH`, `SQUASH_LARGE`).
 
 ## Recommended baseline workflow
@@ -74,6 +74,35 @@ cd ../1-quickstart
 
 This produces `../resources/visiontransformer-env.sqsh`, reused by later run scripts.
 
+### 5. Environment extension options for later chapters
+
+Use this decision rule in chapters `3` to `9`:
+
+- Recommended default: reuse `../resources/visiontransformer-env.sqsh`.
+- Optional fallback: create a local `venv` only for custom experiments.
+
+If you need an optional local `venv` (generic pattern, run from repository root):
+
+```bash
+module use /appl/local/containers/ai-modules
+module load singularity-AI-bindings
+source ./env.sh
+
+# choose any working directory where you want to keep the venv
+mkdir -p ./optional-venv-workdir
+cd ./optional-venv-workdir
+
+singularity exec "$CONTAINER" bash -c '
+python -m venv .venv --system-site-packages
+.venv/bin/python -m pip install <package1> <package2>
+'
+```
+
+Notes:
+
+- Chapter `3` scripts are validated against the sqsh path, not this optional venv path.
+- Keep optional venv usage limited to custom runs where you directly call `.venv/bin/python`.
+
 ## Why containers on LUMI
 
 Containers on LUMI are used for:
@@ -84,24 +113,16 @@ Containers on LUMI are used for:
 
 These containers are tuned for LUMI and are generally not portable as-is to other systems.
 
-## Installing additional Python packages (reference)
+## Optional local venv reference
 
-If you need a quick interactive extension instead of rebuilding images:
-
-```bash
-export SIF=/appl/local/containers/sif-images/lumi-pytorch-rocm-6.2.4-python-3.12-pytorch-v2.7.1.sif
-singularity shell "$SIF"
-Singularity> $WITH_CONDA
-(pytorch) Singularity> python -m venv h5-env --system-site-packages
-(pytorch) Singularity> source h5-env/bin/activate
-(h5-env) (pytorch) Singularity> pip install h5py
-```
-
-Then run scripts with:
+If you choose the optional venv route, run scripts explicitly with that interpreter:
 
 ```bash
-singularity exec "$SIF" bash -c '$WITH_CONDA && source h5-env/bin/activate && python my-script.py'
+cd ./optional-venv-workdir
+singularity exec "$CONTAINER" bash -c '.venv/bin/python my_script.py'
 ```
+
+Replace `my_script.py` with your custom script.
 
 ## Optional alternatives (advanced/reference)
 
@@ -121,14 +142,14 @@ singularity exec "$SIF" bash -c '$WITH_CONDA && source h5-env/bin/activate && py
 Confirm the following before moving on:
 
 - You can run Python in the container with GPU visibility.
-- `../env.sh` values are resolved correctly in your job or interactive session.
-- You can execute scripts using either the base container or the squashfs-extended environment.
+- `env.sh` values are resolved correctly in your job or interactive session.
+- You can execute guide scripts with the base container + squashfs extension.
 
 ## Troubleshooting
 
-- `Set CONTAINER in env.sh`: define `CONTAINER` in `../env.sh` and ensure the file exists.
+- `Set CONTAINER in env.sh`: define `CONTAINER` in `env.sh` and ensure the file exists.
 - GPU count is zero: load `singularity-AI-bindings` and run inside an allocated GPU job/step.
-- Import errors for extra packages: confirm the same activation method is used at runtime (venv/squashfs).
+- Import errors for extra packages: confirm your runtime extension method (sqsh by default, optional local venv if you chose it).
 
 ## Navigation
 
