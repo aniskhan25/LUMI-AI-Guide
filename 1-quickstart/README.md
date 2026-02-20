@@ -127,5 +127,5 @@ After the three steps, confirm all of the following:
 
 ## Navigation
 
-- Previous: [Guide Home](../README.md)
+- Previous: [0. How to use this guide](../0-how-to-use-guide/README.md)
 - Next: [2. Setting up your own environment](../2-setting-up-environment/README.md)
