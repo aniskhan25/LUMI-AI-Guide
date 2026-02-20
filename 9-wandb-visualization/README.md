@@ -10,6 +10,12 @@ Integrate Weights & Biases (W&B) into your training workflow to track metrics, c
 - You have a W&B account and API key available in your environment.
 - The `wandb` package is installed in your runtime environment.
 
+## What changes from baseline
+
+- Baseline you already have: runnable training jobs and optional local tracking workflows.
+- This lesson adds: W&B authentication, run initialization, and cloud-backed experiment tracking.
+- Expected output/artifact: a W&B project/run with logged metrics and system telemetry.
+
 [Weights & Biases](https://docs.wandb.ai/) is an AI developer platform consisting of three major components: [Models](https://docs.wandb.ai/guides/models/), [Weave](https://wandb.github.io/weave/) and [Core](https://docs.wandb.ai/guides/core/). These components provide features such as tracking your runs, models and datasets, visualizing data and hyperparameter sweeps.
 
 

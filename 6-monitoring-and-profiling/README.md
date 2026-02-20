@@ -10,6 +10,12 @@ Measure whether your allocated GPU resources are used efficiently and identify c
 - You have access to live jobs (`squeue --me`) and can open an interactive shell on compute nodes.
 - You are comfortable collecting and transferring trace files for local inspection.
 
+## What changes from baseline
+
+- Baseline you already have: runnable single-node or distributed training jobs.
+- This lesson adds: runtime monitoring with `rocm-smi` and targeted profiling with PyTorch profiler.
+- Expected output/artifact: utilization checks and a trace file (for example `trace.json`) you can inspect.
+
 When running jobs on LUMI's GPUs, you want to make sure you use the given computational resources as efficiently as possible. Your project will be billed for the number of GPUs you allocate times the number of hours you use them. If you only utilize half of the GPU's computational power, you are still billed for the full GPU, resulting in wasted resources and money. In this chapter, we will show how to monitor and profile your jobs to ensure you are using the resources efficiently.
 
 ## Monitoring jobs with `rocm-smi`

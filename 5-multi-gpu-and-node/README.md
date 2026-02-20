@@ -10,6 +10,12 @@ Scale training from one GPU to multiple GPUs and nodes on LUMI using PyTorch DDP
 - You are familiar with Slurm basics (`sbatch`, `srun`, node/task/GPU resource flags).
 - You can run the single-GPU Vision Transformer example before attempting distributed runs.
 
+## What changes from baseline
+
+- Baseline you already have: a stable single-GPU training script and job workflow.
+- This lesson adds: distributed launch patterns with PyTorch DDP and DeepSpeed on one or more nodes.
+- Expected output/artifact: successful multi-GPU/multi-node job runs with correct distributed initialization.
+
 Training Deep Learning models is a resource-intensive task. When the compute and memory resources of a single GPU no longer suffice to train your model, multi-GPU and multi-node solutions can be leveraged to distribute your training job over multiple GPUs or nodes. Various strategies exist to distribute Deep Learning workloads, and various frameworks exist that implement those strategies. In this section, we cover two popular methods: data-parallelism using PyTorch's Distributed Data-Parallel (DDP) module and a mix of data parallelism and model sharding using the DeepSpeed library. We describe the necessary changes to the source code and how to launch the distributed training jobs on LUMI.
 
 ## PyTorch DDP

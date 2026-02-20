@@ -10,6 +10,12 @@ Set up a reliable container-based Python environment on LUMI that you can reuse 
 - You can submit Slurm jobs and run interactive `salloc`/`srun` commands.
 - You completed [QuickStart](../1-quickstart/README.md) or already have an equivalent baseline setup.
 
+## What changes from baseline
+
+- Baseline you already have: a working single-GPU run from QuickStart.
+- This lesson adds: how to select, run, and extend LUMI containers in a reusable way.
+- Expected output/artifact: a validated container workflow and a reproducible environment extension strategy (venv and/or squashfs).
+
 Machine learning frameworks on LUMI serve as isolated environments in the form of container images with a set of Python packages. LUMI uses the [Singularity](https://docs.sylabs.io/guides/main/user-guide/) (SingularityCE) container runtime. Containers can be seen as encapsulated images of a specific environment including all required libraries, tools and Python packages. Container images can be based on virtually any Linux distribution targeting the host architecture, but they still rely on the host kernel and kernel drivers. This plays a significant role in the case of LUMI.
 
 ## Containers on LUMI

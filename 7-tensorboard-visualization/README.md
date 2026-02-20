@@ -10,6 +10,12 @@ Track and visualize training metrics and sample data from distributed PyTorch ru
 - TensorBoard logging dependencies are available in your runtime environment.
 - You can access the LUMI web interface Apps menu.
 
+## What changes from baseline
+
+- Baseline you already have: distributed training runs that print metrics to stdout.
+- This lesson adds: rank-aware TensorBoard logging and visualization through LUMI web apps.
+- Expected output/artifact: TensorBoard event logs in `runs/` and interactive metric dashboards.
+
 [TensorBoard](https://www.tensorflow.org/tensorboard) is a tool for providing the measurements and visualizations needed during the machine learning workflow. It enables tracking experiment metrics like loss and accuracy, visualizing the model graph, projecting embeddings to a lower dimensional space, and much more.
 
 ## Collecting logs
