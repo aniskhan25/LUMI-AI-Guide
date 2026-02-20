@@ -18,6 +18,7 @@ Before proceeding, please ensure you meet the following prerequisites:
 
 The guide is structured into the following sections:
 
+- [0. How to use this guide](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/0-how-to-use-guide#readme)
 - [1. QuickStart](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/1-quickstart#readme)
 - [2. Setting up your own environment](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/2-setting-up-environment#readme)
 - [3. File formats for training data](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/3-file-formats#readme)
