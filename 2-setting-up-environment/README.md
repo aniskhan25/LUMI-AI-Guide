@@ -2,146 +2,133 @@
 
 ## Goal
 
-Set up a reliable container-based Python environment on LUMI that you can reuse in the rest of this guide.
+Define one stable runtime baseline that is reused by chapters `3` to `9`.
 
 ## Assumptions
 
-- You have an active LUMI account and a project with access to GPU resources.
-- You can submit Slurm jobs and run interactive `salloc`/`srun` commands.
-- You completed [QuickStart](../1-quickstart/README.md) or already have an equivalent baseline setup.
+- You completed [1. QuickStart](../1-quickstart/README.md).
+- You can run Slurm jobs on LUMI.
+- You are working from a clone of this repository on `/project` or `/scratch`.
 
 ## What changes from baseline
 
 - Baseline you already have: a working single-GPU run from QuickStart.
-- This lesson adds: how to select, run, and extend LUMI containers in a reusable way.
-- Expected output/artifact: a validated container workflow and a reproducible environment extension strategy (venv and/or squashfs).
+- This lesson adds: one reproducible container workflow and environment-extension pattern for the rest of the guide.
+- Expected output/artifact: a validated container + Python environment contract used consistently in later lessons.
 
 ## Minimal run checkpoint
 
 Command (from an allocated GPU node):
 
 ```bash
-export SIF=/appl/local/containers/sif-images/lumi-pytorch-rocm-6.0.3-python-3.12-pytorch-v2.3.1.sif
-srun singularity exec $SIF bash -c '$WITH_CONDA ; python -c "import torch; print(torch.cuda.device_count())"'
+source ../env.sh
+module use /appl/local/containers/ai-modules
+module load singularity-AI-bindings
+srun singularity exec "$CONTAINER" bash -c '$WITH_CONDA && python -c "import torch; print(torch.cuda.device_count())"'
 ```
 
 Success signal:
 
 - Command prints a GPU count greater than `0`.
 
-Machine learning frameworks on LUMI serve as isolated environments in the form of container images with a set of Python packages. LUMI uses the [Singularity](https://docs.sylabs.io/guides/main/user-guide/) (SingularityCE) container runtime. Containers can be seen as encapsulated images of a specific environment including all required libraries, tools and Python packages. Container images can be based on virtually any Linux distribution targeting the host architecture, but they still rely on the host kernel and kernel drivers. This plays a significant role in the case of LUMI.
+## Baseline contract for chapters 3-9
 
-## Containers on LUMI
+Use these conventions in later lessons unless explicitly overridden:
 
-The motivation for using containers on LUMI is twofold: 
+- Runtime launcher: `srun singularity exec ...` (not `singularity run`).
+- Container selection: `CONTAINER` from `../env.sh`.
+- Container bindings: `module load singularity-AI-bindings`.
+- Python environment extension: squashfs/venv pattern from QuickStart.
+- Data path variables: use paths exported in `env.sh` (for example `TINY_HDF5_PATH`, `TINY_LMDB_PATH`, `SQUASH_LARGE`).
 
-- compatibility with ROCm (GPU runtime) and Slingshot network (inter-node communication), 
-- filesystem friendliness (encapsulation helps reduce the overhead on the filesystem from accessing numerous small files).
+## Recommended baseline workflow
 
-Note that the first point implies that LUMI's containers are **not portable to other machines**, which is usually expected from containers, as these images are unlikely to run on other systems.
+### 1. Load runtime bindings and shared environment
 
-There are two different ways that containers provided by the LUMI User Support Team can be accessed:
-
-- [Through modules and wrapper scripts generated via EasyBuild](https://lumi-supercomputer.github.io/LUMI-EasyBuild-docs/p/PyTorch/#module-and-wrapper-scripts)
-- Directly, with you taking care of all bindings and all necessary environment variables.
-
-In this example we will use the second option as this approach is used in the [LUMI AI workshop material](https://github.com/Lumi-supercomputer/Getting_Started_with_AI_workshop).
-
-The latest versions of the provided containers can be found at `/appl/local/containers/sif-images`. This folder includes base containers, following the naming convention `lumi-rocm-<rocm version number>.sif` and containers that already include an ML framework and some commonly used packages. The names of the `.sif` files indicate which ML framework is installed and which versions are used for `ROCm`, `Python` and the framework. 
-
-If you choose one of the containers in `/appl/local/containers/sif-images/` for your own project, we recommend copying the container to your working directory, as the containers are constantly updated. Newer containers might not be compatible with your setup.
-
-## Interacting with a containerized environment
-
-The Python environment from an image can be accessed either interactively by spawning a shell instance within a container (`singularity shell` command) or by executing commands within a container (`singularity exec` command). Do not expect there to be premade runscripts (`singularity run` command) within the container; you need to execute your own script inside the container.
-
-These commonly used assumptions are good to keep in mind:
-
-- most base images on LUMI use conda (Miniconda) environments that need to be activated with the `$WITH_CONDA` command,
-- there is a basic compiler toolchain included; note specific compiler commands (`gcc-XX` for specific versions installed).
-
-To inspect which specific packages are included in the images you can use this simple command:
-
-```
-export SIF=/appl/local/containers/sif-images/lumi-pytorch-rocm-6.2.1-python-3.12-pytorch-20240918-vllm-4075b35.sif
-singularity exec $SIF bash -c '$WITH_CONDA && pip list'
-``` 
-
-## Singularity and Slurm
-
-To run a program inside a container on a GPU node, you need to prepend the singularity command with the `srun` launcher. Please note that multiple srun tasks will spawn independent instances of the same container image. 
-
-We can check whether the selected PyTorch image detects the allocated GPUs with the following: 
-
-The command
-
-```
-salloc -p small-g --nodes=1 --gpus-per-node=2 --ntasks-per-node=1 --cpus-per-task=14 --time=3 \
-    --account=project_xxxxxxxxx #specify your project id here
-```
-
-allocates 2 GPUs and 14 CPUs from a single compute node for a 3-minute job. We can then print out the number of detected GPUs via the following command:
-
-```
-export SIF=/appl/local/containers/sif-images/lumi-pytorch-rocm-6.0.3-python-3.12-pytorch-v2.3.1.sif
-srun singularity exec $SIF \
-    bash -c '$WITH_CONDA ; \
-             python -c "import torch; print(torch.cuda.device_count())"'
-```
-
-For more information on SLURM on LUMI, please visit the [SLURM quickstart page in our documentation](https://docs.lumi-supercomputer.eu/runjobs/scheduled-jobs/slurm-quickstart/).
-
-## `singularity-AI-bindings` module
-
-To give LUMI containers access to the Slingshot network for good RCCL and MPI performance and access to the file system of the working directory, some additional bindings are required. As it can be quite cumbersome to set these bindings manually, we provide a module that does this for you. You can load the module with the following commands:
-
-```
+```bash
 module use /appl/local/containers/ai-modules
 module load singularity-AI-bindings
+source ../env.sh
 ```
 
-If you prefer to set the bindings manually, we recommend taking a look at the [Running containers on LUMI](https://lumi-supercomputer.github.io/LUMI-training-materials/ai-20240529/extra_05_RunningContainers/) lecture from the [LUMI AI workshop material](https://github.com/Lumi-supercomputer/Getting_Started_with_AI_workshop).
+### 2. Validate container + GPU access
 
-## Installing additional Python packages in a container 
-
-You might find yourself in a situation where none of the provided containers contain all Python packages you need. One possible way of adding custom packages not included in the image is to use a virtual environment on top of the conda environment. For this example, we need to add the HDF5 Python package `h5py` to the environment:
-
+```bash
+srun singularity exec "$CONTAINER" bash -c '$WITH_CONDA && python -c "import torch; print(torch.cuda.is_available(), torch.cuda.device_count())"'
 ```
-module use /appl/local/containers/ai-modules
-module load singularity-AI-bindings
+
+### 3. Inspect installed Python packages (optional)
+
+```bash
+srun singularity exec "$CONTAINER" bash -c '$WITH_CONDA && pip list | head -n 30'
+```
+
+### 4. Extend the Python environment
+
+For this guide, the standard extension path is the squashfs build from QuickStart:
+
+```bash
+cd ../1-quickstart
+./build_visiontransformer_sqsh.sh
+```
+
+This produces `../resources/visiontransformer-env.sqsh`, reused by later run scripts.
+
+## Why containers on LUMI
+
+Containers on LUMI are used for:
+
+- ROCm and Slingshot compatibility
+- reduced filesystem pressure
+- reproducible framework/runtime combinations
+
+These containers are tuned for LUMI and are generally not portable as-is to other systems.
+
+## Installing additional Python packages (reference)
+
+If you need a quick interactive extension instead of rebuilding images:
+
+```bash
 export SIF=/appl/local/containers/sif-images/lumi-pytorch-rocm-6.2.4-python-3.12-pytorch-v2.7.1.sif
-singularity shell $SIF
+singularity shell "$SIF"
 Singularity> $WITH_CONDA
 (pytorch) Singularity> python -m venv h5-env --system-site-packages
 (pytorch) Singularity> source h5-env/bin/activate
 (h5-env) (pytorch) Singularity> pip install h5py
 ```
 
-This will create an `h5-env` environment in the working directory. The `--system-site-packages` flag gives the virtual environment access to the packages from the container. You can now execute scripts that import the `h5py` package. To execute a script called `my-script.py` within the container using the virtual environment, use the additional activation command:
+Then run scripts with:
 
+```bash
+singularity exec "$SIF" bash -c '$WITH_CONDA && source h5-env/bin/activate && python my-script.py'
 ```
-singularity exec $SIF bash -c '$WITH_CONDA && source h5-env/bin/activate && python my-script.py'
-```
 
-This approach allows extending the environment without rebuilding the container from scratch every time a new package is added. The drawback is that the virtual environment is disjoint from the container, which makes it difficult to move as the path to the virtual environment needs to be updated accordingly. Moreover, installing Python packages typically creates thousands of small files. This puts a lot of strain on the Lustre file system and might exceed your file quota. This problem can be solved by creating a new container using the [cotainr tool](https://lumi-supercomputer.github.io/LUMI-training-materials/ai-20241126/extra_06_BuildingContainers/) or turning the virtual environment directory into a [SquashFS file](https://github.com/Lumi-supercomputer/Getting_Started_with_AI_workshop/blob/main/07_Extending_containers_with_virtual_environments_for_faster_testing/examples/extending_containers_with_venv.md). The examples included in this repository use the [SquashFS](https://github.com/Lumi-supercomputer/Getting_Started_with_AI_workshop/blob/main/07_Extending_containers_with_virtual_environments_for_faster_testing/examples/extending_containers_with_venv.md) option.
+## Optional alternatives (advanced/reference)
 
-## Custom images
+- EasyBuild wrapper modules can be used instead of direct `singularity exec`.
+- Custom images are possible, but start from LUMI-provided base images to keep ROCm/Slingshot compatibility.
+- If you manage all bindings manually, keep `singularity-AI-bindings` behavior as your reference baseline.
 
-In theory, you can also bring your own container images or convert images from other registries (DockerHub for instance) to the singularity format. In this case it remains your responsibility to keep the container compatible with LUMI's hardware and system environment. We strongly recommend building your containers on top of the LUMI base images provided. 
+## Used by next lessons
+
+- [3. File formats for training data](../3-file-formats/README.md): uses same container execution + data-path conventions.
+- [4. Data Storage Options](../4-data-storage/README.md): assumes same runtime while changing data placement.
+- [5. Multi-GPU and Multi-Node Training](../5-multi-gpu-and-node/README.md): builds on this baseline for DDP/DeepSpeed launchers.
+- [7-9 tracking lessons](../7-tensorboard-visualization/README.md): reuse the same runtime, adding logging integrations.
 
 ## Verify
 
 Confirm the following before moving on:
 
-- `srun singularity exec $SIF ... torch.cuda.device_count()` reports the expected number of GPUs.
-- You can inspect container packages with `pip list` after activating the base environment.
-- You can install an extra Python package in a venv and run a script inside the container.
+- You can run Python in the container with GPU visibility.
+- `../env.sh` values are resolved correctly in your job or interactive session.
+- You can execute scripts using either the base container or the squashfs-extended environment.
 
 ## Troubleshooting
 
-- GPU not visible inside container: load `singularity-AI-bindings` before `srun singularity exec`.
-- Different behavior across runs: avoid using changing shared `.sif` paths directly; copy/select a stable image for your project.
-- Missing package at runtime: confirm the same environment activation path is used in both interactive and batch runs.
+- `Set CONTAINER in env.sh`: define `CONTAINER` in `../env.sh` and ensure the file exists.
+- GPU count is zero: load `singularity-AI-bindings` and run inside an allocated GPU job/step.
+- Import errors for extra packages: confirm the same activation method is used at runtime (venv/squashfs).
 
 ## Navigation
 
