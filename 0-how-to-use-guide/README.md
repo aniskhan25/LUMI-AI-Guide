@@ -25,7 +25,7 @@ Before starting lesson 1, ensure you have:
 
 ## Recommended learning path
 
-Follow this order for the core workflow:
+Follow this order for the core workflow (`1` to `6`):
 
 1. [1. QuickStart](../1-quickstart/README.md)
 2. [2. Setting up your own environment](../2-setting-up-environment/README.md)
@@ -34,7 +34,7 @@ Follow this order for the core workflow:
 5. [5. Multi-GPU and Multi-Node Training](../5-multi-gpu-and-node/README.md)
 6. [6. Monitoring and Profiling jobs](../6-monitoring-and-profiling/README.md)
 
-Optional experiment-tracking modules:
+After lesson `6`, the core path is complete. Continue with optional experiment-tracking modules as needed:
 
 - [7. TensorBoard visualization](../7-tensorboard-visualization/README.md)
 - [8. MLflow visualization](../8-mlflow-visualization/README.md)

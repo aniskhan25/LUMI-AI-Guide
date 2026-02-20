@@ -99,4 +99,5 @@ Confirm that:
 ## Navigation
 
 - Previous: [5. Multi-GPU and Multi-Node Training](../5-multi-gpu-and-node/README.md)
-- Next: [7. TensorBoard visualization](../7-tensorboard-visualization/README.md)
+- Core path complete: [Guide Home](../README.md)
+- Next (optional): [7. TensorBoard visualization](../7-tensorboard-visualization/README.md)

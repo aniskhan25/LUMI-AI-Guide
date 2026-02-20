@@ -6,7 +6,7 @@ All Python and shell scripts referenced in this guide are part of this repositor
 
 ## Goal
 
-Provide a clear path from first single-GPU execution to distributed training, storage optimization, and experiment tracking on LUMI.
+Provide a clear core path from first single-GPU execution to distributed training, then optional experiment-tracking extensions on LUMI.
 
 ## Requirements
 
@@ -18,9 +18,9 @@ Before starting, ensure you have:
 
 ## Start here
 
-Begin with [0. How to use this guide](0-how-to-use-guide/README.md), then continue to [1. QuickStart](1-quickstart/README.md).
+Begin with [0. How to use this guide](0-how-to-use-guide/README.md). Then follow core lessons `1` to `6`, and continue with optional lessons `7` to `9` if needed.
 
-## Guide map
+## Core lessons (recommended order)
 
 - [0. How to use this guide](0-how-to-use-guide/README.md)
 - [1. QuickStart](1-quickstart/README.md)
@@ -29,11 +29,12 @@ Begin with [0. How to use this guide](0-how-to-use-guide/README.md), then contin
 - [4. Data Storage Options](4-data-storage/README.md)
 - [5. Multi-GPU and Multi-Node Training](5-multi-gpu-and-node/README.md)
 - [6. Monitoring and Profiling jobs](6-monitoring-and-profiling/README.md)
+
+## Optional lessons (experiment tracking)
+
 - [7. TensorBoard visualization](7-tensorboard-visualization/README.md)
 - [8. MLflow visualization](8-mlflow-visualization/README.md)
 - [9. Wandb visualization](9-wandb-visualization/README.md)
-
-Lessons `7` to `9` are optional experiment-tracking modules.
 
 ## Further reading
 
