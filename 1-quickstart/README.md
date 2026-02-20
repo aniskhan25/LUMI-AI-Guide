@@ -62,8 +62,10 @@ sbatch run_base.sh
 Check the job output in:
 
 ```bash
-/scratch/<project>/<user>/slurm/quickstart-base-<jobid>.out
+slurm-<jobid>.out
 ```
+
+The output file is written to the directory where you run `sbatch` (here: `1-quickstart/`).
 
 You should see Python/Torch/ROCm version info and `SMOKE TEST PASSED`.
 
@@ -104,8 +106,10 @@ If needed, replace the `--account` flag in [`run_base.sh`](run_base.sh) and [`ru
 Once the job starts, output is written to:
 
 ```bash
-/scratch/<project>/<user>/slurm/quickstart-<jobid>.out
+slurm-<jobid>.out
 ```
+
+As in Step 1, this is written in the submit directory (`1-quickstart/`) because the script uses Slurm's default output behavior.
 
 The output will show Loss and Accuracy values for each epoch, similar to the following:
 
