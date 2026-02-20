@@ -15,43 +15,34 @@ set -euo pipefail
 module use /appl/local/training/modules/AI-20240529
 module load singularity-userfilesystems singularity-CPEbits
 
-SUBMIT_DIR="${SLURM_SUBMIT_DIR:-$PWD}"
-if [[ "${SUBMIT_DIR##*/}" == "3-file-formats" ]]; then
-  REPO_ROOT="$(cd -- "$SUBMIT_DIR/.." && pwd)"
-else
-  REPO_ROOT="$SUBMIT_DIR"
-fi
+source ../env.sh
+: "${CONTAINER:?Set CONTAINER in ../env.sh}"
+: "${DATA_PROJECT_DIR:?Set DATA_PROJECT_DIR in ../env.sh}"
 
-if [[ ! -f "$REPO_ROOT/env.sh" ]]; then
-  echo "ERROR: env.sh not found. Submit from repo root or 3-file-formats." >&2
-  exit 1
-fi
-
-source "$REPO_ROOT/env.sh"
-cd "$REPO_ROOT/3-file-formats"
-
-FORMAT="${1:-}"
-: "${FORMAT:?Usage: sbatch run-scripts/simple-benchmarks/run-comp-seq.sh <squashfs|lmdb|hdf5>}"
+FORMAT="${1:?Usage: sbatch run-scripts/simple-benchmarks/run-comp-seq.sh <squashfs|lmdb|hdf5>}"
 
 export MPICH_MPIIO_STATS=1
 export MPICH_MEMORY_REPORT=1
 
-run_benchmark() {
-  local format="$1"
-  local bind_arg="${2:-}"
-  srun singularity exec $bind_arg "$CONTAINER" bash -c \
-    'if [ -n "${WITH_CONDA:-}" ]; then eval "$WITH_CONDA"; fi; source venv-extension/bin/activate; python run-scripts/simple-benchmarks/compare-dataset-tiny.py -n 1 -ff "'"$format"'" -N 100000'
-}
-
 case "$FORMAT" in
   squashfs)
-    run_benchmark "squashfs" "-B $DATA_PROJECT_DIR/data-formats/squashfs/train.squashfs:/train_images:image-src=/"
+    TINY_SQSH="$DATA_PROJECT_DIR/data-formats/squashfs/train.squashfs"
+    [[ -f "$TINY_SQSH" ]] || { echo "ERROR: Missing squashfs: $TINY_SQSH" >&2; exit 1; }
+    time srun singularity exec \
+      -B "$TINY_SQSH":/train_images:image-src=/ \
+      "$CONTAINER" \
+      venv-extension/bin/python run-scripts/simple-benchmarks/compare-dataset-tiny.py \
+      -n 1 -ff squashfs -N 100000
     ;;
   lmdb)
-    run_benchmark "lmdb"
+    time srun singularity exec "$CONTAINER" \
+      venv-extension/bin/python run-scripts/simple-benchmarks/compare-dataset-tiny.py \
+      -n 1 -ff lmdb -N 100000
     ;;
   hdf5)
-    run_benchmark "hdf5"
+    time srun singularity exec "$CONTAINER" \
+      venv-extension/bin/python run-scripts/simple-benchmarks/compare-dataset-tiny.py \
+      -n 1 -ff hdf5 -N 100000
     ;;
   *)
     echo "ERROR: Unknown format '$FORMAT'. Use one of: squashfs, lmdb, hdf5." >&2
