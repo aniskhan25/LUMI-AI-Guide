@@ -16,6 +16,8 @@ module load singularity-userfilesystems singularity-CPEbits
 source ../env.sh
 : "${CONTAINER:?Set CONTAINER in ../env.sh}"
 : "${DATA_PROJECT_DIR:?Set DATA_PROJECT_DIR in ../env.sh}"
+SQSH_PATH="../resources/visiontransformer-env.sqsh"
+[[ -f "$SQSH_PATH" ]] || { echo "ERROR: Missing sqsh: $SQSH_PATH" >&2; exit 1; }
 
 FORMAT="${1:?Usage: sbatch run-scripts/simple-benchmarks/run-comp-tiny.sh <squashfs|lmdb|hdf5>}"
 
@@ -27,19 +29,24 @@ case "$FORMAT" in
     TINY_SQSH="$DATA_PROJECT_DIR/data-formats/squashfs/train.squashfs"
     [[ -f "$TINY_SQSH" ]] || { echo "ERROR: Missing squashfs: $TINY_SQSH" >&2; exit 1; }
     time srun singularity exec \
+      -B "$SQSH_PATH":/user-software:image-src=/ \
       -B "$TINY_SQSH":/train_images:image-src=/ \
       "$CONTAINER" \
-      venv-extension/bin/python run-scripts/simple-benchmarks/compare-dataset-tiny.py \
+      /user-software/bin/python run-scripts/simple-benchmarks/compare-dataset-tiny.py \
       -n 7 -ff squashfs -N 100000
     ;;
   lmdb)
-    time srun singularity exec "$CONTAINER" \
-      venv-extension/bin/python run-scripts/simple-benchmarks/compare-dataset-tiny.py \
+    time srun singularity exec \
+      -B "$SQSH_PATH":/user-software:image-src=/ \
+      "$CONTAINER" \
+      /user-software/bin/python run-scripts/simple-benchmarks/compare-dataset-tiny.py \
       -n 7 -ff lmdb -N 100000
     ;;
   hdf5)
-    time srun singularity exec "$CONTAINER" \
-      venv-extension/bin/python run-scripts/simple-benchmarks/compare-dataset-tiny.py \
+    time srun singularity exec \
+      -B "$SQSH_PATH":/user-software:image-src=/ \
+      "$CONTAINER" \
+      /user-software/bin/python run-scripts/simple-benchmarks/compare-dataset-tiny.py \
       -n 7 -ff hdf5 -N 100000
     ;;
   *)

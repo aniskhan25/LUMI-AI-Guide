@@ -32,14 +32,37 @@ Success signal:
 
 - Submit jobs from `3-file-formats/` so relative paths resolve.
 - Use data-path variables from `../env.sh` (`TINY_HDF5_PATH`, `TINY_LMDB_PATH`, `SQUASH_LARGE`, etc.).
+- Runtime extension policy: scripts use `../resources/visiontransformer-env.sqsh`.
 - Avoid unpacking large archives into raw file trees on Lustre when possible.
+- For environment customization options, follow [2. Setting up your own environment](../2-setting-up-environment/README.md).
 
 ## Recommended workflow
 
-1. Pick a format using the quick guide below.
-2. Convert data once.
-3. Run a small benchmark/smoke test.
-4. Keep benchmark results and proceed with the chosen format.
+1. Download/stage raw input data.
+2. Pick a format using the quick guide below.
+3. Convert data once.
+4. Run a small benchmark/smoke test.
+5. Keep benchmark results and proceed with the chosen format.
+
+### Tiny dataset setup used in this chapter
+
+Download raw tiny-ImageNet data:
+
+```bash
+./get_data.sh
+```
+
+Convert to a target format:
+
+```bash
+sbatch convert.sh lmdb
+```
+
+Then run the benchmark:
+
+```bash
+sbatch run-scripts/simple-benchmarks/run-comp-tiny.sh lmdb
+```
 
 ## Quick format guide
 
@@ -128,6 +151,8 @@ Reference results from this chapter:
 
 ## Reproducing benchmarks
 
+- Download tiny raw data first: `./get_data.sh`
+- Convert tiny data first: `sbatch convert.sh <squashfs|lmdb|hdf5>`
 - Tiny benchmark: `run-scripts/simple-benchmarks/run-comp-tiny.sh`
 - Sequential tiny benchmark: `run-scripts/simple-benchmarks/run-comp-seq.sh`
 - Large benchmark: `run-scripts/simple-benchmarks/run-comp-large.sh`
