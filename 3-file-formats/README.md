@@ -16,6 +16,18 @@ Understand tradeoffs between SquashFS, HDF5, and LMDB on LUMI, and choose a prac
 - This lesson adds: format selection and conversion strategy for SquashFS, HDF5, and LMDB.
 - Expected output/artifact: a chosen training-data format plus converted dataset artifacts and benchmark evidence.
 
+## Minimal run checkpoint
+
+Command:
+
+```bash
+sbatch run-scripts/simple-benchmarks/run-comp-tiny.sh lmdb
+```
+
+Success signal:
+
+- Job output contains `LMDB dataloader time:` (or the equivalent `* dataloader time:` line for your selected format).
+
 ## Introduction
 
 Generally, there is no one-size-fits-all file format suitable for all machine learning and artificial intelligence data. Different high-performance file formats have different strategies for increasing the read/write throughput, and these strategies might not be compatible with the format of the data (e.g. variable image sizes). As a result, this compatibility must be determined before an optimal file format can be chosen. 

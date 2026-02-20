@@ -93,6 +93,7 @@ Note that TensorBoard is very memory intensive but has low CPU usage. Thus, in t
 
 Confirm all of the following:
 
+- Quick checkpoint: run `sbatch run_tensorboard.sh` and confirm `runs/events.out.tfevents.*` files are created.
 - Rank-0 process creates TensorBoard logs in the configured `runs/` directory.
 - Training loss and validation accuracy are visible in TensorBoard.
 - You can launch TensorBoard from the LUMI web interface and load the run data.

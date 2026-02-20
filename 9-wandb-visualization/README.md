@@ -104,6 +104,7 @@ Finally, the `Logs` tab will show the output of the run after the initialization
 
 Confirm the integration is working:
 
+- Quick checkpoint: run `sbatch run_wandb.sh` and confirm job output includes `wandb: Tracking run` plus a `View run at` URL.
 - `wandb.init()` starts successfully and prints run/project links in job output.
 - Expected metrics (for example loss and accuracy) appear in the run dashboard.
 - System metrics are visible in W&B during execution.

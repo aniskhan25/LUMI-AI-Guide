@@ -16,6 +16,19 @@ Set up a reliable container-based Python environment on LUMI that you can reuse 
 - This lesson adds: how to select, run, and extend LUMI containers in a reusable way.
 - Expected output/artifact: a validated container workflow and a reproducible environment extension strategy (venv and/or squashfs).
 
+## Minimal run checkpoint
+
+Command (from an allocated GPU node):
+
+```bash
+export SIF=/appl/local/containers/sif-images/lumi-pytorch-rocm-6.0.3-python-3.12-pytorch-v2.3.1.sif
+srun singularity exec $SIF bash -c '$WITH_CONDA ; python -c "import torch; print(torch.cuda.device_count())"'
+```
+
+Success signal:
+
+- Command prints a GPU count greater than `0`.
+
 Machine learning frameworks on LUMI serve as isolated environments in the form of container images with a set of Python packages. LUMI uses the [Singularity](https://docs.sylabs.io/guides/main/user-guide/) (SingularityCE) container runtime. Containers can be seen as encapsulated images of a specific environment including all required libraries, tools and Python packages. Container images can be based on virtually any Linux distribution targeting the host architecture, but they still rely on the host kernel and kernel drivers. This plays a significant role in the case of LUMI.
 
 ## Containers on LUMI
