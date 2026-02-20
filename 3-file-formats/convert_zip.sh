@@ -6,7 +6,6 @@
 #SBATCH --cpus-per-task=128
 #SBATCH --mem=0
 #SBATCH --time=0:30:00
-#SBATCH --output=slurm-convert_zip-%j.out
 
 set -euo pipefail
 

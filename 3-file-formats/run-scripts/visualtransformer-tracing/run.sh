@@ -1,6 +1,5 @@
 #!/bin/bash
 #SBATCH --job-name=noprof-lmdb
-#SBATCH --output=noprof-lmdb-%j.out
 #SBATCH --account=project_462000131
 #SBATCH --partition=standard-g
 #SBATCH --nodes=1
