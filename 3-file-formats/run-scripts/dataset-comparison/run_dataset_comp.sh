@@ -9,17 +9,21 @@
 #SBATCH --mem-per-gpu=60G
 #SBATCH --time=00:20:00
 
+set -euo pipefail
+
 # shortcut for getting the binds right
 module use /appl/local/containers/ai-modules
 module load singularity-AI-bindings
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(cd -- "$SCRIPT_DIR/../.." && pwd)"
-source "$ROOT_DIR/env.sh"
+source ../env.sh
+: "${CONTAINER:?Set CONTAINER in ../env.sh}"
+: "${SQUASH_LARGE:?Set SQUASH_LARGE in ../env.sh}"
+[[ -f "$SQUASH_LARGE" ]] || { echo "ERROR: Missing squashfs: $SQUASH_LARGE" >&2; exit 1; }
 
 export MPICH_MPIIO_STATS=1
 export MPICH_MEMORY_REPORT=1
 
-SQUASH="$SQUASH_LARGE"
-IMAGES=/Data/CLS-LOC/train/
-srun singularity exec -B "$SQUASH":/train_images:image-src=$IMAGES "$CONTAINER" bash -c '$WITH_CONDA && source venv-extension/bin/activate && python compare-dataset.py'
+time srun singularity exec \
+  -B "$SQUASH_LARGE":/train_images:image-src=/Data/CLS-LOC/train/ \
+  "$CONTAINER" \
+  venv-extension/bin/python compare-dataset.py
