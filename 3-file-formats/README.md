@@ -10,6 +10,12 @@ Understand tradeoffs between SquashFS, HDF5, and LMDB on LUMI, and choose a prac
 - You completed [2. Setting up your own environment](../2-setting-up-environment/README.md).
 - The Python and shell scripts in `3-file-formats/` are available if you want to reproduce the benchmarks.
 
+## What changes from baseline
+
+- Baseline you already have: a runnable training environment and working dataset path conventions.
+- This lesson adds: format selection and conversion strategy for SquashFS, HDF5, and LMDB.
+- Expected output/artifact: a chosen training-data format plus converted dataset artifacts and benchmark evidence.
+
 ## Introduction
 
 Generally, there is no one-size-fits-all file format suitable for all machine learning and artificial intelligence data. Different high-performance file formats have different strategies for increasing the read/write throughput, and these strategies might not be compatible with the format of the data (e.g. variable image sizes). As a result, this compatibility must be determined before an optimal file format can be chosen. 

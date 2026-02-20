@@ -10,6 +10,12 @@ Track experiment metrics and metadata with MLflow and inspect runs from the LUMI
 - `mlflow` is installed in your runtime environment.
 - You have a writable path for MLflow artifacts (directory or SQLite backend).
 
+## What changes from baseline
+
+- Baseline you already have: distributed training runs with standard logs.
+- This lesson adds: experiment tracking with MLflow runs, metrics, and tracking storage.
+- Expected output/artifact: persisted MLflow run metadata and metric curves visible in the MLflow UI.
+
 [MLflow](https://www.mlflow.org/) is an open source tool for tracking experiments and models in machine learning projects. MLflow can be easily installed with `pip install mlflow`. Adapting your code to use MLflow requires minimal modification, and the results can be easily displayed using the web interface.
 
 ## Collecting logs
