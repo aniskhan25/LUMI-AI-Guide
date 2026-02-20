@@ -49,7 +49,7 @@ if rank == 0:
     mlflow.log_metric("accuracy", correct / total, step=epoch)
 ```
 
-For a full example, have a look at the script [mlflow_ddp_visiontransformer.py](mlflow_ddp_visiontransformer.py).
+For a full example, have a look at the script [visiontransformer_ddp_mlflow.py](visiontransformer_ddp_mlflow.py).
 
 In addition to metrics, you can also log parameters and artifacts. See the [MLflow documentation for a list of logging functions](https://www.mlflow.org/docs/latest/tracking.html#logging-data-to-runs).
 
@@ -83,5 +83,5 @@ Check these outcomes:
 
 ## Navigation
 
-- Previous: [7. TensorBoard visualization](../7-TensorBoard-visualization/README.md)
-- Next: [9. Wandb visualization](../9-Wandb-visualization/README.md)
+- Previous: [7. TensorBoard visualization](../7-tensorboard-visualization/README.md)
+- Next: [9. Wandb visualization](../9-wandb-visualization/README.md)

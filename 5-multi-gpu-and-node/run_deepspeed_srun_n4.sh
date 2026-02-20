@@ -37,5 +37,5 @@ srun --cpu-bind="v,mask_cpu=${CPU_BIND_MASKS}" singularity exec -B "$SQSH_PATH":
   set -euo pipefail
   export RANK="$SLURM_PROCID"
   export LOCAL_RANK="$SLURM_LOCALID"
-  /user-software/bin/python ds_visiontransformer.py --deepspeed --deepspeed_config ds_config.json
+  /user-software/bin/python visiontransformer_deepspeed.py --deepspeed --deepspeed_config ds_config.json
 '

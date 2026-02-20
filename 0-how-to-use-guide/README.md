@@ -36,9 +36,9 @@ Follow this order for the core workflow:
 
 Optional experiment-tracking modules:
 
-- [7. TensorBoard visualization](../7-TensorBoard-visualization/README.md)
-- [8. MLflow visualization](../8-MLflow-visualization/README.md)
-- [9. Wandb visualization](../9-Wandb-visualization/README.md)
+- [7. TensorBoard visualization](../7-tensorboard-visualization/README.md)
+- [8. MLflow visualization](../8-mlflow-visualization/README.md)
+- [9. Wandb visualization](../9-wandb-visualization/README.md)
 
 ## Baseline conventions used across lessons
 

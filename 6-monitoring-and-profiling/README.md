@@ -38,7 +38,7 @@ The output will look similar to the following:
 
 The `rocm-smi` tool shows multiple useful metrics such as GPU utilization, memory usage, temperature, and power usage. The most intuitive metrics might be GPU utilization and memory usage; however, they are not accurate indicators of whether the GPU is fully utilized, as a kernel waiting idle for data shows in the driver as 100% GPU utilization. The best indicator is instead the drawn power. For a single GPU, a power usage of around 300W is a good indicator that the full GPU is being leveraged. 
 
-Let's have a look at the [ddp_visiontransformer.py](../5-multi-gpu-and-node/ddp_visiontransformer.py) example from the [Multi-GPU and Multi-Node Training](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/5-multi-gpu-and-node#readme) chapter that runs on 8 GPUs on one node. We submit the job with the following command:
+Let's have a look at the [visiontransformer_ddp.py](../5-multi-gpu-and-node/visiontransformer_ddp.py) example from the [Multi-GPU and Multi-Node Training](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/5-multi-gpu-and-node#readme) chapter that runs on 8 GPUs on one node. We submit the job with the following command:
 
 ```bash
 sbatch run_ddp_torchrun.sh
@@ -99,4 +99,4 @@ Confirm that:
 ## Navigation
 
 - Previous: [5. Multi-GPU and Multi-Node Training](../5-multi-gpu-and-node/README.md)
-- Next: [7. TensorBoard visualization](../7-TensorBoard-visualization/README.md)
+- Next: [7. TensorBoard visualization](../7-tensorboard-visualization/README.md)

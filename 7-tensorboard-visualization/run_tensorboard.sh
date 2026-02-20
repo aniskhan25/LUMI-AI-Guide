@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=wandb-ddp
+#SBATCH --job-name=tensorboard-ddp
 #SBATCH --account=project_462000131
 #SBATCH --partition=standard-g
 
@@ -11,7 +11,7 @@
 #SBATCH --mem=480G
 
 #SBATCH --time=01:00:00
-#SBATCH --output=/scratch/project_462000131/anisrahm/slurm/wandb-ddp-%j.out
+#SBATCH --output=/scratch/project_462000131/anisrahm/slurm/tensorboard-ddp-%j.out
 
 set -euo pipefail
 
@@ -30,4 +30,4 @@ export NCCL_NET_GDR_LEVEL=PHB
 
 time srun singularity exec -B "$SQSH_PATH":/user-software:image-src=/ "$CONTAINER" \
   /user-software/bin/python -m torch.distributed.run \
-  --standalone --nnodes=1 --nproc_per_node=8 wandb_ddp_visiontransformer.py
+  --standalone --nnodes=1 --nproc_per_node=8 visiontransformer_ddp_tensorboard.py

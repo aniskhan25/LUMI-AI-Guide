@@ -110,5 +110,5 @@ Confirm the integration is working:
 
 ## Navigation
 
-- Previous: [8. MLflow visualization](../8-MLflow-visualization/README.md)
+- Previous: [8. MLflow visualization](../8-mlflow-visualization/README.md)
 - Next: [Guide Home](../README.md)
