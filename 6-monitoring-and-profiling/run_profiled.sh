@@ -18,12 +18,12 @@ set -euo pipefail
 module use /appl/local/containers/ai-modules
 module load singularity-AI-bindings
 
-source ../scripts/slurm_bootstrap.sh
-bootstrap_repo --require-sqsh
+source ../env.sh
+: "${CONTAINER:?Set CONTAINER in ../env.sh}"
+: "${TINY_HDF5_PATH:?Set TINY_HDF5_PATH in ../env.sh}"
+[[ -f "$TINY_HDF5_PATH" ]] || { echo "ERROR: Missing HDF5 file: $TINY_HDF5_PATH" >&2; exit 1; }
+SQSH_PATH="../resources/visiontransformer-env.sqsh"
+[[ -f "$SQSH_PATH" ]] || { echo "ERROR: Missing sqsh file: $SQSH_PATH" >&2; exit 1; }
 
-srun singularity exec -B "$SQSH_PATH":/user-software:image-src=/ "$CONTAINER" bash -c '
-  set -euo pipefail
-  if [ -n "${WITH_CONDA:-}" ]; then eval "$WITH_CONDA"; fi
-  source /user-software/bin/activate
-  python visiontransformer_profiled.py
-'
+time srun singularity exec -B "$SQSH_PATH":/user-software:image-src=/ "$CONTAINER" \
+  /user-software/bin/python visiontransformer_profiled.py

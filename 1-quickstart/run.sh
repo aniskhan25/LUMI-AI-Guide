@@ -18,12 +18,7 @@ set -euo pipefail
 module use /appl/local/containers/ai-modules
 module load singularity-AI-bindings
 
-source ../scripts/slurm_bootstrap.sh
-bootstrap_repo --require-sqsh
+source ../env.sh
 
-srun singularity exec -B "$SQSH_PATH":/user-software:image-src=/ "$CONTAINER" bash -c '
-  set -euo pipefail
-  if [ -n "${WITH_CONDA:-}" ]; then eval "$WITH_CONDA"; fi
-  source /user-software/bin/activate
-  python visiontransformer.py
-'
+: "${CONTAINER:?Set CONTAINER in env.sh}"
+singularity exec -B ../resources/visiontransformer-env.sqsh:/user-software:image-src=/ "$CONTAINER" /user-software/bin/python visiontransformer.py

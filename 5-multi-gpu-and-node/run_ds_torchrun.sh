@@ -17,15 +17,14 @@ set -euo pipefail
 module use /appl/local/containers/ai-modules
 module load singularity-AI-bindings
 
-source ../scripts/slurm_bootstrap.sh
-bootstrap_repo --require-sqsh
+source ../env.sh
+: "${CONTAINER:?Set CONTAINER in ../env.sh}"
+: "${TINY_HDF5_PATH:?Set TINY_HDF5_PATH in ../env.sh}"
+[[ -f "$TINY_HDF5_PATH" ]] || { echo "ERROR: Missing HDF5 file: $TINY_HDF5_PATH" >&2; exit 1; }
+SQSH_PATH="../resources/visiontransformer-env.sqsh"
+[[ -f "$SQSH_PATH" ]] || { echo "ERROR: Missing sqsh file: $SQSH_PATH" >&2; exit 1; }
 
-export MASTER_ADDR=$(scontrol show hostnames $SLURM_JOB_NODELIST | head -n 1)
-export MASTER_PORT=29500
-
-srun singularity exec -B "$SQSH_PATH":/user-software:image-src=/ "$CONTAINER" bash -c '
-  set -euo pipefail
-  if [ -n "${WITH_CONDA:-}" ]; then eval "$WITH_CONDA"; fi
-  source /user-software/bin/activate
-  python -m torch.distributed.run --nproc_per_node=8 --nnodes="$SLURM_NNODES" --node_rank="$SLURM_PROCID" --master_addr="$MASTER_ADDR" --master_port="$MASTER_PORT" ds_visiontransformer.py --deepspeed --deepspeed_config ds_config.json
-'
+time srun singularity exec -B "$SQSH_PATH":/user-software:image-src=/ "$CONTAINER" \
+  /user-software/bin/python -m torch.distributed.run \
+  --standalone --nnodes=1 --nproc_per_node=8 \
+  ds_visiontransformer.py --deepspeed --deepspeed_config ds_config.json

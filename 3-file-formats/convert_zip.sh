@@ -8,13 +8,16 @@
 #SBATCH --time=0:30:00
 #SBATCH --output=slurm-convert_zip-%j.out
 
+set -euo pipefail
+
 module use /appl/local/training/modules/AI-20240529
 module load singularity-userfilesystems singularity-CPEbits
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../env.sh"
+source ../env.sh
+: "${CONTAINER:?Set CONTAINER in ../env.sh}"
+: "${DATA_BENCH_DIR:?Set DATA_BENCH_DIR in ../env.sh}"
 
-OUT_FOLDER="$DATA_BENCH_DIR"
-mkdir -p "$OUT_FOLDER"
+mkdir -p "$DATA_BENCH_DIR"
 
-srun singularity exec "$CONTAINER" bash -c '$WITH_CONDA && source venv-extension/bin/activate && python scripts/lmdb/convert_large_to_lmdb.py -o "$DATA_BENCH_DIR"'
+time srun --cpu-bind=none singularity exec "$CONTAINER" \
+  venv-extension/bin/python scripts/lmdb/convert_large_to_lmdb.py -o "$DATA_BENCH_DIR"
