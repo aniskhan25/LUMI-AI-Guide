@@ -1,7 +1,14 @@
 # 5. Multi-GPU and Multi-Node Training
 
-> [!NOTE]  
-> If you wish to run the included examples on LUMI, have a look at the [quickstart](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/1-quickstart#readme) chapter for instructions on how to set up the required environment.
+## Goal
+
+Scale training from one GPU to multiple GPUs and nodes on LUMI using PyTorch DDP and DeepSpeed.
+
+## Assumptions
+
+- You have a working baseline environment from [1. QuickStart](../1-quickstart/README.md).
+- You are familiar with Slurm basics (`sbatch`, `srun`, node/task/GPU resource flags).
+- You can run the single-GPU Vision Transformer example before attempting distributed runs.
 
 Training Deep Learning models is a resource-intensive task. When the compute and memory resources of a single GPU no longer suffice to train your model, multi-GPU and multi-node solutions can be leveraged to distribute your training job over multiple GPUs or nodes. Various strategies exist to distribute Deep Learning workloads, and various frameworks exist that implement those strategies. In this section, we cover two popular methods: data-parallelism using PyTorch's Distributed Data-Parallel (DDP) module and a mix of data parallelism and model sharding using the DeepSpeed library. We describe the necessary changes to the source code and how to launch the distributed training jobs on LUMI.
 
@@ -344,15 +351,21 @@ On a LUMI-G node, each GPU is connected to a 200Gb/s Network Interface Card (NIC
 
 `NCCL_SOCKET_IFNAME` must be set to make RCCL use the Slingshot-11 interconnect to which each GPU is connected. If this is not set, RCCL will try to use a network interface that it has no access to and inter-node GPU-to-GPU communication will not work.
 
-### Table of contents
+## Verify
 
-- [Home](..#readme)
-- [1. QuickStart](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/1-quickstart#readme)
-- [2. Setting up your own environment](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/2-setting-up-environment#readme)
-- [3. File formats for training data](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/3-file-formats#readme)
-- [4. Data Storage Options](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/4-data-storage#readme)
-- [5. Multi-GPU and Multi-Node Training](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/5-multi-gpu-and-node#readme)
-- [6. Monitoring and Profiling jobs](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/6-monitoring-and-profiling#readme)
-- [7. TensorBoard visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/7-TensorBoard-visualization#readme)
-- [8. MLflow visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/8-MLflow-visualization#readme)
-- [9. Wandb visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/9-Wandb-visualization#readme)
+Before moving on:
+
+- Single-node distributed runs launch with the expected process count (`8` GCD processes on one LUMI-G node).
+- Multi-node jobs complete distributed initialization (`MASTER_ADDR`/`MASTER_PORT` path works).
+- Training logs show consistent epoch progress without deadlocks.
+
+## Troubleshooting
+
+- Initialization hangs at startup: verify rendezvous variables and that all ranks see the same `MASTER_ADDR`/`MASTER_PORT`.
+- Poor inter-node performance: ensure RCCL environment variables are set correctly for Slingshot and GDR.
+- CPU oversubscription: align `ntasks-per-node`, `cpus-per-task`, and binding strategy (`torchrun` vs `srun`).
+
+## Navigation
+
+- Previous: [4. Data Storage Options](../4-data-storage/README.md)
+- Next: [6. Monitoring and Profiling jobs](../6-monitoring-and-profiling/README.md)

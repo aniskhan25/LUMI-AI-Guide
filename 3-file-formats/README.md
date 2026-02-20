@@ -1,7 +1,14 @@
 # 3. File formats for training data
 
-> [!NOTE]  
-> The Python and shell scripts in the `file-formats` directory are used for the benchmarks presented in this chapter. Many of them require packages that are not included in the environment that is set up in the [QuickStart](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/1-quickstart#readme) chapter. If you wish to install additional packages and run these scripts yourself, have a look at the [Setting up your own environment](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/2-setting-up-environment#readme) chapter.
+## Goal
+
+Understand tradeoffs between SquashFS, HDF5, and LMDB on LUMI, and choose a practical format for your training data pipeline.
+
+## Assumptions
+
+- You can run Python inside a LUMI container and install extra packages when needed.
+- You completed [2. Setting up your own environment](../2-setting-up-environment/README.md).
+- The Python and shell scripts in `3-file-formats/` are available if you want to reproduce the benchmarks.
 
 ## Introduction
 
@@ -91,15 +98,21 @@ For the large imagenet, we loop through 200.000 out of the 1.2 million images fo
 
 LMDB shows roughly 28% better performance than squashfs. 
 
-### Table of contents
+## Verify
 
-- [Home](..#readme)
-- [1. QuickStart](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/1-quickstart#readme)
-- [2. Setting up your own environment](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/2-setting-up-environment#readme)
-- [3. File formats for training data](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/3-file-formats#readme)
-- [4. Data Storage Options](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/4-data-storage#readme)
-- [5. Multi-GPU and Multi-Node Training](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/5-multi-gpu-and-node#readme)
-- [6. Monitoring and Profiling jobs](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/6-monitoring-and-profiling#readme)
-- [7. TensorBoard visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/7-TensorBoard-visualization#readme)
-- [8. MLflow visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/8-MLflow-visualization#readme)
-- [9. Wandb visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/9-Wandb-visualization#readme)
+Before continuing, check that:
+
+- You can describe when each format is a better fit (compatibility, conversion cost, and throughput).
+- You can run one data conversion workflow relevant to your dataset.
+- Your DataLoader runs successfully with your selected format.
+
+## Troubleshooting
+
+- Conversion is too slow or stresses Lustre: avoid unpacking huge raw trees on LUMI; prefer direct conversion from archives.
+- Data loading errors with custom datasets: verify your parser/dataset class handles labels and binary payloads correctly.
+- Container mount issues with SquashFS: confirm bind path and mount syntax match your image and target directory.
+
+## Navigation
+
+- Previous: [2. Setting up your own environment](../2-setting-up-environment/README.md)
+- Next: [4. Data Storage Options](../4-data-storage/README.md)

@@ -1,7 +1,14 @@
 # 4. Data Storage Options
 
-> [!NOTE]  
-> If you wish to run the included examples on LUMI, have a look at the [quickstart](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/1-quickstart#readme) chapter for instructions on how to set up the required environment.
+## Goal
+
+Choose the right LUMI storage option for your workload and understand when to use Lustre (`LUMI-P`/`LUMI-F`) versus node-local RAMfs.
+
+## Assumptions
+
+- You have a working training environment from [QuickStart](../1-quickstart/README.md).
+- You can submit Slurm jobs and stage data between filesystems.
+- Your dataset access pattern is known well enough to reason about throughput and locality.
 
 This section describes the most useful data storage options for AI users on LUMI.
 
@@ -57,15 +64,21 @@ An example of using RAMfs for the visiontransformer script can be found in [run_
  - [LUG2019-Lustre_Overstriping_Shared_Write_Performance-Farrell.pdf](https://wiki.lustre.org/images/b/b3/LUG2019-Lustre_Overstriping_Shared_Write_Performance-Farrell.pdf)
  - [Configuring Lustre File Striping](https://wiki.lustre.org/index.php/Configuring_Lustre_File_Striping)
 
-### Table of contents
+## Verify
 
-- [Home](..#readme)
-- [1. QuickStart](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/1-quickstart#readme)
-- [2. Setting up your own environment](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/2-setting-up-environment#readme)
-- [3. File formats for training data](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/3-file-formats#readme)
-- [4. Data Storage Options](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/4-data-storage#readme)
-- [5. Multi-GPU and Multi-Node Training](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/5-multi-gpu-and-node#readme)
-- [6. Monitoring and Profiling jobs](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/6-monitoring-and-profiling#readme)
-- [7. TensorBoard visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/7-TensorBoard-visualization#readme)
-- [8. MLflow visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/8-MLflow-visualization#readme)
-- [9. Wandb visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/9-Wandb-visualization#readme)
+Check these outcomes:
+
+- You can explain the cost/performance tradeoff between `LUMI-P`, `LUMI-F`, and RAMfs.
+- You can set Lustre striping for a target directory or file with `lfs setstripe`.
+- You can run the RAMfs example and understand what data must be copied out before job end.
+
+## Troubleshooting
+
+- RAMfs runs out of space on `small-g`: request full node memory with `--mem 0 --exclusive` when required.
+- Lustre throughput is lower than expected: review stripe count and concurrent access pattern to avoid OST hotspots.
+- Data disappears after run: any data kept only in `/tmp` is lost after job termination unless copied out.
+
+## Navigation
+
+- Previous: [3. File formats for training data](../3-file-formats/README.md)
+- Next: [5. Multi-GPU and Multi-Node Training](../5-multi-gpu-and-node/README.md)

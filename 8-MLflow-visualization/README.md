@@ -1,7 +1,14 @@
 # 8. MLflow visualization
 
-> [!NOTE]  
-> If you wish to run the included examples on LUMI, have a look at the [quickstart](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/1-quickstart#readme) chapter for instructions on how to set up the required environment.
+## Goal
+
+Track experiment metrics and metadata with MLflow and inspect runs from the LUMI web interface.
+
+## Assumptions
+
+- You can run the distributed training examples from earlier chapters.
+- `mlflow` is installed in your runtime environment.
+- You have a writable path for MLflow artifacts (directory or SQLite backend).
 
 [MLflow](https://www.mlflow.org/) is an open source tool for tracking experiments and models in machine learning projects. MLflow can be easily installed with `pip install mlflow`. Adapting your code to use MLflow requires minimal modification, and the results can be easily displayed using the web interface.
 
@@ -60,15 +67,21 @@ The default resource settings should be fine for most cases.
 Once the session has started you can see graphs for loss and accuracy similar to this:
 ![Image title](../assets/images/mlflow.png)
 
-### Table of contents
+## Verify
 
-- [Home](..#readme)
-- [1. QuickStart](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/1-quickstart#readme)
-- [2. Setting up your own environment](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/2-setting-up-environment#readme)
-- [3. File formats for training data](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/3-file-formats#readme)
-- [4. Data Storage Options](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/4-data-storage#readme)
-- [5. Multi-GPU and Multi-Node Training](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/5-multi-gpu-and-node#readme)
-- [6. Monitoring and Profiling jobs](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/6-monitoring-and-profiling#readme)
-- [7. TensorBoard visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/7-TensorBoard-visualization#readme)
-- [8. MLflow visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/8-MLflow-visualization#readme)
-- [9. Wandb visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/9-Wandb-visualization#readme)
+Check these outcomes:
+
+- A new MLflow run appears with the expected run name.
+- Loss/accuracy metrics are logged across epochs.
+- Tracking files are written to the configured URI (`MLFLOW_TRACKING_URI` or `set_tracking_uri` path).
+
+## Troubleshooting
+
+- No runs visible in UI: confirm the UI points to the same tracking URI used by your job.
+- Permission/path errors: use a writable project/scratch path for MLflow data.
+- Duplicate or fragmented runs: make sure only rank 0 starts and logs to the run in distributed mode.
+
+## Navigation
+
+- Previous: [7. TensorBoard visualization](../7-TensorBoard-visualization/README.md)
+- Next: [9. Wandb visualization](../9-Wandb-visualization/README.md)

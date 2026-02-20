@@ -1,5 +1,15 @@
 # 2. Setting up your own environment
 
+## Goal
+
+Set up a reliable container-based Python environment on LUMI that you can reuse in the rest of this guide.
+
+## Assumptions
+
+- You have an active LUMI account and a project with access to GPU resources.
+- You can submit Slurm jobs and run interactive `salloc`/`srun` commands.
+- You completed [QuickStart](../1-quickstart/README.md) or already have an equivalent baseline setup.
+
 Machine learning frameworks on LUMI serve as isolated environments in the form of container images with a set of Python packages. LUMI uses the [Singularity](https://docs.sylabs.io/guides/main/user-guide/) (SingularityCE) container runtime. Containers can be seen as encapsulated images of a specific environment including all required libraries, tools and Python packages. Container images can be based on virtually any Linux distribution targeting the host architecture, but they still rely on the host kernel and kernel drivers. This plays a significant role in the case of LUMI.
 
 ## Containers on LUMI
@@ -100,15 +110,21 @@ This approach allows extending the environment without rebuilding the container 
 
 In theory, you can also bring your own container images or convert images from other registries (DockerHub for instance) to the singularity format. In this case it remains your responsibility to keep the container compatible with LUMI's hardware and system environment. We strongly recommend building your containers on top of the LUMI base images provided. 
 
-### Table of contents
+## Verify
 
-- [Home](..#readme)
-- [1. QuickStart](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/1-quickstart#readme)
-- [2. Setting up your own environment](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/2-setting-up-environment#readme)
-- [3. File formats for training data](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/3-file-formats#readme)
-- [4. Data Storage Options](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/4-data-storage#readme)
-- [5. Multi-GPU and Multi-Node Training](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/5-multi-gpu-and-node#readme)
-- [6. Monitoring and Profiling jobs](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/6-monitoring-and-profiling#readme)
-- [7. TensorBoard visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/7-TensorBoard-visualization#readme)
-- [8. MLflow visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/8-MLflow-visualization#readme)
-- [9. Wandb visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/9-Wandb-visualization#readme)
+Confirm the following before moving on:
+
+- `srun singularity exec $SIF ... torch.cuda.device_count()` reports the expected number of GPUs.
+- You can inspect container packages with `pip list` after activating the base environment.
+- You can install an extra Python package in a venv and run a script inside the container.
+
+## Troubleshooting
+
+- GPU not visible inside container: load `singularity-AI-bindings` before `srun singularity exec`.
+- Different behavior across runs: avoid using changing shared `.sif` paths directly; copy/select a stable image for your project.
+- Missing package at runtime: confirm the same environment activation path is used in both interactive and batch runs.
+
+## Navigation
+
+- Previous: [1. QuickStart](../1-quickstart/README.md)
+- Next: [3. File formats for training data](../3-file-formats/README.md)
