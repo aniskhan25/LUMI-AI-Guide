@@ -16,6 +16,18 @@ Choose the right LUMI storage option for your workload and understand when to us
 - This lesson adds: storage-placement decisions across `LUMI-P`, `LUMI-F`, and RAMfs, including striping.
 - Expected output/artifact: a documented storage choice and, optionally, a validated RAMfs run pattern.
 
+## Minimal run checkpoint
+
+Command:
+
+```bash
+sbatch run_ramfs.sh
+```
+
+Success signal:
+
+- Job completes and writes a model file at `$DATA_BENCH_DIR/ramfs/vit_b_16_imagenet.<jobid>.pth`.
+
 This section describes the most useful data storage options for AI users on LUMI.
 
 Machine learning frameworks generally make extensive use of parallel processing to shorten time to obtain results. With the increased number of nodes available for computations, a single storage target might become a bottleneck for I/O, especially when large amounts of data are to be accessed.

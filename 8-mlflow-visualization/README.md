@@ -77,6 +77,7 @@ Once the session has started you can see graphs for loss and accuracy similar to
 
 Check these outcomes:
 
+- Quick checkpoint: run `sbatch run_mlflow.sh` and confirm a new run appears under your configured MLflow tracking path.
 - A new MLflow run appears with the expected run name.
 - Loss/accuracy metrics are logged across epochs.
 - Tracking files are written to the configured URI (`MLFLOW_TRACKING_URI` or `set_tracking_uri` path).

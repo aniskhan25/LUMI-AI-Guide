@@ -17,6 +17,18 @@ Run one single-GPU training job on LUMI and confirm that:
 - `../env.sh` is configured for your environment and points to a valid container via `CONTAINER`.
 - `../resources/train_images.hdf5` is available.
 
+## Minimal run checkpoint
+
+Command:
+
+```bash
+sbatch run.sh
+```
+
+Success signal:
+
+- Job output contains `Epoch 1, Loss:` and `Accuracy:` lines.
+
 Clone this repository to LUMI if needed:
 
 ```bash
