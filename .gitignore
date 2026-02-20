@@ -163,6 +163,7 @@ cython_debug/
 
 
 # manually added files and folders
+.DS_Store
 *.hdf5
 *pth
 venv-extension/
