@@ -1,6 +1,5 @@
 #!/bin/bash
 #SBATCH --job-name=dataset_compare
-#SBATCH --output=results/loaderdiff-nw1-cpu7
 #SBATCH --account=project_462000131
 #SBATCH --partition=standard-g
 #SBATCH --nodes=1

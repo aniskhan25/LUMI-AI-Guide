@@ -10,7 +10,6 @@
 #SBATCH --cpus-per-task=7
 #SBATCH --mem-per-gpu=60G
 #SBATCH --time=01:00:00
-#SBATCH --output=/scratch/project_462000131/anisrahm/slurm/ds-srun-4n-%j.out
 
 set -euo pipefail
 

@@ -6,7 +6,6 @@
 #SBATCH --cpus-per-task=7
 #SBATCH --mem-per-gpu=60G
 #SBATCH --time=02:00:00
-#SBATCH --output=/scratch/project_462000131/anisrahm/slurm/ramfs-%j.out
 
 set -euo pipefail
 

@@ -11,7 +11,6 @@
 #SBATCH --mem-per-gpu=60G
 
 #SBATCH --time=00:15:00
-#SBATCH --output=/scratch/project_462000131/anisrahm/slurm/quickstart-base-%j.out
 
 module use /appl/local/containers/ai-modules
 module load singularity-AI-bindings

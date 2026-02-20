@@ -7,11 +7,9 @@
 #SBATCH --cpus-per-task=7
 #SBATCH --mem-per-gpu=60G
 #SBATCH --time=00:10:00
-#SBATCH --output=/scratch/project_462000131/anisrahm/slurm/comp-tiny-%j.out
 
 set -euo pipefail
 
-# shortcut for getting the binds right
 module use /appl/local/training/modules/AI-20240529
 module load singularity-userfilesystems singularity-CPEbits
 
