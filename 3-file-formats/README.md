@@ -68,19 +68,19 @@ dataset = ImageFolder('/train_images')  # Data is bind-mounted at /train_images
 Hierarchical Data Format (HDF5) is a well-established high-performance file format, which interfaces well with the popular `numpy` library through its `h5py` Python interface. This convenience does come at a cost of poor compatibility with irregularly shaped data, such as images with varying shapes and graph networks. 
 
 ### Data conversion
-Converting a dataset into the HDF5 format can be done entirely in Python. However, in order to unpack archive data to raw data on LUMI, one needs to first write a _parser_ which can read the archive data and stream it into the HDF5 format. This parser can be written using Python native packages such as `zipfile`, `tarfile` or the higher-level `shutil`. An example of such a parser can be seen [here](https://github.com/Lumi-supercomputer/LUMI-AI-example/blob/95444cb13eec48f6eb78d62f73449d859d0e8414/scripts/generics.py#L37) for the 157GB imagenet dataset, however this script is not general-purpose and must be adapted for each dataset. Once the parser is in place, it is quite straightforward to create the desired HDF5 file using the `hdf5.File().create_dataset` as illustrated [here](https://github.com/Lumi-supercomputer/LUMI-AI-example/blob/95444cb13eec48f6eb78d62f73449d859d0e8414/scripts/hdf5/convert_to_hdf5.py#L14), where the data needs to fit into a large `numpy.ndarray`-like shape like for the tiny-imagenet.
+Converting a dataset into the HDF5 format can be done entirely in Python. In order to unpack archive data on LUMI, you first need a parser that can stream the archive into HDF5 using packages such as `zipfile`, `tarfile`, or `shutil`. Once the parser is in place, creating the target HDF5 file is straightforward with `h5py.File().create_dataset`; see [convert_to_hdf5.py](scripts/hdf5/convert_to_hdf5.py) for a concrete example.
 
 ### Running PyTorch
-In order to create a PyTorch `DataLoader`, we need to have a PyTorch `dataset` which fetches items and knows about the size of the data. The `dataset` can be different depending on the data, and as such needs to be custom-made to each project as well. This can be done by opening the HDF5 file using the `h5py` library and fetching items using ordinary indexing of numpy-like objects. An example is illustrated where the custom dataset class is [created here](https://github.com/Lumi-supercomputer/LUMI-AI-example/blob/95444cb13eec48f6eb78d62f73449d859d0e8414/scripts/hdf5/hdf5_dataset.py#L6) for the tiny-imagenet and is used in a vision transformer application [here](https://github.com/Lumi-supercomputer/LUMI-AI-example/blob/95444cb13eec48f6eb78d62f73449d859d0e8414/scripts/hdf5/visiontransformer-hdf5.py#L72) as well.
+To create a PyTorch `DataLoader`, you need a custom `Dataset` implementation that knows dataset size and item retrieval. For HDF5, this is typically done by opening the file via `h5py` and indexing numpy-like objects. See [hdf5_dataset.py](scripts/hdf5/hdf5_dataset.py) and its usage in [visualtransformer-hdf5.py](scripts/hdf5/visualtransformer-hdf5.py).
 
 ## LMDB
 Lightning Memory-Mapped Database (LMDB) is a very fast file format, which like squashfs imposes no restriction on the shape of the data and thus offers good compatibility. This is achieved through memory-mapped files that provide fast access without necessarily loading the entire dataset into memory.
 
 ### Data conversion
-The process to convert to LMDB is quite similar to that of HDF5. We first need to parse the archive file and then process using the Python library `lmdb`. However, as this format is more flexible and not strictly bound to conventions of `numpy` arrays, creating and processing the data is slightly more complicated. An example of this is found [here](https://github.com/Lumi-supercomputer/LUMI-AI-example/blob/95444cb13eec48f6eb78d62f73449d859d0e8414/scripts/lmdb/convert_to_lmdb.py) for the tiny-imagenet in raw format and [here](https://github.com/Lumi-supercomputer/LUMI-AI-example/blob/95444cb13eec48f6eb78d62f73449d859d0e8414/scripts/lmdb/convert_large_to_lmdb.py) for the large imagenet in a `.zip` file format. 
+The conversion process is similar to HDF5: parse archive contents and write to LMDB using the `lmdb` Python library. Because LMDB is more flexible than ndarray-style formats, write/read code is usually a bit more custom. See [convert_to_lmdb.py](scripts/lmdb/convert_to_lmdb.py) for tiny ImageNet and [convert_large_to_lmdb.py](scripts/lmdb/convert_large_to_lmdb.py) for the large archive case.
 
 ### Running PyTorch
-Similar to HDF5, we require a custom built `dataset` for the LMDB file format in order to efficiently load the data into PyTorch through the `DataLoader` framework. This can likewise be created using the `lmdb` Python library as illustrated [here](https://github.com/Lumi-supercomputer/LUMI-AI-example/blob/95444cb13eec48f6eb78d62f73449d859d0e8414/scripts/lmdb/lmdb_dataset.py#L10). The `dataset` is more complicated since we now  need to encode the data to binary ourselves. 
+As with HDF5, we use a custom `Dataset` for LMDB to load data efficiently through PyTorch `DataLoader`; see [lmdb_dataset.py](scripts/lmdb/lmdb_dataset.py). The implementation is typically more involved because values are encoded and decoded from binary payloads.
 
 ## Performance
 The following benchmarks compare loading performance across the different file formats using PyTorch DataLoader on both small and large ImageNet datasets.
@@ -99,7 +99,7 @@ HDF5 and LMDB show similar performance, while squashfs is about 33% slower. The 
 `DataLoader(data, batch_size=32, shuffle=True, num_workers=7)`
 That is, the data is shuffled to be loaded in a random order, and is loaded in batches of 32 samples at a time. The number of workers is set equal to the number of CPUs requested in the allocation. Where on [LUMI one should maximally request 7 cores per GPU requested](https://lumi-supercomputer.github.io/LUMI-training-materials/User-Updates/Update-202308/responsible-use/#core-and-memory-use-on-small-g-and-dev-g).
 
-We can repeat the benchmark in a sequential job with one CPU core and `num_worker=1`: we find that squashfs and LMDB scales as you would expect, however HDF5 does not run well sequentially.
+We can repeat the benchmark in a sequential job with one CPU core and `num_workers=1`: we find that squashfs and LMDB scales as you would expect, however HDF5 does not run well sequentially.
 
 |          | mean (s) | std (s) |  N  |
 | :------: | :------: | :-----: | :-: |

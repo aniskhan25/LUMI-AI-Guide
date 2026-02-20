@@ -34,7 +34,7 @@ Begin with [0. How to use this guide](0-how-to-use-guide/README.md). Then follow
 
 - [7. TensorBoard visualization](7-tensorboard-visualization/README.md)
 - [8. MLflow visualization](8-mlflow-visualization/README.md)
-- [9. Wandb visualization](9-wandb-visualization/README.md)
+- [9. W&B visualization](9-wandb-visualization/README.md)
 
 ## Further reading
 
