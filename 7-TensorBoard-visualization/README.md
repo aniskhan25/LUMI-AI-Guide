@@ -1,7 +1,14 @@
 # 7. TensorBoard visualization
 
-> [!NOTE]  
-> If you wish to run the included examples on LUMI, have a look at the [quickstart](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/1-quickstart#readme) chapter for instructions on how to set up the required environment.
+## Goal
+
+Track and visualize training metrics and sample data from distributed PyTorch runs with TensorBoard.
+
+## Assumptions
+
+- You can run the DDP example from [5. Multi-GPU and Multi-Node Training](../5-multi-gpu-and-node/README.md).
+- TensorBoard logging dependencies are available in your runtime environment.
+- You can access the LUMI web interface Apps menu.
 
 [TensorBoard](https://www.tensorflow.org/tensorboard) is a tool for providing the measurements and visualizations needed during the machine learning workflow. It enables tracking experiment metrics like loss and accuracy, visualizing the model graph, projecting embeddings to a lower dimensional space, and much more.
 
@@ -76,15 +83,21 @@ To launch it, select the log directory where you have data to visualize, which i
 
 Note that TensorBoard is very memory intensive but has low CPU usage. Thus, in the case of performance problems, adding more memory during allocation can help.
 
-### Table of contents
+## Verify
 
-- [Home](..#readme)
-- [1. QuickStart](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/1-quickstart#readme)
-- [2. Setting up your own environment](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/2-setting-up-environment#readme)
-- [3. File formats for training data](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/3-file-formats#readme)
-- [4. Data Storage Options](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/4-data-storage#readme)
-- [5. Multi-GPU and Multi-Node Training](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/5-multi-gpu-and-node#readme)
-- [6. Monitoring and Profiling jobs](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/6-monitoring-and-profiling#readme)
-- [7. TensorBoard visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/7-TensorBoard-visualization#readme)
-- [8. MLflow visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/8-MLflow-visualization#readme)
-- [9. Wandb visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/9-Wandb-visualization#readme)
+Confirm all of the following:
+
+- Rank-0 process creates TensorBoard logs in the configured `runs/` directory.
+- Training loss and validation accuracy are visible in TensorBoard.
+- You can launch TensorBoard from the LUMI web interface and load the run data.
+
+## Troubleshooting
+
+- Empty dashboard: verify the selected log directory and confirm rank-0 is writing events.
+- Missing logs in distributed mode: ensure only one process initializes `SummaryWriter` for shared outputs.
+- Slow or unstable UI: allocate more memory for the TensorBoard job.
+
+## Navigation
+
+- Previous: [6. Monitoring and Profiling jobs](../6-monitoring-and-profiling/README.md)
+- Next: [8. MLflow visualization](../8-MLflow-visualization/README.md)

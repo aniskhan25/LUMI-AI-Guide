@@ -1,16 +1,31 @@
 # 1. QuickStart
 
-This chapter covers how to set up the environment to run the [`visiontransformer.py`](visiontransformer.py) script on LUMI. 
+This lesson gives you a minimal, end-to-end first run of [`visiontransformer.py`](visiontransformer.py) on LUMI.
 
-First, you clone this repository to LUMI via the following command:
+## Goal
+
+Run one single-GPU training job on LUMI and confirm that:
+
+- the container works on GPU
+- the squashfs extension is built
+- training logs and a model checkpoint are produced
+
+## Assumptions
+
+- You have a LUMI project account and can submit jobs to `small-g`.
+- The repository is cloned on `/project` or `/scratch` (not `$HOME`).
+- `../env.sh` is configured for your environment and points to a valid container via `CONTAINER`.
+- `../resources/train_images.hdf5` is available.
+
+Clone this repository to LUMI if needed:
 
 ```bash
 git clone https://github.com/Lumi-supercomputer/LUMI-AI-Guide.git
 ```
 
-We recommend using your `/project/` or `/scratch/` directory of your project to clone the repository as your home directory (`$HOME`) has a capacity of 20 GB and is intended to store user configuration files and personal data.
+Use `/project` or `/scratch` for this clone. `$HOME` has limited capacity and is meant for configuration and personal files.
 
-Next, navigate to the `LUMI-AI-Guide/1-quickstart` directory:
+Then move to the lesson directory:
 
 ```bash
 cd LUMI-AI-Guide/1-quickstart
@@ -94,17 +109,23 @@ Accuracy: 21.265%
 ...
 ```
 
-Congratulations! You have run your first training job on LUMI. The next chapter [Setting up your own environment](../2-setting-up-environment/README.md) explains in more detail how to build and maintain your own environment.
+## Verify
 
- ### Table of contents
+After the three steps, confirm all of the following:
 
-- [Home](..#readme)
-- [1. QuickStart](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/1-quickstart#readme)
-- [2. Setting up your own environment](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/2-setting-up-environment#readme)
-- [3. File formats for training data](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/3-file-formats#readme)
-- [4. Data Storage Options](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/4-data-storage#readme)
-- [5. Multi-GPU and Multi-Node Training](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/5-multi-gpu-and-node#readme)
-- [6. Monitoring and Profiling jobs](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/6-monitoring-and-profiling#readme)
-- [7. TensorBoard visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/7-TensorBoard-visualization#readme)
-- [8. MLflow visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/8-MLflow-visualization#readme)
-- [9. Wandb visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/9-Wandb-visualization#readme)
+- Base smoke-test output includes `SMOKE TEST PASSED`.
+- `../resources/visiontransformer-env.sqsh` exists.
+- Training job output includes epoch-level loss and accuracy logs.
+- `vit_b_16_imagenet.pth` is created in `1-quickstart/`.
+
+## Troubleshooting
+
+- Job fails at submission: update `--account` in [`run_base.sh`](run_base.sh) and [`run.sh`](run.sh), then check with `lumi-workspaces`.
+- Container variable error (`Set CONTAINER in env.sh`): set `CONTAINER` in `../env.sh` to a valid `.sif`.
+- Missing dataset error: place or point `TINY_HDF5_PATH` to `../resources/train_images.hdf5`.
+- No GPU visible in smoke test: ensure `module load singularity-AI-bindings` is present and rerun.
+
+## Navigation
+
+- Previous: [Guide Home](../README.md)
+- Next: [2. Setting up your own environment](../2-setting-up-environment/README.md)

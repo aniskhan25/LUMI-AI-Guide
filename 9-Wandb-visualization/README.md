@@ -1,7 +1,14 @@
 # 9. Wandb visualization
 
-> [!NOTE]  
-> If you wish to run the included examples on LUMI, have a look at the [quickstart](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/1-quickstart#readme) chapter for instructions on how to set up the required environment.
+## Goal
+
+Integrate Weights & Biases (W&B) into your training workflow to track metrics, configuration, and system behavior.
+
+## Assumptions
+
+- You can run the training examples from this guide.
+- You have a W&B account and API key available in your environment.
+- The `wandb` package is installed in your runtime environment.
 
 [Weights & Biases](https://docs.wandb.ai/) is an AI developer platform consisting of three major components: [Models](https://docs.wandb.ai/guides/models/), [Weave](https://wandb.github.io/weave/) and [Core](https://docs.wandb.ai/guides/core/). These components provide features such as tracking your runs, models and datasets, visualizing data and hyperparameter sweeps.
 
@@ -87,15 +94,21 @@ Finally, the `Logs` tab will show the output of the run after the initialization
 
 ![Wandb Logs](../assets/images/wandb_logs.png)
 
-### Table of contents
+## Verify
 
-- [Home](..#readme)
-- [1. QuickStart](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/1-quickstart#readme)
-- [2. Setting up your own environment](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/2-setting-up-environment#readme)
-- [3. File formats for training data](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/3-file-formats#readme)
-- [4. Data Storage Options](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/4-data-storage#readme)
-- [5. Multi-GPU and Multi-Node Training](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/5-multi-gpu-and-node#readme)
-- [6. Monitoring and Profiling jobs](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/6-monitoring-and-profiling#readme)
-- [7. TensorBoard visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/7-TensorBoard-visualization#readme)
-- [8. MLflow visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/8-MLflow-visualization#readme)
-- [9. Wandb visualization](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main/9-Wandb-visualization#readme)
+Confirm the integration is working:
+
+- `wandb.init()` starts successfully and prints run/project links in job output.
+- Expected metrics (for example loss and accuracy) appear in the run dashboard.
+- System metrics are visible in W&B during execution.
+
+## Troubleshooting
+
+- Authentication fails: verify `WANDB_API_KEY` and rerun `wandb login`.
+- Run not visible online: check if W&B is in offline mode and whether syncing is enabled.
+- Duplicate logs in distributed training: ensure only rank 0 initializes and logs to W&B.
+
+## Navigation
+
+- Previous: [8. MLflow visualization](../8-MLflow-visualization/README.md)
+- Next: [Guide Home](../README.md)
