@@ -71,7 +71,7 @@ In TensorBoard, the collected data will be visualized similar to the following:
 
 ![Image title](../assets/images/loss.png)
 
-For a full example that integrates TensorBoard to the DDP script, have a look at [tensorboard_ddp_visiontransformer.py](tensorboard_ddp_visiontransformer.py). For the batch script there are no changes required except for replacing [ddp_visiontransformer.py](../5-multi-gpu-and-node/ddp_visiontransformer.py) with [tensorboard_ddp_visiontransformer.py](tensorboard_ddp_visiontransformer.py).
+For a full example that integrates TensorBoard to the DDP script, have a look at [visiontransformer_ddp_tensorboard.py](visiontransformer_ddp_tensorboard.py). For the batch script there are no changes required except for replacing [visiontransformer_ddp.py](../5-multi-gpu-and-node/visiontransformer_ddp.py) with [visiontransformer_ddp_tensorboard.py](visiontransformer_ddp_tensorboard.py).
 
 ## Visualizing the logs
 
@@ -100,4 +100,4 @@ Confirm all of the following:
 ## Navigation
 
 - Previous: [6. Monitoring and Profiling jobs](../6-monitoring-and-profiling/README.md)
-- Next: [8. MLflow visualization](../8-MLflow-visualization/README.md)
+- Next: [8. MLflow visualization](../8-mlflow-visualization/README.md)

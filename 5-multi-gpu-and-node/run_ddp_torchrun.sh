@@ -30,4 +30,4 @@ export NCCL_NET_GDR_LEVEL=PHB
 
 time srun singularity exec -B "$SQSH_PATH":/user-software:image-src=/ "$CONTAINER" \
   /user-software/bin/python -m torch.distributed.run \
-  --standalone --nnodes=1 --nproc_per_node=8 ddp_visiontransformer.py
+  --standalone --nnodes=1 --nproc_per_node=8 visiontransformer_ddp.py
