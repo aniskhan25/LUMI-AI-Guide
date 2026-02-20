@@ -18,15 +18,16 @@ set -euo pipefail
 module use /appl/local/containers/ai-modules
 module load singularity-AI-bindings
 
-source ../scripts/slurm_bootstrap.sh
-bootstrap_repo --require-sqsh
+source ../env.sh
+: "${CONTAINER:?Set CONTAINER in ../env.sh}"
+: "${TINY_HDF5_PATH:?Set TINY_HDF5_PATH in ../env.sh}"
+[[ -f "$TINY_HDF5_PATH" ]] || { echo "ERROR: Missing HDF5 file: $TINY_HDF5_PATH" >&2; exit 1; }
+SQSH_PATH="../resources/visiontransformer-env.sqsh"
+[[ -f "$SQSH_PATH" ]] || { echo "ERROR: Missing sqsh file: $SQSH_PATH" >&2; exit 1; }
 
 export NCCL_SOCKET_IFNAME=hsn0,hsn1,hsn2,hsn3
 export NCCL_NET_GDR_LEVEL=PHB
 
-srun singularity exec -B "$SQSH_PATH":/user-software:image-src=/ "$CONTAINER" bash -c '
-  set -euo pipefail
-  if [ -n "${WITH_CONDA:-}" ]; then eval "$WITH_CONDA"; fi
-  source /user-software/bin/activate
-  python -m torch.distributed.run --standalone --nnodes=1 --nproc_per_node=8 mlflow_ddp_visiontransformer.py
-'
+time srun singularity exec -B "$SQSH_PATH":/user-software:image-src=/ "$CONTAINER" \
+  /user-software/bin/python -m torch.distributed.run \
+  --standalone --nnodes=1 --nproc_per_node=8 mlflow_ddp_visiontransformer.py

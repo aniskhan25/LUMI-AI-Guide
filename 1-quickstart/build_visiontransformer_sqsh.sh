@@ -4,27 +4,22 @@ set -euo pipefail
 module use /appl/local/containers/ai-modules
 module load singularity-AI-bindings
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
-source "$REPO_ROOT/env.sh"
+source ../env.sh
 
 : "${CONTAINER:?Set CONTAINER in env.sh}"
 
-RESOURCES_DIR="$REPO_ROOT/resources"
-OUT_SQSH="$RESOURCES_DIR/visiontransformer-env.sqsh"
+OUT_SQSH="../resources/visiontransformer-env.sqsh"
 BUILD_DIR="$SCRATCH_ROOT/visiontransformer-env-build"
 
-mkdir -p "$RESOURCES_DIR"
+mkdir -p ../resources
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 
 echo "Building extension environment in: $BUILD_DIR"
 singularity exec -B "$BUILD_DIR":/user-software "$CONTAINER" bash -c '
 set -euo pipefail
-if [ -n "${WITH_CONDA:-}" ]; then eval "$WITH_CONDA"; fi
 python -m venv /user-software --system-site-packages
-source /user-software/bin/activate
-python -m pip install h5py lmdb msgpack six tqdm
+/user-software/bin/python -m pip install h5py lmdb msgpack six tqdm
 '
 
 rm -f "$OUT_SQSH"

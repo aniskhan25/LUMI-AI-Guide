@@ -65,7 +65,6 @@ sbatch run.sh
 `run.sh` uses:
 
 - `env.sh` for container selection
-- `scripts/slurm_bootstrap.sh` for repo/env setup
 - `resources/visiontransformer-env.sqsh` for the extended Python environment
 
 For this example, we use the [Tiny ImageNet Dataset](https://paperswithcode.com/dataset/tiny-imagenet) which is already transformed into the file system friendly hdf5 format (Chapter [File formats for training data](../3-file-formats/README.md) explains in detail why this step is necessary). Please have a look at the terms of access for the ImageNet Dataset [here](https://www.image-net.org/download.php).
