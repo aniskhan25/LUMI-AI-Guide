@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=ds-srun
+#SBATCH --job-name=deepspeed-srun
 #SBATCH --account=project_462000131
 #SBATCH --partition=standard-g
 

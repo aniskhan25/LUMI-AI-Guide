@@ -50,7 +50,6 @@ torch.cuda.set_device(local_rank)
 rank = int(os.environ["RANK"])
 set_cpu_affinity(local_rank)
 
-# Define transformations
 transform = transforms.Compose(
     [
         transforms.Resize(256),
@@ -80,18 +79,22 @@ def train_model(args, model, criterion, optimizer, train_loader, val_loader, epo
 
     for epoch in range(epochs):
         model.train()
+
         running_loss = 0.0
         for images, labels in train_loader:
             images, labels = images.to(model_engine.local_rank), labels.to(
                 model_engine.local_rank
             )
+
             optimizer.zero_grad()
 
             outputs = model_engine(images)
+
             loss = criterion(outputs, labels)
 
             model_engine.backward(loss)
             model_engine.step()
+
             running_loss += loss.item()
 
         if rank == 0:
@@ -99,6 +102,7 @@ def train_model(args, model, criterion, optimizer, train_loader, val_loader, epo
 
         # Validation step, note that only results from rank 0 are used here.
         model.eval()
+
         correct = 0
         total = 0
         with torch.no_grad():
@@ -106,8 +110,11 @@ def train_model(args, model, criterion, optimizer, train_loader, val_loader, epo
                 images, labels = images.to(model_engine.local_rank), labels.to(
                     model_engine.local_rank
                 )
+
                 outputs = model_engine(images)
+
                 _, predicted = torch.max(outputs, 1)
+
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
 
@@ -119,8 +126,6 @@ def train_model(args, model, criterion, optimizer, train_loader, val_loader, epo
 
 
 with HDF5Dataset(HDF5_PATH, transform=transform) as full_train_dataset:
-
-    # Splitting the dataset into train and validation sets
     train_size = int(0.8 * len(full_train_dataset))
     val_size = len(full_train_dataset) - train_size
     train_dataset, val_dataset = random_split(

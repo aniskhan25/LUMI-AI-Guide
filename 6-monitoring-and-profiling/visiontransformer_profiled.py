@@ -16,7 +16,6 @@ from hdf5_dataset import HDF5Dataset
 
 HDF5_PATH = os.environ.get("TINY_HDF5_PATH", "../resources/train_images.hdf5")
 
-# Define transformations
 transform = transforms.Compose(
     [
         transforms.Resize(256),
@@ -65,7 +64,7 @@ def train_model(model, criterion, optimizer, train_loader, val_loader, epochs=1)
             prof.export_chrome_trace("trace.json")
 
         print(f"Epoch {epoch+1}, Loss: {running_loss/len(train_loader)}")
-        # Validation step
+
         model.eval()
         correct = 0
         total = 0
@@ -80,7 +79,6 @@ def train_model(model, criterion, optimizer, train_loader, val_loader, epochs=1)
 
 
 with HDF5Dataset(HDF5_PATH, transform=transform) as full_train_dataset:
-    # Splitting the dataset into train and validation sets
     train_size = int(0.8 * len(full_train_dataset))
     val_size = len(full_train_dataset) - train_size
     train_dataset, val_dataset = random_split(
