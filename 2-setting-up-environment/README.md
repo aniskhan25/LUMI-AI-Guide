@@ -124,14 +124,14 @@ These containers are tuned for LUMI and are generally not portable as-is to othe
 
 ## Optional local venv reference
 
-If you choose the optional venv route, run scripts explicitly with that interpreter:
+If you choose the optional venv route, run a lightweight GPU check with that interpreter:
 
 ```bash
 cd ./optional-venv-workdir
-singularity exec "$CONTAINER" bash -c '.venv/bin/python ../../1-quickstart/visiontransformer.py'
+singularity exec "$CONTAINER" bash -c '.venv/bin/python -c "import torch; print(torch.cuda.device_count())"'
 ```
 
-Replace `../../1-quickstart/visiontransformer.py` with your custom script if needed.
+Expected output is a value greater than `0`.
 
 ## Optional alternatives (advanced/reference)
 
