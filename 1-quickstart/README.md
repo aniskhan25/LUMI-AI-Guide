@@ -95,6 +95,7 @@ sbatch run_vit.sh
 
 For quickstart, `run_vit.sh` uses `torchvision.datasets.FakeData` so the run is independent of dataset preparation.  
 Quickstart in this lesson uses FakeData only.
+The reported metrics are smoke-test indicators and are not meaningful model-quality numbers.
 
 To run the Vision Transformer example, we use the batch job script [`run_vit.sh`](run_vit.sh), which runs [`visiontransformer.py`](visiontransformer.py) on a single GPU on a LUMI-G node.
 A quickstart to SLURM is provided in the [LUMI documentation](https://docs.lumi-supercomputer.eu/runjobs/scheduled-jobs/slurm-quickstart/). 
@@ -109,17 +110,17 @@ slurm-<jobid>.out
 
 As in Step 1, this is written in the submit directory (`1-quickstart/`) because the script uses Slurm's default output behavior.
 
-The output will show Loss and Accuracy values for each epoch, similar to the following:
+The output will show smoke-test metrics for each epoch, similar to the following:
 
 ```bash
-Epoch 1, Loss: 4.68622251625061
-Accuracy: 9.57%
-Epoch 2, Loss: 4.104039922332763
-Accuracy: 15.795%
-Epoch 3, Loss: 3.7419378942489625
-Accuracy: 19.525%
-Epoch 4, Loss: 3.6926351853370667
-Accuracy: 21.265%
+Quickstart mode: using FakeData with random labels.
+Metrics are only for smoke testing runtime, not model quality.
+Starting epoch 1.
+Epoch 1, Smoke Loss: 5.82
+Smoke Accuracy (chance~0.5%): 0.49%
+Starting epoch 2.
+Epoch 2, Smoke Loss: 5.46
+Smoke Accuracy (chance~0.5%): 0.24%
 ...
 ```
 
