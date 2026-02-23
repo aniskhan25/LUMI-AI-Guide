@@ -201,7 +201,7 @@ Use `torchrun` first for the minimal DeepSpeed path, then scale to multi-node.
 
 #### `torchrun`
 ##### Single-node, multi-GPU
-The jobscript to run the DeepSpeed example on a single LUMI-G node with all 4 GPUs (8 GCDs) is [run_ds_torchrun.sh](run_ds_torchrun.sh). We reserve the full node and launch a single task, with 56 cpus per task:
+The jobscript to run the DeepSpeed example on a single LUMI-G node with all 4 GPUs (8 GCDs) is [run_deepspeed_torchrun.sh](run_deepspeed_torchrun.sh). We reserve the full node and launch a single task, with 56 cpus per task:
 
 ```bash
 #SBATCH --nodes=1
@@ -287,7 +287,7 @@ Use [run_ddp_srun_n4.sh](run_ddp_srun_n4.sh) and adjust:
 
 ### DeepSpeed with `srun`
 #### Single-node, multi-GPU
-The jobscript for a single node is [run_ds_srun.sh](run_ds_srun.sh):
+The jobscript for a single node is [run_deepspeed_srun.sh](run_deepspeed_srun.sh):
 
 ```bash
 #SBATCH --nodes=1

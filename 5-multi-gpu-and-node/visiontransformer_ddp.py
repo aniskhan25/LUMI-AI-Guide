@@ -49,7 +49,6 @@ torch.cuda.set_device(local_rank)
 rank = int(os.environ["RANK"])
 set_cpu_affinity(local_rank)
 
-# Define transformations
 transform = transforms.Compose(
     [
         transforms.Resize(256),
@@ -59,7 +58,6 @@ transform = transforms.Compose(
     ]
 )
 
-
 model = vit_b_16(weights="DEFAULT").to(local_rank)
 model = DistributedDataParallel(model, device_ids=[local_rank])
 
@@ -68,8 +66,6 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 
 def train_model(model, criterion, optimizer, train_loader, val_loader, epochs=10):
-    # note that "cuda" is used as a general reference to GPUs,
-    # even when running on AMD GPUs that use ROCm
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
@@ -78,13 +74,17 @@ def train_model(model, criterion, optimizer, train_loader, val_loader, epochs=10
 
     for epoch in range(epochs):
         model.train()
+
         running_loss = 0.0
         for images, labels in train_loader:
             images, labels = images.to(device), labels.to(device)
 
             optimizer.zero_grad()
+
             outputs = model(images)
+
             loss = criterion(outputs, labels)
+
             loss.backward()
             optimizer.step()
 
@@ -95,13 +95,17 @@ def train_model(model, criterion, optimizer, train_loader, val_loader, epochs=10
 
         # Validation step, note that only results from rank 0 are used here.
         model.eval()
+
         correct = 0
         total = 0
         with torch.no_grad():
             for images, labels in val_loader:
                 images, labels = images.to(device), labels.to(device)
+
                 outputs = model(images)
+
                 _, predicted = torch.max(outputs, 1)
+
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
 
@@ -113,10 +117,9 @@ def train_model(model, criterion, optimizer, train_loader, val_loader, epochs=10
 
 
 with HDF5Dataset(HDF5_PATH, transform=transform) as full_train_dataset:
-
-    # Splitting the dataset into train and validation sets
     train_size = int(0.8 * len(full_train_dataset))
     val_size = len(full_train_dataset) - train_size
+
     train_dataset, val_dataset = random_split(
         full_train_dataset, [train_size, val_size]
     )

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=ds-torchrun-4n
+#SBATCH --job-name=deepspeed-torchrun-4n
 #SBATCH --account=project_462000131
 #SBATCH --partition=standard-g
 
