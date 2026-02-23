@@ -45,7 +45,7 @@ cd LUMI-AI-Guide/1-quickstart
 The recommended quickstart flow has three steps:
 
 1. Smoke-test the base container.
-2. Prepare the squashfs extension (build or copy).
+2. Build the squashfs extension.
 3. Run the Vision Transformer training script with that extension.
 
 This keeps the runtime model consistent with the rest of the guide.
@@ -68,23 +68,13 @@ The output file is written to the directory where you run `sbatch` (here: `1-qui
 
 You should see Python/Torch/ROCm version info and `SMOKE TEST PASSED`.
 
-## Step 2: Prepare the squashfs extension
+## Step 2: Build the squashfs extension
 
-Choose one option:
-
-Option A (reproducible): build `visiontransformer-env.sqsh` from the base container:
+Build `visiontransformer-env.sqsh` from the base container:
 
 ```bash
 ./build_visiontransformer_sqsh.sh
 ```
-
-Option B (fast path): copy prebuilt assets from shared storage:
-
-```bash
-./setup_environment.sh
-```
-
-Both options provide:
 
 - `../resources/visiontransformer-env.sqsh`
 
