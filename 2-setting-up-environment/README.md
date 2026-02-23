@@ -127,10 +127,10 @@ If you choose the optional venv route, run scripts explicitly with that interpre
 
 ```bash
 cd ./optional-venv-workdir
-singularity exec "$CONTAINER" bash -c '.venv/bin/python my_script.py'
+singularity exec "$CONTAINER" bash -c '.venv/bin/python ../1-quickstart/visiontransformer.py'
 ```
 
-Replace `my_script.py` with your custom script.
+Replace `../1-quickstart/visiontransformer.py` with your custom script if needed.
 
 ## Optional alternatives (advanced/reference)
 
