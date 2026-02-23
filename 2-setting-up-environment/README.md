@@ -103,7 +103,7 @@ cd ./optional-venv-workdir
 
 singularity exec "$CONTAINER" bash -c '
 python -m venv .venv --system-site-packages
-.venv/bin/python -m pip install h5py lmdb msgpack six tqdm
+.venv/bin/python -m pip install h5py lmdb msgpack six tqdm mlflow
 '
 ```
 
