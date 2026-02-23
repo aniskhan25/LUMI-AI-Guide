@@ -93,7 +93,9 @@ The jobscript to run the PyTorch DDP example on a single LUMI-G node with all 4 
 We use the `torchrun` launcher, which will launch 8 processes on the node:
 
 ```bash
-srun singularity exec $SIF bash -c '$WITH_CONDA && source visiontransformer-env/bin/activate && python -m torch.distributed.run --standalone --nnodes=1 --nproc_per_node=8 visiontransformer_ddp.py'
+srun singularity exec -B ../resources/visiontransformer-env.sqsh:/user-software:image-src=/ "$CONTAINER" \
+  /user-software/bin/python -m torch.distributed.run \
+  --standalone --nnodes=1 --nproc_per_node=8 visiontransformer_ddp.py
 ```
 
 ##### Multi-node
@@ -113,7 +115,11 @@ export MASTER_PORT=29500
 
 And run with `torchrun`, passing the `--rdzv_*` parameters to the launcher:
 ```bash
-srun singularity exec $CONTAINER bash -c '$WITH_CONDA && source visiontransformer-env/bin/activate && python -m torch.distributed.run --nnodes=$SLURM_JOB_NUM_NODES --nproc_per_node=8 --rdzv_id=\$SLURM_JOB_ID --rdzv_backend=c10d --rdzv_endpoint="$MASTER_ADDR:$MASTER_PORT" visiontransformer_ddp.py'
+srun singularity exec -B ../resources/visiontransformer-env.sqsh:/user-software:image-src=/ "$CONTAINER" \
+  /user-software/bin/python -m torch.distributed.run \
+  --nnodes=$SLURM_JOB_NUM_NODES --nproc_per_node=8 \
+  --rdzv_id=\$SLURM_JOB_ID --rdzv_backend=c10d --rdzv_endpoint="$MASTER_ADDR:$MASTER_PORT" \
+  visiontransformer_ddp.py
 ```
 
 ## DeepSpeed
@@ -213,7 +219,11 @@ export MASTER_PORT=29500
 
 We use the `torchrun` launcher, which will launch 8 processes on the node:
 ```bash
-srun singularity exec $CONTAINER bash -c 'export CXX=g++-12; $WITH_CONDA && source visiontransformer-env/bin/activate && python -m torch.distributed.run --nproc_per_node 8 --nnodes $SLURM_NNODES --node_rank $SLURM_PROCID --master_addr $MASTER_ADDR --master_port $MASTER_PORT visiontransformer_deepspeed.py --deepspeed --deepspeed_config ds_config.json'
+srun singularity exec -B ../resources/visiontransformer-env.sqsh:/user-software:image-src=/ "$CONTAINER" \
+  /user-software/bin/python -m torch.distributed.run \
+  --nproc_per_node 8 --nnodes $SLURM_NNODES --node_rank $SLURM_PROCID \
+  --master_addr $MASTER_ADDR --master_port $MASTER_PORT \
+  visiontransformer_deepspeed.py --deepspeed --deepspeed_config ds_config.json
 ```
 
 ##### Multi-node
@@ -227,7 +237,11 @@ To run on multiple nodes, we adjust the job requirements:
 
 And pass the `--rdzv_*` parameters to the launcher:
 ```bash
-srun singularity exec $CONTAINER bash -c 'export CXX=g++-12; $WITH_CONDA && source visiontransformer-env/bin/activate && python -m torch.distributed.run --nnodes=$SLURM_JOB_NUM_NODES --nproc_per_node=8 --node_rank $SLURM_PROCID --rdzv_id=\$SLURM_JOB_ID --rdzv_backend=c10d --rdzv_endpoint="$MASTER_ADDR:$MASTER_PORT" visiontransformer_deepspeed.py --deepspeed --deepspeed_config ds_config.json'
+srun singularity exec -B ../resources/visiontransformer-env.sqsh:/user-software:image-src=/ "$CONTAINER" \
+  /user-software/bin/python -m torch.distributed.run \
+  --nnodes=$SLURM_JOB_NUM_NODES --nproc_per_node=8 --node_rank $SLURM_PROCID \
+  --rdzv_id=\$SLURM_JOB_ID --rdzv_backend=c10d --rdzv_endpoint="$MASTER_ADDR:$MASTER_PORT" \
+  visiontransformer_deepspeed.py --deepspeed --deepspeed_config ds_config.json
 ```
 
 ## `srun` launch variants (advanced alternatives)
@@ -258,9 +272,8 @@ export WORLD_SIZE=$SLURM_NPROCS
 Run:
 
 ```bash
-srun singularity exec $CONTAINER bash -c "export RANK=\$SLURM_PROCID && export LOCAL_RANK=\$SLURM_LOCALID \
-                                                                                $WITH_CONDA && source visiontransformer-env/bin/activate && \
-                                                                                python visiontransformer_ddp.py"
+srun singularity exec -B ../resources/visiontransformer-env.sqsh:/user-software:image-src=/ "$CONTAINER" bash -c "export RANK=\$SLURM_PROCID && export LOCAL_RANK=\$SLURM_LOCALID \
+                                                                                /user-software/bin/python visiontransformer_ddp.py"
 ```
 
 `RANK` and `LOCAL_RANK` must be exported inside the container command because they are only available in the Slurm jobstep.
@@ -296,7 +309,8 @@ export WORLD_SIZE=$SLURM_NPROCS
 Run:
 
 ```bash
-srun --cpu-bind=v,mask_cpu=$CPU_BIND_MASKS singularity exec $CONTAINER bash -c 'export CXX=g++-12; export RANK=$SLURM_PROCID; export LOCAL_RANK=$SLURM_LOCALID; $WITH_CONDA && source visiontransformer-env/bin/activate && python visiontransformer_deepspeed.py --deepspeed --deepspeed_config ds_config.json'
+srun --cpu-bind=v,mask_cpu=$CPU_BIND_MASKS singularity exec -B ../resources/visiontransformer-env.sqsh:/user-software:image-src=/ "$CONTAINER" \
+  bash -c 'export RANK=$SLURM_PROCID; export LOCAL_RANK=$SLURM_LOCALID; /user-software/bin/python visiontransformer_deepspeed.py --deepspeed --deepspeed_config ds_config.json'
 ```
 
 #### Multi-node
@@ -349,9 +363,8 @@ When `srun` is used, Slurm binding options can be used in the job script:
 ```bash
 CPU_BIND_MASKS="0x00fe000000000000,0xfe00000000000000,0x0000000000fe0000,0x00000000fe000000,0x00000000000000fe,0x000000000000fe00,0x000000fe00000000,0x0000fe0000000000"
 
-srun --cpu-bind=mask_cpu=$CPU_BIND_MASKS singularity exec $CONTAINER bash -c "export RANK=\$SLURM_PROCID && export LOCAL_RANK=\$SLURM_LOCALID \
-                                                                                $WITH_CONDA && source visiontransformer-env/bin/activate && \
-                                                                                python visiontransformer_ddp.py"
+srun --cpu-bind=mask_cpu=$CPU_BIND_MASKS singularity exec -B ../resources/visiontransformer-env.sqsh:/user-software:image-src=/ "$CONTAINER" bash -c "export RANK=\$SLURM_PROCID && export LOCAL_RANK=\$SLURM_LOCALID \
+                                                                                /user-software/bin/python visiontransformer_ddp.py"
 ```
 
 To output the binding information, `--cpu-bind=v` can be passed to `srun`:

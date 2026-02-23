@@ -35,7 +35,7 @@ When running jobs on LUMI's GPUs, you want to make sure you use the given comput
 The `rocm-smi` tool is a command-line utility that allows you to monitor the status of the GPUs on LUMI. Let's start with the [visiontransformer.py](../1-quickstart/visiontransformer.py) script from [QuickStart](../1-quickstart/README.md), which runs on a single GPU. We submit the job with the following command:
 
 ```bash
-sbatch run.sh
+sbatch ../1-quickstart/run_vit.sh
 ```
 
 We can check the `jobid` of the job with the `squeue --me` command and open an interactive parallel session (replace `8704360` with the `jobid` of your job) with the following command:
@@ -59,7 +59,7 @@ The `rocm-smi` tool shows multiple useful metrics such as GPU utilization, memor
 Let's have a look at the [visiontransformer_ddp.py](../5-multi-gpu-and-node/visiontransformer_ddp.py) example from [Multi-GPU and Multi-Node Training](../5-multi-gpu-and-node/README.md), which runs on 8 GPUs on one node. We submit the job with the following command:
 
 ```bash
-sbatch run_ddp_torchrun.sh
+sbatch ../5-multi-gpu-and-node/run_ddp_torchrun.sh
 ```
 
 `rocm-smi` will now show us the status of all 8 GPUs on the node:

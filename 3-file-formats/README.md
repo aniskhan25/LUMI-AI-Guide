@@ -95,6 +95,11 @@ In this repo, use:
 
 ```bash
 sbatch convert.sh squashfs
+```
+
+After conversion finishes, run benchmark:
+
+```bash
 sbatch run-scripts/simple-benchmarks/run-comp-tiny.sh squashfs
 ```
 
@@ -105,7 +110,7 @@ Background reference:
 Use `mksquashfs` on a source directory:
 
 ```bash
-mksquashfs ILSVRC/ imagenet.squashfs
+mksquashfs <source_directory>/ <output_name>.squashfs
 ```
 
 Transfer the resulting `.squashfs` file to LUMI (`rsync --partial --progress --stats` is recommended for large files).
@@ -131,6 +136,11 @@ In this repo, use:
 
 ```bash
 sbatch convert.sh hdf5
+```
+
+After conversion finishes, run benchmark:
+
+```bash
 sbatch run-scripts/simple-benchmarks/run-comp-tiny.sh hdf5
 ```
 
@@ -155,6 +165,11 @@ In this repo, use:
 
 ```bash
 sbatch convert.sh lmdb
+```
+
+After conversion finishes, run benchmark:
+
+```bash
 sbatch run-scripts/simple-benchmarks/run-comp-tiny.sh lmdb
 ```
 
