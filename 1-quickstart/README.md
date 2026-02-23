@@ -85,10 +85,10 @@ The extension includes packages needed by the sample scripts, such as `h5py`.
 Submit:
 
 ```bash
-sbatch run.sh
+sbatch run_vit.sh
 ```
 
-`run.sh` uses:
+`run_vit.sh` uses:
 
 - `env.sh` for container selection
 - `../resources/visiontransformer-env.sqsh` for the extended Python environment
@@ -96,10 +96,10 @@ sbatch run.sh
 For this example, `visiontransformer.py` automatically uses HDF5 data when available (`TINY_HDF5_PATH` or `../resources/train_images.hdf5`).  
 If no HDF5 file is found, it falls back to `torchvision.datasets.FakeData`, so quickstart still runs on a fresh clone.
 
-To run the Vision Transformer example, we use the batch job script [`run.sh`](run.sh), which runs [`visiontransformer.py`](visiontransformer.py) on a single GPU on a LUMI-G node.
+To run the Vision Transformer example, we use the batch job script [`run_vit.sh`](run_vit.sh), which runs [`visiontransformer.py`](visiontransformer.py) on a single GPU on a LUMI-G node.
 A quickstart to SLURM is provided in the [LUMI documentation](https://docs.lumi-supercomputer.eu/runjobs/scheduled-jobs/slurm-quickstart/). 
 
-If needed, replace the `--account` flag in [`run_base.sh`](run_base.sh) and [`run.sh`](run.sh) with your own project account. You can find your project account by running `lumi-workspaces`.
+If needed, replace the `--account` flag in [`run_base.sh`](run_base.sh) and [`run_vit.sh`](run_vit.sh) with your own project account. You can find your project account by running `lumi-workspaces`.
 
 Once the job starts, output is written to:
 
@@ -134,7 +134,7 @@ After the three steps, confirm all of the following:
 
 ## Troubleshooting
 
-- Job fails at submission: update `--account` in [`run_base.sh`](run_base.sh) and [`run.sh`](run.sh), then check with `lumi-workspaces`.
+- Job fails at submission: update `--account` in [`run_base.sh`](run_base.sh) and [`run_vit.sh`](run_vit.sh), then check with `lumi-workspaces`.
 - Container variable error (`Set CONTAINER in env.sh`): set `CONTAINER` in `../env.sh` to a valid `.sif`.
 - Missing HDF5 file: quickstart uses `FakeData` automatically. To use real data, set `TINY_HDF5_PATH` or place `../resources/train_images.hdf5`.
 - No GPU visible in smoke test: ensure `module load singularity-AI-bindings` is present and rerun.
