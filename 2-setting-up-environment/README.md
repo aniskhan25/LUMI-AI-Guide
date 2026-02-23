@@ -18,13 +18,21 @@ Define one stable runtime baseline that is reused by chapters `3` to `9`.
 
 ## Minimal run checkpoint
 
-Command (from an allocated GPU node):
+Allocate an interactive GPU node:
+
+```bash
+salloc --account=project_462000131 --partition=small-g \
+  --nodes=1 --gpus-per-node=1 --ntasks=1 --cpus-per-task=7 \
+  --mem-per-gpu=60G --time=00:15:00
+```
+
+Then run:
 
 ```bash
 source ../env.sh
 module use /appl/local/containers/ai-modules
 module load singularity-AI-bindings
-srun singularity exec "$CONTAINER" bash -c '$WITH_CONDA && python -c "import torch; print(torch.cuda.device_count())"'
+srun singularity exec "$CONTAINER" python -c "import torch; print(torch.cuda.device_count())"
 ```
 
 Success signal:
@@ -54,13 +62,13 @@ source ../env.sh
 ### 2. Validate container + GPU access
 
 ```bash
-srun singularity exec "$CONTAINER" bash -c '$WITH_CONDA && python -c "import torch; print(torch.cuda.is_available(), torch.cuda.device_count())"'
+srun singularity exec "$CONTAINER" python -c "import torch; print(torch.cuda.is_available(), torch.cuda.device_count())"
 ```
 
 ### 3. Inspect installed Python packages (optional)
 
 ```bash
-srun singularity exec "$CONTAINER" bash -c '$WITH_CONDA && pip list | head -n 30'
+srun singularity exec "$CONTAINER" pip list | head -n 30
 ```
 
 ### 4. Extend the Python environment
