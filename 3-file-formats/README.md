@@ -21,8 +21,9 @@ Choose a practical training-data format on LUMI and run one validated loader ben
 Commands (from a clean state):
 
 ```bash
-./get_data.sh
+bash ./get_data.sh
 sbatch convert.sh lmdb
+# wait for conversion job to finish successfully
 sbatch run-scripts/simple-benchmarks/run-comp-tiny.sh lmdb
 ```
 
@@ -51,7 +52,7 @@ Success signal:
 Download raw tiny-ImageNet data:
 
 ```bash
-./get_data.sh
+bash ./get_data.sh
 ```
 
 Convert to a target format:
@@ -174,6 +175,7 @@ Before continuing:
 - Conversion overloads filesystem: convert from archive directly when possible, avoid huge raw extraction trees.
 - Missing path/runtime variables: source `../env.sh` and verify dataset paths before submission.
 - Container mount issues with SquashFS: verify `-B <file>:/mount:image-src=/...` syntax and source path.
+- `get_data.sh: Permission denied`: run `bash ./get_data.sh` or set execute permission with `chmod +x get_data.sh`.
 
 ## Navigation
 
