@@ -38,7 +38,7 @@ def train_model(model, criterion, optimizer, train_loader, val_loader, epochs=10
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
-        print(f"Epoch {epoch+1}, Loss: {running_loss/len(train_loader)}")
+        print(f"Epoch {epoch+1}, Smoke Loss: {running_loss/len(train_loader)}")
         # Validation step
         model.eval()
         correct = 0
@@ -50,7 +50,7 @@ def train_model(model, criterion, optimizer, train_loader, val_loader, epochs=10
                 _, predicted = torch.max(outputs, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
-        print(f"Accuracy: {100 * correct / total}%")
+        print(f"Smoke Accuracy (chance~0.5%): {100 * correct / total}%")
 
 
 def run_training(full_train_dataset):
@@ -62,7 +62,8 @@ def run_training(full_train_dataset):
     train_model(model, criterion, optimizer, train_loader, val_loader)
 
 
-print("Using FakeData (quickstart).")
+print("Quickstart mode: using FakeData with random labels.")
+print("Metrics are only for smoke testing runtime, not model quality.")
 fake_dataset = FakeData(
     size=2048,
     image_size=(3, 224, 224),
