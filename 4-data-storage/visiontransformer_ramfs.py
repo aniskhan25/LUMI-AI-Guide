@@ -1,9 +1,11 @@
-from torch.utils.data import DataLoader, random_split
-import torch
-import torchvision.transforms as transforms
-from torchvision.models import vit_b_16
-import sys
 import os
+import sys
+import torch
+
+import torchvision.transforms as transforms
+
+from torchvision.models import vit_b_16
+from torch.utils.data import DataLoader, random_split
 
 hdf5_module_dir = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "3-file-formats", "scripts", "hdf5")
