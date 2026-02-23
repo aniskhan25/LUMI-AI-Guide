@@ -33,15 +33,17 @@ case "$FORMAT" in
   lmdb)
     mkdir -p "$DATA_DIR/lmdb"
     [[ -f "$SQSH_PATH" ]] || { echo "ERROR: Missing sqsh: $SQSH_PATH" >&2; exit 1; }
-    time srun --cpu-bind=none singularity exec "$CONTAINER" \
+    time srun --cpu-bind=none singularity exec \
       -B "$SQSH_PATH":/user-software:image-src=/ \
+      "$CONTAINER" \
       /user-software/bin/python scripts/lmdb/convert_to_lmdb.py
     ;;
   hdf5)
     mkdir -p "$DATA_DIR/hdf5"
     [[ -f "$SQSH_PATH" ]] || { echo "ERROR: Missing sqsh: $SQSH_PATH" >&2; exit 1; }
-    time srun --cpu-bind=none singularity exec "$CONTAINER" \
+    time srun --cpu-bind=none singularity exec \
       -B "$SQSH_PATH":/user-software:image-src=/ \
+      "$CONTAINER" \
       /user-software/bin/python scripts/hdf5/convert_to_hdf5.py
     ;;
   *)
