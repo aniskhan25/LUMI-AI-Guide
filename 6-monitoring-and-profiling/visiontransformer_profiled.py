@@ -1,13 +1,18 @@
-from torch.utils.data import DataLoader, random_split
-import torch
-import torchvision.transforms as transforms
-from torchvision.models import vit_b_16
-from torch.profiler import profile, ProfilerActivity
-import sys
 import os
+import sys
+import torch
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from resources.hdf5_dataset import HDF5Dataset
+from torch.profiler import profile, ProfilerActivity
+import torchvision.transforms as transforms
+
+from torch.utils.data import DataLoader, random_split
+from torchvision.models import vit_b_16
+
+hdf5_module_dir = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "3-file-formats", "scripts", "hdf5")
+)
+sys.path.insert(0, hdf5_module_dir)
+from hdf5_dataset import HDF5Dataset
 
 HDF5_PATH = os.environ.get("TINY_HDF5_PATH", "../resources/train_images.hdf5")
 
@@ -74,9 +79,7 @@ def train_model(model, criterion, optimizer, train_loader, val_loader, epochs=1)
         print(f"Accuracy: {100 * correct / total}%")
 
 
-with HDF5Dataset(
-    HDF5_PATH, transform=transform
-) as full_train_dataset:
+with HDF5Dataset(HDF5_PATH, transform=transform) as full_train_dataset:
     # Splitting the dataset into train and validation sets
     train_size = int(0.8 * len(full_train_dataset))
     val_size = len(full_train_dataset) - train_size
