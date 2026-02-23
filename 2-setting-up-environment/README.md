@@ -89,12 +89,13 @@ Use this decision rule in chapters `3` to `9`:
 - Recommended default: reuse `../resources/visiontransformer-env.sqsh`.
 - Optional fallback: create a local `venv` only for custom experiments.
 
-If you need an optional local `venv` (generic pattern, run from repository root):
+If you need an optional local `venv` (run from lesson `2-setting-up-environment`):
 
 ```bash
+cd ../2-setting-up-environment
 module use /appl/local/containers/ai-modules
 module load singularity-AI-bindings
-source ./env.sh
+source ../env.sh
 
 # choose any working directory where you want to keep the venv
 mkdir -p ./optional-venv-workdir
@@ -127,10 +128,10 @@ If you choose the optional venv route, run scripts explicitly with that interpre
 
 ```bash
 cd ./optional-venv-workdir
-singularity exec "$CONTAINER" bash -c '.venv/bin/python ../1-quickstart/visiontransformer.py'
+singularity exec "$CONTAINER" bash -c '.venv/bin/python ../../1-quickstart/visiontransformer.py'
 ```
 
-Replace `../1-quickstart/visiontransformer.py` with your custom script if needed.
+Replace `../../1-quickstart/visiontransformer.py` with your custom script if needed.
 
 ## Optional alternatives (advanced/reference)
 
