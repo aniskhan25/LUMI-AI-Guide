@@ -7,7 +7,7 @@ This lesson gives you a minimal, end-to-end first run of [`visiontransformer.py`
 Run one single-GPU training job on LUMI and confirm that:
 
 - the container works on GPU
-- the squashfs extension is built
+- the squashfs extension is available
 - training logs and a model checkpoint are produced
 
 ## Assumptions
@@ -15,19 +15,18 @@ Run one single-GPU training job on LUMI and confirm that:
 - You have a LUMI project account and can submit jobs to `small-g`.
 - The repository is cloned on `/project` or `/scratch` (not `$HOME`).
 - `../env.sh` is configured for your environment and points to a valid container via `CONTAINER`.
-- `../resources/train_images.hdf5` is available.
 
 ## Minimal run checkpoint
 
 Command:
 
 ```bash
-sbatch run.sh
+sbatch run_base.sh
 ```
 
 Success signal:
 
-- Job output contains `Epoch 1, Loss:` and `Accuracy:` lines.
+- Job output contains `SMOKE TEST PASSED`.
 
 Clone this repository to LUMI if needed:
 
@@ -46,7 +45,7 @@ cd LUMI-AI-Guide/1-quickstart
 The recommended quickstart flow has three steps:
 
 1. Smoke-test the base container.
-2. Build a squashfs extension with missing Python packages.
+2. Prepare the squashfs extension (build or copy).
 3. Run the Vision Transformer training script with that extension.
 
 This keeps the runtime model consistent with the rest of the guide.
@@ -69,17 +68,25 @@ The output file is written to the directory where you run `sbatch` (here: `1-qui
 
 You should see Python/Torch/ROCm version info and `SMOKE TEST PASSED`.
 
-## Step 2: Build the squashfs extension
+## Step 2: Prepare the squashfs extension
 
-Build `visiontransformer-env.sqsh` from the base container:
+Choose one option:
+
+Option A (reproducible): build `visiontransformer-env.sqsh` from the base container:
 
 ```bash
 ./build_visiontransformer_sqsh.sh
 ```
 
-This writes:
+Option B (fast path): copy prebuilt assets from shared storage:
 
-- `resources/visiontransformer-env.sqsh`
+```bash
+./setup_environment.sh
+```
+
+Both options provide:
+
+- `../resources/visiontransformer-env.sqsh`
 
 The extension includes packages needed by the sample scripts, such as `h5py`.
 
@@ -94,9 +101,10 @@ sbatch run.sh
 `run.sh` uses:
 
 - `env.sh` for container selection
-- `resources/visiontransformer-env.sqsh` for the extended Python environment
+- `../resources/visiontransformer-env.sqsh` for the extended Python environment
 
-For this example, we use the [Tiny ImageNet Dataset](https://paperswithcode.com/dataset/tiny-imagenet) which is already transformed into the file system friendly hdf5 format (Chapter [File formats for training data](../3-file-formats/README.md) explains in detail why this step is necessary). Please have a look at the terms of access for the ImageNet Dataset [here](https://www.image-net.org/download.php).
+For this example, `visiontransformer.py` automatically uses HDF5 data when available (`TINY_HDF5_PATH` or `../resources/train_images.hdf5`).  
+If no HDF5 file is found, it falls back to `torchvision.datasets.FakeData`, so quickstart still runs on a fresh clone.
 
 To run the Vision Transformer example, we use the batch job script [`run.sh`](run.sh), which runs [`visiontransformer.py`](visiontransformer.py) on a single GPU on a LUMI-G node.
 A quickstart to SLURM is provided in the [LUMI documentation](https://docs.lumi-supercomputer.eu/runjobs/scheduled-jobs/slurm-quickstart/). 
@@ -138,7 +146,7 @@ After the three steps, confirm all of the following:
 
 - Job fails at submission: update `--account` in [`run_base.sh`](run_base.sh) and [`run.sh`](run.sh), then check with `lumi-workspaces`.
 - Container variable error (`Set CONTAINER in env.sh`): set `CONTAINER` in `../env.sh` to a valid `.sif`.
-- Missing dataset error: place or point `TINY_HDF5_PATH` to `../resources/train_images.hdf5`.
+- Missing HDF5 file: quickstart uses `FakeData` automatically. To use real data, set `TINY_HDF5_PATH` or place `../resources/train_images.hdf5`.
 - No GPU visible in smoke test: ensure `module load singularity-AI-bindings` is present and rerun.
 
 ## Navigation
