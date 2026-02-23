@@ -18,12 +18,23 @@ Choose a practical training-data format on LUMI and run one validated loader ben
 
 ## Minimal run checkpoint
 
-Commands (from a clean state):
+From a clean state, run these commands one by one.
+
+1. Download tiny-ImageNet data:
 
 ```bash
 bash ./get_data.sh
+```
+
+2. Convert to LMDB:
+
+```bash
 sbatch convert.sh lmdb
-# wait for conversion job to finish successfully
+```
+
+3. Wait for the conversion job to finish successfully, then run benchmark:
+
+```bash
 sbatch run-scripts/simple-benchmarks/run-comp-tiny.sh lmdb
 ```
 
@@ -49,19 +60,19 @@ Success signal:
 
 ### Tiny dataset setup used in this chapter
 
-Download raw tiny-ImageNet data:
+1. Download raw tiny-ImageNet data:
 
 ```bash
 bash ./get_data.sh
 ```
 
-Convert to a target format:
+2. Convert to a target format:
 
 ```bash
 sbatch convert.sh lmdb
 ```
 
-Then run the benchmark:
+3. After conversion finishes, run the benchmark:
 
 ```bash
 sbatch run-scripts/simple-benchmarks/run-comp-tiny.sh lmdb
