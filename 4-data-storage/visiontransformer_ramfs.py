@@ -5,8 +5,9 @@ from torchvision.models import vit_b_16
 import sys
 import os
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from resources.hdf5_dataset import HDF5Dataset
+repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.join(repo_root, "resources"))
+from hdf5_dataset import HDF5Dataset
 
 
 # Define transformations
