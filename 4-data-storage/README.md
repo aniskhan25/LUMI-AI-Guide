@@ -24,6 +24,8 @@ Command:
 sbatch run_ramfs.sh
 ```
 
+Prerequisite: create the tiny HDF5 dataset first in lesson 3.
+
 Success signal:
 
 - Job completes and writes a model file at `$DATA_BENCH_DIR/ramfs/vit_b_16_imagenet.<jobid>.pth`.
