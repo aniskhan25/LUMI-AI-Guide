@@ -18,9 +18,11 @@ Choose a practical training-data format on LUMI and run one validated loader ben
 
 ## Minimal run checkpoint
 
-Command:
+Commands (from a clean state):
 
 ```bash
+./get_data.sh
+sbatch convert.sh lmdb
 sbatch run-scripts/simple-benchmarks/run-comp-tiny.sh lmdb
 ```
 
