@@ -80,6 +80,9 @@ sbatch run-scripts/simple-benchmarks/run-comp-tiny.sh lmdb
 
 ## Quick format guide
 
+Use the script workflow above for this guide.  
+The format sections below are background/reference plus pointers to the exact repo scripts.
+
 | Format | Best fit | Main tradeoff | Chapter scripts |
 | :-- | :-- | :-- | :-- |
 | SquashFS | Fastest setup, minimal custom code, strong filesystem behavior | Slower on very large workloads than LMDB | `scripts/squashfs/*` |
@@ -87,6 +90,15 @@ sbatch run-scripts/simple-benchmarks/run-comp-tiny.sh lmdb
 | LMDB | Large/variable-size image datasets and high read performance | More custom conversion/dataset logic | `scripts/lmdb/*` |
 
 ## SquashFS
+
+In this repo, use:
+
+```bash
+sbatch convert.sh squashfs
+sbatch run-scripts/simple-benchmarks/run-comp-tiny.sh squashfs
+```
+
+Background reference:
 
 ### Data conversion
 
@@ -115,6 +127,15 @@ dataset = ImageFolder("/train_images")
 
 ## HDF5
 
+In this repo, use:
+
+```bash
+sbatch convert.sh hdf5
+sbatch run-scripts/simple-benchmarks/run-comp-tiny.sh hdf5
+```
+
+Background reference:
+
 ### Data conversion
 
 Conversion can be done fully in Python. For local examples in this repo, see:
@@ -129,6 +150,15 @@ Use a custom dataset backed by `h5py`:
 - [scripts/hdf5/visualtransformer-hdf5.py](scripts/hdf5/visualtransformer-hdf5.py)
 
 ## LMDB
+
+In this repo, use:
+
+```bash
+sbatch convert.sh lmdb
+sbatch run-scripts/simple-benchmarks/run-comp-tiny.sh lmdb
+```
+
+Background reference:
 
 ### Data conversion
 
@@ -165,13 +195,17 @@ Reference results from this chapter:
 
 ## Reproducing benchmarks
 
-- Download tiny raw data first: `./get_data.sh`
-- Convert tiny data first: `sbatch convert.sh <squashfs|lmdb|hdf5>`
-- Tiny benchmark: `run-scripts/simple-benchmarks/run-comp-tiny.sh`
-- Sequential tiny benchmark: `run-scripts/simple-benchmarks/run-comp-seq.sh`
-- Large benchmark: `run-scripts/simple-benchmarks/run-comp-large.sh`
-- Full large benchmark: `run-scripts/simple-benchmarks/run-comp-large-full.sh`
-- Dataset-comparison helper: `run-scripts/dataset-comparison/run_dataset_comp.sh`
+- Download tiny raw data first: `bash ./get_data.sh`
+- Convert tiny data by format: `sbatch convert.sh <squashfs|lmdb|hdf5>`
+- Tiny benchmark: `sbatch run-scripts/simple-benchmarks/run-comp-tiny.sh <squashfs|lmdb|hdf5>`
+- Sequential tiny benchmark: `sbatch run-scripts/simple-benchmarks/run-comp-seq.sh <squashfs|lmdb|hdf5>`
+- Large benchmark: `sbatch run-scripts/simple-benchmarks/run-comp-large.sh <squashfs|lmdb>`
+- Full large benchmark: `sbatch run-scripts/simple-benchmarks/run-comp-large-full.sh <squashfs|lmdb>`
+- Dataset-comparison helper: `sbatch run-scripts/dataset-comparison/run_dataset_comp.sh`
+- Post-process tiny sequential results: `python3 run-scripts/simple-benchmarks/post-process.py -d seq`
+- Post-process tiny parallel results: `python3 run-scripts/simple-benchmarks/post-process.py -d tiny`
+- Post-process large results: `python3 run-scripts/simple-benchmarks/post-process.py -d large`
+- Post-process full-large results: `python3 run-scripts/simple-benchmarks/post-process.py -d full`
 
 ## Verify
 
