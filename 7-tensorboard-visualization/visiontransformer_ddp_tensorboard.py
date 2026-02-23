@@ -1,20 +1,25 @@
-import torch
-import numpy as np
-import torchvision
 import os
+import sys
+import torch
+import psutil
+import torchvision
+
+import numpy as np
+import matplotlib.pyplot as plt
+import torch.distributed as dist
 import torchvision.transforms as transforms
-from torchvision.models import vit_b_16
+
 from torch.utils.data import DataLoader, random_split
 from torch.nn.parallel import DistributedDataParallel
-import torch.distributed as dist
-from torch.utils.data.distributed import DistributedSampler
-import psutil
 from torch.utils.tensorboard import SummaryWriter
-import matplotlib.pyplot as plt
-import sys
+from torch.utils.data.distributed import DistributedSampler
+from torchvision.models import vit_b_16
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from resources.hdf5_dataset import HDF5Dataset
+hdf5_module_dir = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "3-file-formats", "scripts", "hdf5")
+)
+sys.path.insert(0, hdf5_module_dir)
+from hdf5_dataset import HDF5Dataset
 
 HDF5_PATH = os.environ.get("TINY_HDF5_PATH", "../resources/train_images.hdf5")
 
