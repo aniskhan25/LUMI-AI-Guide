@@ -19,7 +19,7 @@ echo "Building extension environment in: $BUILD_DIR"
 singularity exec -B "$BUILD_DIR":/user-software "$CONTAINER" bash -c '
 set -euo pipefail
 python -m venv /user-software --system-site-packages
-/user-software/bin/python -m pip install h5py lmdb msgpack six tqdm mlflow
+/user-software/bin/python -m pip install h5py lmdb msgpack six tqdm mlflow==2.22.0
 '
 
 rm -f "$OUT_SQSH"
