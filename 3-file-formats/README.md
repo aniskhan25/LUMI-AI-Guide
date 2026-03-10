@@ -74,23 +74,7 @@ Success signal:
 
 ### Tiny dataset setup used in this chapter
 
-1. Download raw tiny-ImageNet data:
-
-```bash
-bash ./get_data.sh
-```
-
-2. Convert to a target format:
-
-```bash
-sbatch convert.sh lmdb
-```
-
-3. After conversion finishes, run the benchmark:
-
-```bash
-sbatch run-scripts/simple-benchmarks/run-comp-tiny.sh lmdb
-```
+Use the commands from **Minimal run checkpoint** above.
 
 ## Quick format guide
 
