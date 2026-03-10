@@ -14,9 +14,16 @@ RAW_PATH="$RAW_DIR/tiny-imagenet-200"
 mkdir -p "$ZIP_DIR" "$RAW_DIR"
 
 if [[ ! -f "$ZIP_PATH" ]]; then
+  echo "Downloading tiny-imagenet-200.zip..."
   wget -c -O "$ZIP_PATH" "https://cs231n.stanford.edu/tiny-imagenet-200.zip"
+else
+  echo "Zip already exists: $ZIP_PATH"
 fi
 
 if [[ ! -d "$RAW_PATH" ]]; then
+  echo "Unzipping files (may take a while)..."
   unzip -q "$ZIP_PATH" -d "$RAW_DIR"
+  echo "Unzip complete: $RAW_PATH"
+else
+  echo "Raw dataset already exists: $RAW_PATH"
 fi

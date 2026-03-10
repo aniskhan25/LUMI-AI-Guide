@@ -28,6 +28,12 @@ cd /path/to/LUMI-AI-Guide/3-file-formats
 
 From a clean state, run these commands one by one.
 
+Typical runtime once each step starts (queue wait not included):
+
+- `bash ./get_data.sh`: ~2-15 minutes (download + unzip, depends on network/filesystem load)
+- `sbatch convert.sh lmdb`: ~5-30 minutes
+- `sbatch run-scripts/simple-benchmarks/run-comp-tiny.sh lmdb`: ~2-15 minutes
+
 1. Download tiny-ImageNet data:
 
 ```bash
@@ -105,6 +111,8 @@ In this repo, use:
 sbatch convert.sh squashfs
 ```
 
+Typical runtime once job starts: ~5-30 minutes.
+
 After conversion finishes, run benchmark:
 
 ```bash
@@ -146,6 +154,8 @@ In this repo, use:
 sbatch convert.sh hdf5
 ```
 
+Typical runtime once job starts: ~5-30 minutes.
+
 After conversion finishes, run benchmark:
 
 ```bash
@@ -174,6 +184,8 @@ In this repo, use:
 ```bash
 sbatch convert.sh lmdb
 ```
+
+Typical runtime once job starts: ~5-30 minutes.
 
 After conversion finishes, run benchmark:
 
