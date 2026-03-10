@@ -16,6 +16,11 @@ Before starting, ensure you have:
 - a LUMI user account and basic command-line/Slurm usage
 - a project with available GPU hours if you want to run the examples
 
+## Important account note
+
+This guide keeps `#SBATCH --account=...` lines inside job scripts for simple copy-run commands.
+Before submitting jobs, replace those account values with your own LUMI project account.
+
 ## Start here
 
 Begin with [0. How to use this guide](0-how-to-use-guide/README.md). Then follow core lessons `1` to `6`, and continue with optional lessons `7` to `9` if needed.
