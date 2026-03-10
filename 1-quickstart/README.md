@@ -16,6 +16,14 @@ Run one single-GPU training job on LUMI and confirm that:
 - The repository is cloned on `/project` or `/scratch` (not `$HOME`).
 - `../env.sh` is configured for your environment and points to a valid container via `CONTAINER`.
 
+## Working directory
+
+Run commands in this chapter from:
+
+```bash
+cd /path/to/LUMI-AI-Guide/1-quickstart
+```
+
 ## Minimal run checkpoint
 
 Command:

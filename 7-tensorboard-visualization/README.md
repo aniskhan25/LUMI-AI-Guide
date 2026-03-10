@@ -10,6 +10,14 @@ Track and visualize training metrics and sample data from distributed PyTorch ru
 - TensorBoard logging dependencies are available in your runtime environment.
 - You can access the LUMI web interface Apps menu.
 
+## Working directory
+
+Run commands in this chapter from:
+
+```bash
+cd /path/to/LUMI-AI-Guide/7-tensorboard-visualization
+```
+
 ## What changes from baseline
 
 - Baseline you already have: distributed training runs that print metrics to stdout.

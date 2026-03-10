@@ -10,6 +10,14 @@ Track experiment metrics and metadata with MLflow and inspect runs from the LUMI
 - `mlflow` is installed in your runtime environment.
 - You have a writable path for MLflow artifacts (directory or SQLite backend).
 
+## Working directory
+
+Run commands in this chapter from:
+
+```bash
+cd /path/to/LUMI-AI-Guide/8-mlflow-visualization
+```
+
 ## What changes from baseline
 
 - Baseline you already have: distributed training runs with standard logs.

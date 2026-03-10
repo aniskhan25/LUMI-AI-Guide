@@ -10,6 +10,14 @@ Integrate Weights & Biases (W&B) into your training workflow to track metrics, c
 - You have a W&B account and API key available in your environment.
 - The `wandb` package is installed in your runtime environment.
 
+## Working directory
+
+Run commands in this chapter from:
+
+```bash
+cd /path/to/LUMI-AI-Guide/9-wandb-visualization
+```
+
 ## What changes from baseline
 
 - Baseline you already have: runnable training jobs and optional local tracking workflows.

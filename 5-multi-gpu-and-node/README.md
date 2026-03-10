@@ -10,6 +10,14 @@ Scale training from one GPU to multiple GPUs and nodes on LUMI using PyTorch DDP
 - You are familiar with Slurm basics (`sbatch`, `srun`, node/task/GPU resource flags).
 - You can run the single-GPU Vision Transformer example before attempting distributed runs.
 
+## Working directory
+
+Run commands in this chapter from:
+
+```bash
+cd /path/to/LUMI-AI-Guide/5-multi-gpu-and-node
+```
+
 ## What changes from baseline
 
 - Baseline you already have: a stable single-GPU training script and job workflow.

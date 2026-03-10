@@ -10,6 +10,14 @@ Measure whether your allocated GPU resources are used efficiently and identify c
 - You have access to live jobs (`squeue --me`) and can open an interactive shell on compute nodes.
 - You are comfortable collecting and transferring trace files for local inspection.
 
+## Working directory
+
+Run commands in this chapter from:
+
+```bash
+cd /path/to/LUMI-AI-Guide/6-monitoring-and-profiling
+```
+
 ## What changes from baseline
 
 - Baseline you already have: runnable single-node or distributed training jobs.

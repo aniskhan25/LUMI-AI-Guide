@@ -10,6 +10,14 @@ Choose a practical training-data format on LUMI and run one validated loader ben
 - You can run containerized jobs with `srun singularity exec`.
 - You have dataset paths configured via `env.sh`.
 
+## Working directory
+
+Run commands in this chapter from:
+
+```bash
+cd /path/to/LUMI-AI-Guide/3-file-formats
+```
+
 ## What changes from baseline
 
 - Baseline you already have: a stable runtime environment and container workflow.

@@ -10,6 +10,14 @@ Define one stable runtime baseline that is reused by chapters `3` to `9`.
 - You can run Slurm jobs on LUMI.
 - You are working from a clone of this repository on `/project` or `/scratch`.
 
+## Working directory
+
+Run commands in this chapter from:
+
+```bash
+cd /path/to/LUMI-AI-Guide/2-setting-up-environment
+```
+
 ## What changes from baseline
 
 - Baseline you already have: a working single-GPU run from QuickStart.

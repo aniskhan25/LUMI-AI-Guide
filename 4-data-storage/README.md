@@ -10,6 +10,14 @@ Choose the right LUMI storage option for your workload and understand when to us
 - You can submit Slurm jobs and stage data between filesystems.
 - Your dataset access pattern is known well enough to reason about throughput and locality.
 
+## Working directory
+
+Run commands in this chapter from:
+
+```bash
+cd /path/to/LUMI-AI-Guide/4-data-storage
+```
+
 ## What changes from baseline
 
 - Baseline you already have: converted training data and a runnable training workflow.
