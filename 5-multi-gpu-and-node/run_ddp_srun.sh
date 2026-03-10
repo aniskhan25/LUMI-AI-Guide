@@ -17,6 +17,9 @@ set -euo pipefail
 module use /appl/local/containers/ai-modules
 module load singularity-AI-bindings
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
 source ../env.sh
 : "${CONTAINER:?Set CONTAINER in ../env.sh}"
 : "${TINY_HDF5_PATH:?Set TINY_HDF5_PATH in ../env.sh}"
