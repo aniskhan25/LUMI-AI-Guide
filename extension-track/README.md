@@ -6,3 +6,4 @@ This track extends the onboarding lessons with advanced, AI Factory-oriented wor
 
 - [01. Foundation model adaptation on MI250X](01-foundation-model-adaptation/README.md)
 - [02. Inference and embeddings on MI250X](02-inference-and-embeddings/README.md)
+- [03. RAG on MI250X](03-rag-and-knowledge-workflows/README.md)
