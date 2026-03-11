@@ -81,6 +81,25 @@ Use the commands from **Minimal run checkpoint** above.
 Use the script workflow above for this guide.  
 The format sections below are background/reference plus pointers to the exact repo scripts.
 
+### Container mount command anatomy
+
+When you see:
+
+```bash
+srun singularity exec -B "$SQSH_PATH":/user-software:image-src=/ "$CONTAINER" <cmd>
+```
+
+- `-B host_path:container_path` binds a host path into the container.
+- `"$SQSH_PATH":/user-software:image-src=/` mounts the SquashFS as a filesystem at `/user-software`.
+- `image-src=/` selects the SquashFS root.
+- `"$CONTAINER"` is the base PyTorch SIF image.
+- `<cmd>` is the command executed inside the container.
+
+Example mapping:
+
+- Host path: `/scratch/.../visiontransformer-env.sqsh`
+- In container: `/user-software/bin/python`
+
 | Format | Best fit | Main tradeoff | Chapter scripts |
 | :-- | :-- | :-- | :-- |
 | SquashFS | Fastest setup, minimal custom code, strong filesystem behavior | Slower on very large workloads than LMDB | `scripts/squashfs/*` |
