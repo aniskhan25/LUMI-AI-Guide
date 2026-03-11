@@ -7,7 +7,7 @@ export REPO_ROOT="/project/project_462000131/anisrahm/LUMI-AI-Guide"
 
 export PROJECT_ACCOUNT="${PROJECT_ACCOUNT:-project_462000131}"
 export LUMI_USER="${LUMI_USER:-${USER:-anisrahm}}"
-export CONTAINER="${CONTAINER:-/appl/local/laifs/containers/lumi-multitorch-u24r64f21m43t29-20260124_092648/lumi-multitorch-full-u24r64f21m43t29-20260124_092648.sif}"
+export CONTAINER="${CONTAINER:-/appl/local/laifs/containers/lumi-multitorch-u24r64f21m43t29-20260225_144743/lumi-multitorch-full-u24r64f21m43t29-20260225_144743.sif}"
 
 export PROJECT_ROOT="${PROJECT_ROOT:-/project/${PROJECT_ACCOUNT}/${LUMI_USER}}"
 export SCRATCH_ROOT="${SCRATCH_ROOT:-/scratch/${PROJECT_ACCOUNT}/${LUMI_USER}}"
