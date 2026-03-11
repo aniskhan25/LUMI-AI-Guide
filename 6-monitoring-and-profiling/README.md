@@ -80,6 +80,16 @@ All eight devices are now listed in the output. Note that power consumption is o
 
 Using `rocm-smi` can give us an easy way to peek at GPU utilization, but it doesn't provide any information about which parts of the code are taking the most time. For this, we can use PyTorch's built-in profiler.
 
+Run the profiled example:
+
+```bash
+sbatch run_profiled.sh
+```
+
+Success signal:
+
+- After job completion, `trace.json` exists in this lesson directory.
+
 We can enable the profiler by adding the following lines around the code we wish to profile:
 
 ```python
