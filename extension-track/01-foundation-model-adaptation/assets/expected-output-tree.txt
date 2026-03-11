@@ -1,0 +1,10 @@
+baseline-run/
+  checkpoint/
+    config.json
+    model.safetensors (or pytorch_model.bin)
+    tokenizer.json
+    tokenizer_config.json
+    vocab.txt
+  metrics.json
+  run_summary.json
+

@@ -41,6 +41,11 @@ Begin with [0. How to use this guide](0-how-to-use-guide/README.md). Then follow
 - [8. MLflow visualization](8-mlflow-visualization/README.md)
 - [9. W&B visualization](9-wandb-visualization/README.md)
 
+## Extension track (advanced AI Factory workflows)
+
+- [Extension track index](extension-track/README.md)
+- [01. Foundation model adaptation on MI250X](extension-track/01-foundation-model-adaptation/README.md)
+
 ## Further reading
 
 - [LUMI Documentation](https://docs.lumi-supercomputer.eu/)

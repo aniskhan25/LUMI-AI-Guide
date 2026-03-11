@@ -1,0 +1,36 @@
+run:
+  run_name: baseline-run
+  output_dir: outputs
+  seed: 42
+  log_every_steps: 10
+
+model:
+  name: distilbert-base-uncased
+  num_labels: 2
+
+adaptation:
+  mode: head_only  # options: head_only, full, lora
+  lora_r: 8
+  lora_alpha: 16
+  lora_dropout: 0.1
+
+data:
+  train_jsonl: data/sample_data/train.jsonl
+  eval_jsonl: data/sample_data/eval.jsonl
+  text_key: text
+  label_key: label
+  max_seq_len: 256
+
+training:
+  num_epochs: 1
+  batch_size: 8
+  learning_rate: 5e-5
+  weight_decay: 0.01
+  gradient_accumulation_steps: 1
+  max_train_samples: 512
+  max_eval_samples: 256
+
+runtime:
+  device_index: 0
+  allow_cpu_fallback: false
+
