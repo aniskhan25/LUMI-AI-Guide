@@ -1,0 +1,30 @@
+run:
+  run_name: embeddings-baseline
+  output_dir: outputs
+  seed: 42
+  log_every_batches: 5
+
+model:
+  name: distilbert-base-uncased
+  trust_remote_code: false
+
+data:
+  input_jsonl: data/sample_corpus.jsonl
+  id_key: id
+  text_key: text
+  metadata_key: metadata
+  max_samples: 0  # 0 means no limit
+
+inference:
+  batch_size: 16
+  max_seq_len: 256
+  normalize_embeddings: true
+
+runtime:
+  device_index: 0
+  allow_cpu_fallback: false
+
+output:
+  embeddings_filename: embeddings.jsonl
+  summary_filename: run_summary.json
+

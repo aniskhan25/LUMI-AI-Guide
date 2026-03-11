@@ -45,6 +45,7 @@ Begin with [0. How to use this guide](0-how-to-use-guide/README.md). Then follow
 
 - [Extension track index](extension-track/README.md)
 - [01. Foundation model adaptation on MI250X](extension-track/01-foundation-model-adaptation/README.md)
+- [02. Inference and embeddings on MI250X](extension-track/02-inference-and-embeddings/README.md)
 
 ## Further reading
 

@@ -1,0 +1,9 @@
+{"id":"gen-0001","prompt":"Summarize this update in one sentence: The deployment completed, but cache warm-up caused elevated latency for 15 minutes."}
+{"id":"gen-0002","prompt":"Rewrite as an action item: Investigate recurring timeout errors in the ingestion service after midnight UTC."}
+{"id":"gen-0003","prompt":"Extract a short risk statement: Vendor contract renewal date is missing from the approval tracker."}
+{"id":"gen-0004","prompt":"Transform into a concise customer-facing note: Scheduled maintenance moved from Friday to Saturday 09:00 UTC."}
+{"id":"gen-0005","prompt":"Produce a one-line summary: Validation accuracy improved by 3 percent after data cleaning."}
+{"id":"gen-0006","prompt":"Rewrite as a technical log entry: GPU job retried with smaller batch size after out-of-memory failure."}
+{"id":"gen-0007","prompt":"Generate a short status line: New embedding pipeline processed 50k records with no missing IDs."}
+{"id":"gen-0008","prompt":"Summarize: Three data files were skipped because schema version did not match expected format."}
+

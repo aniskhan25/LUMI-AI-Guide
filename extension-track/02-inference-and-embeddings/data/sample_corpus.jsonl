@@ -1,0 +1,21 @@
+{"id":"doc-0001","text":"Hydropower forecast for next quarter indicates moderate seasonal variation in output.","metadata":{"domain":"energy","lang":"en"}}
+{"id":"doc-0002","text":"Clinical note summarization requires preserving medications, dosages, and timeline events.","metadata":{"domain":"healthcare","lang":"en"}}
+{"id":"doc-0003","text":"The customer support transcript describes repeated payment failures after card renewal.","metadata":{"domain":"finance","lang":"en"}}
+{"id":"doc-0004","text":"A logistics report highlights delivery delays caused by weather and routing bottlenecks.","metadata":{"domain":"logistics","lang":"en"}}
+{"id":"doc-0005","text":"Field maintenance logs mention vibration anomalies in turbine three during peak load.","metadata":{"domain":"industrial","lang":"en"}}
+{"id":"doc-0006","text":"Contract clause extraction should identify renewal dates and termination conditions.","metadata":{"domain":"legal","lang":"en"}}
+{"id":"doc-0007","text":"Cybersecurity incident summary includes suspicious login attempts across multiple regions.","metadata":{"domain":"security","lang":"en"}}
+{"id":"doc-0008","text":"The product review dataset contains short comments with mixed sentiment and slang.","metadata":{"domain":"retail","lang":"en"}}
+{"id":"doc-0009","text":"Meeting notes discuss migration from nightly batch ETL to near-real-time processing.","metadata":{"domain":"data-engineering","lang":"en"}}
+{"id":"doc-0010","text":"Research abstract compares transformer and recurrent models for anomaly detection.","metadata":{"domain":"research","lang":"en"}}
+{"id":"doc-0011","text":"Audit findings cite missing approval records in procurement workflows.","metadata":{"domain":"governance","lang":"en"}}
+{"id":"doc-0012","text":"Agricultural sensor readings show soil moisture decline in northern plots.","metadata":{"domain":"agriculture","lang":"en"}}
+{"id":"doc-0013","text":"Insurance claim narratives include descriptions of property damage and repair estimates.","metadata":{"domain":"insurance","lang":"en"}}
+{"id":"doc-0014","text":"Education feedback notes difficulty in remote labs due to unstable video streams.","metadata":{"domain":"education","lang":"en"}}
+{"id":"doc-0015","text":"Public transport schedule updates emphasize weekend frequency adjustments.","metadata":{"domain":"transport","lang":"en"}}
+{"id":"doc-0016","text":"Manufacturing quality report flags out-of-range measurements in final assembly.","metadata":{"domain":"manufacturing","lang":"en"}}
+{"id":"doc-0017","text":"Environmental monitoring bulletin reports elevated particulate matter near highways.","metadata":{"domain":"environment","lang":"en"}}
+{"id":"doc-0018","text":"Pharmacovigilance intake form describes mild adverse reactions after dosage increase.","metadata":{"domain":"pharma","lang":"en"}}
+{"id":"doc-0019","text":"Telecom operations note packet loss spikes during evening traffic windows.","metadata":{"domain":"telecom","lang":"en"}}
+{"id":"doc-0020","text":"Human resources memo announces updated onboarding checkpoints for contractors.","metadata":{"domain":"hr","lang":"en"}}
+
