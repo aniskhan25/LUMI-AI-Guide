@@ -24,6 +24,14 @@ cd /path/to/LUMI-AI-Guide/3-file-formats
 - This lesson adds: data-format selection and conversion strategy for SquashFS, HDF5, and LMDB.
 - Expected output/artifact: one chosen format, converted data artifact(s), and a successful benchmark run.
 
+## How this chapter reaches the goal
+
+1. Download and unpack Tiny-ImageNet once.
+2. Convert the dataset into one target format (`squashfs`, `hdf5`, or `lmdb`).
+3. Run a benchmark script on the converted data.
+4. Compare dataloader timing from job logs.
+5. Keep the best format for later lessons.
+
 ## Minimal run checkpoint
 
 From a clean state, run these commands one by one.
@@ -55,6 +63,32 @@ sbatch run-scripts/simple-benchmarks/run-comp-tiny.sh lmdb
 Success signal:
 
 - Job output includes a `dataloader time:` line (for example `LMDB dataloader time:`).
+
+## `convert.sh` in plain language
+
+What it takes:
+
+- Command: `sbatch convert.sh <squashfs|lmdb|hdf5>`
+- Data root: `DATA_PROJECT_DIR/data-formats` from `../env.sh`
+- Container runtime: `CONTAINER` from `../env.sh`
+- Extra Python packages: `../resources/visiontransformer-env.sqsh` (for `lmdb` and `hdf5`)
+
+What each mode does:
+
+- `squashfs`: runs `mksquashfs` on `raw/tiny-imagenet-200/train` and `raw/tiny-imagenet-200/val`.
+- `lmdb`: runs `scripts/lmdb/convert_to_lmdb.py` inside the container.
+- `hdf5`: runs `scripts/hdf5/convert_to_hdf5.py` inside the container.
+
+Where outputs go:
+
+- SquashFS: `data-formats/squashfs/train.squashfs`, `data-formats/squashfs/val.squashfs`
+- LMDB: `data-formats/lmdb/...`
+- HDF5: `data-formats/hdf5/...`
+
+What you usually customize:
+
+- Slurm resources at top of `convert.sh` (`--time`, `--cpus-per-task`, memory).
+- Conversion mode argument (`squashfs`, `lmdb`, `hdf5`).
 
 ## Baseline contract for this chapter
 
