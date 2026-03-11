@@ -112,6 +112,11 @@ Have a look at the [visiontransformer_profiled.py](visiontransformer_profiled.py
 
 ![Image title](../assets/images/perfetto-trace.png)
 
+Perfetto navigation shortcuts:
+
+- Zoom in/out: `W` / `S`
+- Move left/right: `A` / `D`
+
 Note that Chrome tabs are usually limited to around 2 GB of memory usage and that the trace files can become quite large and easily exceed this limit. It is therefore recommended to only profile a small part of the code that we are particularly interested in and not the full training loop.
 
 ## AMD profilers
