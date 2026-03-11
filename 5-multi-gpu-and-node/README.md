@@ -44,14 +44,14 @@ Success signal:
 
 - Job output includes epoch progress lines (for example `Starting epoch 1.` and `Accuracy:`) without distributed initialization errors.
 
-Training Deep Learning models is a resource-intensive task. When the compute and memory resources of a single GPU no longer suffice to train your model, multi-GPU and multi-node solutions can be leveraged to distribute your training job over multiple GPUs or nodes. Various strategies exist to distribute Deep Learning workloads, and various frameworks exist that implement those strategies. In this section, we cover two popular methods: data-parallelism using PyTorch's Distributed Data-Parallel (DDP) module and a mix of data parallelism and model sharding using the DeepSpeed library. We describe the necessary changes to the source code and how to launch the distributed training jobs on LUMI.
+Training Deep Learning models is a resource-intensive task. When the compute and memory resources of a single GPU no longer suffice to train your model, multi-GPU and multi-node solutions can be leveraged to distribute your training job over multiple GPUs or nodes. Various strategies exist to distribute Deep Learning workloads, and various frameworks exist that implement those strategies. In this section, we cover two popular methods: data-parallelism using PyTorch's Distributed Data-Parallel (DDP) module and a mix of data parallelism and model sharding using the DeepSpeed library. We explain the code changes already implemented in these example scripts and how to launch the distributed training jobs on LUMI.
 
 ## PyTorch DDP
 
 PyTorch DDP can be used to implement data-parallelism in your training job. Data-parallel solutions are particularly useful when you would like to speed up the training process and your model fits in the memory of a single GPU. For example, when you are training on a large dataset.
 
 ### Source code changes
-The script in [visiontransformer_ddp.py](visiontransformer_ddp.py) implements PyTorch DDP on the visiontransformer example. The following changes to the source code are necessary:
+The script in [visiontransformer_ddp.py](visiontransformer_ddp.py) implements PyTorch DDP on the visiontransformer example. This script already includes the key DDP changes:
 
 Initialize the distributed environment:
 
@@ -135,7 +135,7 @@ srun singularity exec -B ../resources/visiontransformer-env.sqsh:/user-software:
 DeepSpeed implements a strategy for distributed training that mixes data parallelism with sharding of model parameters. It supports various levels of model sharding and offloading of parameters to CPU memory. DeepSpeed is particularly useful when your training job does not fit in the memory of a single GPU and you would like to scale your training job to multiple GPUs and/or nodes to leverage the increased combined memory capacity, as well as speed up the training job.
 
 ### Source code changes
-The script in [visiontransformer_deepspeed.py](visiontransformer_deepspeed.py) implements DeepSpeed on the visiontransformer example. The following changes to the source code are necessary:
+The script in [visiontransformer_deepspeed.py](visiontransformer_deepspeed.py) implements DeepSpeed on the visiontransformer example. This script already includes the key DeepSpeed changes:
 
 
 Parse command-line parameters:
