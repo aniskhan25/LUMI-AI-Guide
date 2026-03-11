@@ -23,14 +23,17 @@ SQSH_PATH="../resources/visiontransformer-env.sqsh"
 OUT_DIR="$DATA_BENCH_DIR/ramfs"
 mkdir -p "$OUT_DIR"
 DST_MODEL="$OUT_DIR/vit_b_16_imagenet.${SLURM_JOB_ID:-$$}.pth"
-MIOPEN_CACHE_DIR="$OUT_DIR/miopen-cache.${SLURM_JOB_ID:-$$}"
-mkdir -p "$MIOPEN_CACHE_DIR"
-export SINGULARITYENV_MIOPEN_CUSTOM_CACHE_DIR="$MIOPEN_CACHE_DIR"
-export SINGULARITYENV_MIOPEN_USER_DB_PATH="$MIOPEN_CACHE_DIR"
+MIOPEN_BASE="${SLURM_TMPDIR:-/tmp}"
+MIOPEN_HOST_DIR="${MIOPEN_BASE}/miopen-${USER}-${SLURM_JOB_ID:-$$}-${SLURMD_NODENAME:-$(hostname)}-${SLURM_LOCALID:-0}"
+MIOPEN_CONT_DIR="/miopen-cache"
+mkdir -p "$MIOPEN_HOST_DIR"
+chmod 700 "$MIOPEN_HOST_DIR"
+export SINGULARITYENV_MIOPEN_CUSTOM_CACHE_DIR="$MIOPEN_CONT_DIR"
+export SINGULARITYENV_MIOPEN_USER_DB_PATH="$MIOPEN_CONT_DIR"
 
 time srun singularity exec \
   -B "$SQSH_PATH":/user-software:image-src=/ \
-  -B "$MIOPEN_CACHE_DIR":"$MIOPEN_CACHE_DIR" \
+  -B "$MIOPEN_HOST_DIR":"$MIOPEN_CONT_DIR" \
   "$CONTAINER" bash -c "
   set -euo pipefail
   cp -a \"$TINY_HDF5_PATH\" /tmp/train_images.hdf5
