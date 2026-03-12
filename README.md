@@ -53,6 +53,7 @@ Begin with [0. How to use this guide](0-how-to-use-guide/README.md). Then follow
 - [07. Serving and advanced inference on MI250X](extension-track/07-advanced-inference-and-serving/README.md)
 - [08. Customer AI reference architectures](extension-track/08-reference-architectures/README.md)
 - [09. Sensitive data and trustworthy AI](extension-track/09-sensitive-data-and-trustworthy-operations/README.md)
+- [10. MLOps on LUMI AI Factory](extension-track/10-mlops-and-lifecycle-management/README.md)
 
 ## Further reading
 

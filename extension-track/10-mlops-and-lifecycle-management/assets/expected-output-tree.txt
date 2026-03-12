@@ -1,0 +1,21 @@
+10-mlops-and-lifecycle-management/
+  README.md
+  DEVELOPMENT-SPEC.md
+  templates/
+    run-manifest.yaml
+    artifact-layout.md
+    promotion-checklist.md
+    lifecycle-states.md
+  worked-example/
+    baseline-experiment.md
+    promoted-version.md
+    shareable-artifacts.md
+  scripts/
+    validate_manifest.py
+    build_run_summary.py
+  assets/
+    naming-cheatsheet.md
+    lifecycle-checklist.md
+    expected-output-tree.txt
+  troubleshooting/
+    common-failures.md
