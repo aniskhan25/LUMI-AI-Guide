@@ -1,0 +1,22 @@
+08-reference-architectures/
+  README.md
+  architectures/
+    adapt-and-apply.md
+    retrieval-grounded-assistant.md
+    evaluate-and-improve-loop.md
+    high-throughput-inference-factory.md
+  templates/
+    architecture-brief-template.md
+    decision-matrix.md
+  worked-example/
+    customer-scenario.md
+    recommended-architecture.md
+  assets/
+    architecture-catalog.md
+    operational-checklists.md
+    decision-cheatsheet.md
+    expected-output-tree.txt
+    validate_architecture_brief.py
+  troubleshooting/
+    common-misarchitectures.md
+
