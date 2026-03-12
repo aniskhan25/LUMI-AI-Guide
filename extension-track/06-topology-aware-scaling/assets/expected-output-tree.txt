@@ -1,0 +1,27 @@
+outputs/
+  scaling-1gcd/
+    raw/
+      placement_rank0.json
+      metrics_rank0.json
+    run_summary.json
+  scaling-8gcd-single-node/
+    raw/
+      placement_rank0.json
+      ...
+      placement_rank7.json
+      metrics_rank0.json
+      ...
+      metrics_rank7.json
+    run_summary.json
+  scaling-multi-node/
+    raw/
+      placement_rank0.json
+      ...
+      placement_rank15.json
+      metrics_rank0.json
+      ...
+      metrics_rank15.json
+    run_summary.json
+  scaling_report.json
+  scaling_report.md
+

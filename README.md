@@ -49,6 +49,7 @@ Begin with [0. How to use this guide](0-how-to-use-guide/README.md). Then follow
 - [03. RAG on MI250X](extension-track/03-rag-and-knowledge-workflows/README.md)
 - [04. Evaluation and trustworthiness on MI250X](extension-track/04-evaluation-and-trustworthiness/README.md)
 - [05. Synthetic data on MI250X](extension-track/05-synthetic-data-and-data-centric-workflows/README.md)
+- [06. Scaling on MI250X](extension-track/06-topology-aware-scaling/README.md)
 
 ## Further reading
 

@@ -9,3 +9,4 @@ This track extends the onboarding lessons with advanced, AI Factory-oriented wor
 - [03. RAG on MI250X](03-rag-and-knowledge-workflows/README.md)
 - [04. Evaluation and trustworthiness on MI250X](04-evaluation-and-trustworthiness/README.md)
 - [05. Synthetic data on MI250X](05-synthetic-data-and-data-centric-workflows/README.md)
+- [06. Scaling on MI250X](06-topology-aware-scaling/README.md)
