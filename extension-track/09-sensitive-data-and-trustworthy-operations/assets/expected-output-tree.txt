@@ -1,0 +1,20 @@
+09-sensitive-data-and-trustworthy-operations/
+  README.md
+  DEVELOPMENT-SPEC.md
+  templates/
+    data-classification-table.md
+    trust-gate-template.md
+    revised-architecture-brief.md
+  worked-example/
+    baseline-architecture.md
+    sensitive-data-variant.md
+    data-flow-map.md
+  assets/
+    trust-checklist.md
+    red-amber-green-worksheet.md
+    prompt-and-logging-minimization.md
+    expected-output-tree.txt
+    validate_revised_brief.py
+  troubleshooting/
+    common-failures.md
+

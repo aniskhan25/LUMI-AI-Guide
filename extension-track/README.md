@@ -12,3 +12,4 @@ This track extends the onboarding lessons with advanced, AI Factory-oriented wor
 - [06. Scaling on MI250X](06-topology-aware-scaling/README.md)
 - [07. Serving and advanced inference on MI250X](07-advanced-inference-and-serving/README.md)
 - [08. Customer AI reference architectures](08-reference-architectures/README.md)
+- [09. Sensitive data and trustworthy AI](09-sensitive-data-and-trustworthy-operations/README.md)
