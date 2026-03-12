@@ -1,0 +1,19 @@
+11-team-operating-models-and-collaboration/
+  README.md
+  DEVELOPMENT-SPEC.md
+  templates/
+    team-operating-model.md
+    responsibility-matrix.md
+    handoff-checklist.md
+    artifact-flow-map.md
+  worked-example/
+    project-scenario.md
+    collaboration-pattern.md
+    sharing-model.md
+  assets/
+    collaboration-cheatsheet.md
+    daas-vs-self-managed-note.md
+    validate_collaboration_blueprint.py
+    expected-output-tree.txt
+  troubleshooting/
+    common-failures.md

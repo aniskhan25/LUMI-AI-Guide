@@ -14,3 +14,4 @@ This track extends the onboarding lessons with advanced, AI Factory-oriented wor
 - [08. Customer AI reference architectures](08-reference-architectures/README.md)
 - [09. Sensitive data and trustworthy AI](09-sensitive-data-and-trustworthy-operations/README.md)
 - [10. MLOps on LUMI AI Factory](10-mlops-and-lifecycle-management/README.md)
+- [11. Team collaboration on AI Factory](11-team-operating-models-and-collaboration/README.md)
