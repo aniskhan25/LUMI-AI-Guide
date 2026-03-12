@@ -1,0 +1,20 @@
+eval-rag-baseline/
+  baseline/
+    eval_queries.jsonl
+    rag_config_effective.yaml
+    run_metadata.json
+    system_outputs.jsonl
+    scored_records.jsonl
+    summary.json
+    failure_samples.jsonl
+  candidate/
+    eval_queries.jsonl
+    rag_config_effective.yaml
+    run_metadata.json
+    system_outputs.jsonl
+    scored_records.jsonl
+    summary.json
+    failure_samples.jsonl
+  comparison.json
+  evaluation_report.md
+

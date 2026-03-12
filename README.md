@@ -47,6 +47,7 @@ Begin with [0. How to use this guide](0-how-to-use-guide/README.md). Then follow
 - [01. Foundation model adaptation on MI250X](extension-track/01-foundation-model-adaptation/README.md)
 - [02. Inference and embeddings on MI250X](extension-track/02-inference-and-embeddings/README.md)
 - [03. RAG on MI250X](extension-track/03-rag-and-knowledge-workflows/README.md)
+- [04. Evaluation and trustworthiness on MI250X](extension-track/04-evaluation-and-trustworthiness/README.md)
 
 ## Further reading
 

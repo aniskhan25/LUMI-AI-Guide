@@ -1,0 +1,34 @@
+run:
+  run_name: eval-rag-baseline
+  output_dir: ../outputs
+
+paths:
+  rag_lesson_dir: ../../03-rag-and-knowledge-workflows
+  rag_config: ../../03-rag-and-knowledge-workflows/configs/rag.yaml
+  eval_set_jsonl: ../data/eval_set.jsonl
+  reference_answers_jsonl: ../data/reference_answers.jsonl
+
+variants:
+  baseline:
+    name: baseline
+    top_k: 3
+  candidate:
+    name: candidate
+    top_k: 5
+
+metrics:
+  min_answer_score: 0.5
+  pass_condition:
+    min_retrieval_hit_rate: 0.6
+    min_answer_score_mean: 0.5
+    min_grounded_rate: 0.5
+    min_completion_rate: 0.95
+
+comparison:
+  baseline_variant: baseline
+  candidate_variant: candidate
+  weighted_score:
+    retrieval_hit_rate: 0.35
+    answer_score_mean: 0.35
+    grounded_rate: 0.20
+    completion_rate: 0.10
