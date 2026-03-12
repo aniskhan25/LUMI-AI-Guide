@@ -16,3 +16,4 @@ This track extends the onboarding lessons with advanced, AI Factory-oriented wor
 - [10. MLOps on LUMI AI Factory](10-mlops-and-lifecycle-management/README.md)
 - [11. Team collaboration on AI Factory](11-team-operating-models-and-collaboration/README.md)
 - [12. Cost and capacity planning on MI250X](12-cost-awareness-and-capacity-planning/README.md)
+- [13. Industrial document AI](13-industrial-document-ai/README.md)
