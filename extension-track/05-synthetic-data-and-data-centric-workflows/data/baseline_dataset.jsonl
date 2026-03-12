@@ -1,0 +1,11 @@
+{"record_id":"base-0001","question":"What should happen after a severe security incident?","answer":"Escalate quickly and provide an incident report later.","gap_label":"security-operations","source_flag":"original","dataset_version":"baseline-v1"}
+{"record_id":"base-0002","question":"How long can support transcripts be kept?","answer":"Transcripts are retained for one year.","gap_label":"data-governance","source_flag":"original","dataset_version":"baseline-v1"}
+{"record_id":"base-0003","question":"When must deletion requests be handled?","answer":"Deletion should be processed within one month.","gap_label":"data-governance","source_flag":"original","dataset_version":"baseline-v1"}
+{"record_id":"base-0004","question":"What must be validated before deploying a model?","answer":"Run schema and latency checks before deployment.","gap_label":"mlops","source_flag":"original","dataset_version":"baseline-v1"}
+{"record_id":"base-0005","question":"How are high-value procurement requests approved?","answer":"Procurement requires approvals by responsible owners.","gap_label":"finance","source_flag":"original","dataset_version":"baseline-v1"}
+{"record_id":"base-0006","question":"What are API reliability objectives?","answer":"APIs should be fast and highly available.","gap_label":"platform-slo","source_flag":"original","dataset_version":"baseline-v1"}
+{"record_id":"base-0007","question":"What to do if coolant temperature rises too high?","answer":"Use emergency procedures and write the incident details.","gap_label":"operations","source_flag":"original","dataset_version":"baseline-v1"}
+{"record_id":"base-0008","question":"What checks are required for release readiness?","answer":"Use regression tests on benchmark data.","gap_label":"mlops","source_flag":"original","dataset_version":"baseline-v1"}
+{"record_id":"base-0009","question":"Who reviews procurement compliance?","answer":"Compliance teams review requests against policy.","gap_label":"finance","source_flag":"original","dataset_version":"baseline-v1"}
+{"record_id":"base-0010","question":"How should incident containment be handled?","answer":"Contain incidents quickly according to procedure.","gap_label":"security-operations","source_flag":"original","dataset_version":"baseline-v1"}
+

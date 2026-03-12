@@ -1,0 +1,8 @@
+rules:
+  min_input_chars: 40
+  min_target_chars: 40
+  require_required_term_match: true
+  deduplicate_against_baseline: true
+  deduplicate_candidates: true
+  max_manual_review_examples: 5
+
