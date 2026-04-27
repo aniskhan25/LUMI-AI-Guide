@@ -66,8 +66,7 @@ Load the lesson runtime in your shell:
 
 ```bash
 module purge
-module use /appl/local/laifs/modules
-module load lumi-aif-singularity-bindings
+module use /appl/local/csc/modulefiles
 module load pytorch
 source ../../env.sh
 ```
@@ -106,7 +105,7 @@ Note:
 - Device allocation for this lesson happens through `sbatch jobs/run_single_gcd.sh`.
 - Do not use the default system `python3` if it is Python 3.6.
 - Use `python` from the loaded `pytorch` module, which provides the newer interpreter needed by these scripts.
-- Prefer `module use /appl/local/laifs/modules` together with `module load lumi-aif-singularity-bindings`.
+- Use `module use /appl/local/csc/modulefiles` before `module load pytorch`.
 - The default config requires GPU visibility, which is why training is run through the batch job.
 - For non-LUMI local debugging only, you may temporarily enable CPU fallback in [configs/baseline.yaml](configs/baseline.yaml) or use `--allow-cpu` with the validator.
 
@@ -178,10 +177,8 @@ Symptoms:
 
 Checks:
 
-- Ensure the binding module is loaded:
-  - `module load lumi-aif-singularity-bindings`
-- Ensure you loaded the AI Factory module path and PyTorch module:
-  - `module use /appl/local/laifs/modules`
+- Ensure you loaded the CSC module path and PyTorch module:
+  - `module use /appl/local/csc/modulefiles`
   - `module load pytorch`
 - Confirm the batch job runs on a GPU partition:
   - `dev-g` for the short baseline run
