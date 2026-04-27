@@ -62,15 +62,13 @@ The default baseline is `head_only`, because it is the safest first run.
 
 ## Minimal run checkpoint
 
-Allocate a small interactive GPU step and load the same runtime contract used in the earlier lessons:
+Load the lesson runtime in your shell:
 
 ```bash
-salloc --account=project_462000131 --partition=small-g \
-  --nodes=1 --gpus-per-node=1 --ntasks=1 --cpus-per-task=7 \
-  --mem-per-gpu=60G --time=00:15:00
-
-module use /appl/local/containers/ai-modules
-module load lumi-aif-singularity-bindings || module load singularity-AI-bindings
+module purge
+module use /appl/local/laifs/modules
+module load lumi-aif-singularity-bindings
+module load pytorch
 source ../../env.sh
 ```
 
@@ -79,57 +77,48 @@ Then, from the lesson directory, run these commands in order:
 1. Prepare the sample dataset:
 
 ```bash
-srun singularity exec "$CONTAINER" \
-  python data/prepare_sample_data.py --output data/sample_data
+python data/prepare_sample_data.py --output data/sample_data
 ```
 
-2. Run one short adaptation pass:
-
-```bash
-srun singularity exec "$CONTAINER" \
-  python scripts/train.py --config configs/baseline.yaml
-```
-
-3. Validate outputs:
-
-```bash
-srun singularity exec "$CONTAINER" \
-  python scripts/validate_run.py --run-dir outputs/baseline-run
-```
-
-Success signal:
-
-- Training prints `GPU_VISIBLE_COUNT=<n>`.
-- The run completes and prints `RUN_COMPLETE=1`.
-- Validation prints `VALIDATION_OK=1`.
-
-Note:
-
-- Do not assume `python` exists in your host shell on LUMI.
-- The recommended path is to run the scripts inside `"$CONTAINER"` as shown above.
-- If you prefer a module-based interactive runtime instead, load a PyTorch module that provides `python` before running the scripts.
-- The default config requires GPU visibility.
-- For non-LUMI local debugging only, you may temporarily enable CPU fallback in [configs/baseline.yaml](configs/baseline.yaml) or use `--allow-cpu` with the validator.
-
-## Minimal LUMI run checkpoint
-
-Once the local baseline path is understood, submit the LUMI job:
+2. Submit the short baseline run:
 
 ```bash
 sbatch jobs/run_single_gcd.sh
 ```
 
+3. After the batch job finishes successfully, validate outputs:
+
+```bash
+python scripts/validate_run.py \
+  --run-dir "${SCRATCH_ROOT}/foundation-adaptation/baseline-run" \
+  --min-accuracy 0.0
+```
+
 Success signal:
 
-- Job output shows `GPU_VISIBLE_COUNT=1` or greater.
-- Training logs appear without container or CUDA visibility errors.
-- Output directory contains the expected files listed below.
+- The job output shows `GPU_VISIBLE_COUNT=1` or greater.
+- The training run completes and prints `RUN_COMPLETE=1`.
+- Validation prints `VALIDATION_OK=1`.
 
-After that, you can optionally inspect full-node visibility:
+Note:
+
+- Data preparation and validation do not need a GPU allocation.
+- Device allocation for this lesson happens through `sbatch jobs/run_single_gcd.sh`.
+- Do not use the default system `python3` if it is Python 3.6.
+- Use `python` from the loaded `pytorch` module, which provides the newer interpreter needed by these scripts.
+- Prefer `module use /appl/local/laifs/modules` together with `module load lumi-aif-singularity-bindings`.
+- The default config requires GPU visibility, which is why training is run through the batch job.
+- For non-LUMI local debugging only, you may temporarily enable CPU fallback in [configs/baseline.yaml](configs/baseline.yaml) or use `--allow-cpu` with the validator.
+
+## Optional full-node visibility check
+
+After the single-GCD baseline succeeds, you can inspect full-node visibility:
 
 ```bash
 sbatch jobs/run_single_node.sh
 ```
+
+For this short baseline run, `jobs/run_single_gcd.sh` uses `dev-g`.
 
 ## Baseline contract for this chapter
 
@@ -180,14 +169,81 @@ Change only one thing at a time:
 
 ## Troubleshooting
 
-See [troubleshooting/common-failures.md](troubleshooting/common-failures.md).
+### 1) No GPU visible inside container
 
-The most common issues are:
+Symptoms:
 
-- GPU not visible inside the container
-- missing or invalid `CONTAINER` path
-- JSONL schema mismatches
-- out-of-memory from changing batch size or sequence length too early
+- `GPU_VISIBLE_COUNT=0`
+- train script exits with a CUDA visibility error
+
+Checks:
+
+- Ensure the binding module is loaded:
+  - `module load lumi-aif-singularity-bindings`
+- Ensure you loaded the AI Factory module path and PyTorch module:
+  - `module use /appl/local/laifs/modules`
+  - `module load pytorch`
+- Confirm the batch job runs on a GPU partition:
+  - `dev-g` for the short baseline run
+  - `standard-g` for the full-node run
+
+### 2) Missing or wrong container path
+
+Symptoms:
+
+- `Set CONTAINER in env.sh`
+- `singularity exec` fails before Python starts
+
+Checks:
+
+- Set a valid `CONTAINER` in [env.sh](/Users/anisrahm/Documents/LUMI-AI-Guide/env.sh)
+- Verify that the container path exists and is readable on LUMI
+
+### 3) JSONL parse or key errors
+
+Symptoms:
+
+- `KeyError: text`
+- `KeyError: label`
+- JSON decode failures
+
+Checks:
+
+- Rebuild the sample data:
+
+```bash
+python data/prepare_sample_data.py --output data/sample_data
+```
+
+- Keep the expected schema:
+
+```json
+{"text":"training job completed with stable loss","label":1}
+```
+
+### 4) Out-of-memory
+
+Symptoms:
+
+- runtime OOM
+- sudden process termination during the forward pass
+
+Checks:
+
+- Reduce `training.batch_size`
+- Reduce `data.max_seq_len`
+- Keep `adaptation.mode=head_only` for the first baseline run
+
+### 5) Poor scaling assumptions
+
+Symptoms:
+
+- full-node runs are slower than expected
+
+Checks:
+
+- Do not assume simple CPU/GPU numbering alignment on MI250X/GCD topology
+- Start from the single-device baseline and profile before making scaling decisions
 
 ## Navigation
 

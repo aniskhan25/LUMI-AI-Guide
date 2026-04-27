@@ -2,7 +2,7 @@
 
 #SBATCH --job-name=aif-adapt-1gcd
 #SBATCH --account=project_462000131
-#SBATCH --partition=small-g
+#SBATCH --partition=dev-g
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --gpus-per-node=1
@@ -35,4 +35,3 @@ python data/prepare_sample_data.py --output data/sample_data
 python scripts/train.py --config configs/baseline.yaml --output-dir '$OUT_DIR' --run-name '$RUN_NAME'
 python scripts/validate_run.py --run-dir '$OUT_DIR' --min-accuracy 0.0
 "
-
