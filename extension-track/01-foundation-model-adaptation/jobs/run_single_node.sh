@@ -27,6 +27,8 @@ OUT_DIR="${OUT_DIR:-${SCRATCH_ROOT}/foundation-adaptation/${RUN_NAME}}"
 echo "Lesson directory: $LESSON_DIR"
 echo "Output directory: $OUT_DIR"
 
+unset SLURM_MEM_PER_CPU SLURM_MEM_PER_GPU SLURM_MEM_PER_NODE
+
 srun singularity exec "$CONTAINER" bash -lc "
 set -euo pipefail
 python - <<'PY'
