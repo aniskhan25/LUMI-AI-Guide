@@ -6,7 +6,7 @@ Use this document to lock decisions and track implementation for Lesson 01.
 
 - Lesson id: `EXT-01`
 - Title: `Adapting Foundation Models on LUMI-G with the AI Factory Software Environment`
-- Short nav title: `Foundation model adaptation on MI250X`
+- Short nav title: `Foundation model adaptation on LUMI-G`
 - Owner: `<team or person>`
 - Target branch: `feature/advanced-onboarding-lessons`
 
@@ -117,4 +117,3 @@ Record outputs for each gate:
 | Content reviewer | `TBD` | `Pending` | `TBD` | `TBD` |
 | Technical reviewer | `TBD` | `Pending` | `TBD` | `TBD` |
 | Platform reviewer (LUMI-G specifics) | `TBD` | `Pending` | `TBD` | `TBD` |
-

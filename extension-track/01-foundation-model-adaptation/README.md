@@ -1,4 +1,4 @@
-# 01. Foundation Model Adaptation on MI250X
+# 01. Foundation Model Adaptation on LUMI-G
 
 ## Goal
 
@@ -62,24 +62,39 @@ The default baseline is `head_only`, because it is the safest first run.
 
 ## Minimal run checkpoint
 
-From the lesson directory, run these commands in order:
+Allocate a small interactive GPU step and load the same runtime contract used in the earlier lessons:
+
+```bash
+salloc --account=project_462000131 --partition=small-g \
+  --nodes=1 --gpus-per-node=1 --ntasks=1 --cpus-per-task=7 \
+  --mem-per-gpu=60G --time=00:15:00
+
+module use /appl/local/containers/ai-modules
+module load lumi-aif-singularity-bindings || module load singularity-AI-bindings
+source ../../env.sh
+```
+
+Then, from the lesson directory, run these commands in order:
 
 1. Prepare the sample dataset:
 
 ```bash
-python data/prepare_sample_data.py --output data/sample_data
+srun singularity exec "$CONTAINER" \
+  python data/prepare_sample_data.py --output data/sample_data
 ```
 
 2. Run one short adaptation pass:
 
 ```bash
-python scripts/train.py --config configs/baseline.yaml
+srun singularity exec "$CONTAINER" \
+  python scripts/train.py --config configs/baseline.yaml
 ```
 
 3. Validate outputs:
 
 ```bash
-python scripts/validate_run.py --run-dir outputs/baseline-run
+srun singularity exec "$CONTAINER" \
+  python scripts/validate_run.py --run-dir outputs/baseline-run
 ```
 
 Success signal:
@@ -90,6 +105,9 @@ Success signal:
 
 Note:
 
+- Do not assume `python` exists in your host shell on LUMI.
+- The recommended path is to run the scripts inside `"$CONTAINER"` as shown above.
+- If you prefer a module-based interactive runtime instead, load a PyTorch module that provides `python` before running the scripts.
 - The default config requires GPU visibility.
 - For non-LUMI local debugging only, you may temporarily enable CPU fallback in [configs/baseline.yaml](configs/baseline.yaml) or use `--allow-cpu` with the validator.
 
