@@ -15,8 +15,7 @@ set -euo pipefail
 module use /appl/local/containers/ai-modules
 module load lumi-aif-singularity-bindings || module load singularity-AI-bindings
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-LESSON_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+LESSON_DIR="${SLURM_SUBMIT_DIR:-$PWD}"
 REPO_ROOT="$(cd -- "$LESSON_DIR/../.." && pwd)"
 
 source "$REPO_ROOT/env.sh"
@@ -39,4 +38,3 @@ python data/prepare_sample_data.py --output data/sample_data
 python scripts/train.py --config configs/baseline.yaml --output-dir '$OUT_DIR' --run-name '$RUN_NAME'
 python scripts/validate_run.py --run-dir '$OUT_DIR' --min-accuracy 0.0
 "
-
