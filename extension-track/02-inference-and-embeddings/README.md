@@ -42,13 +42,18 @@ Can I process a corpus on LUMI-G, preserve record IDs, and write structured outp
 
 ## Why embeddings are the main path
 
-Embeddings are the cleanest first inference workload because:
+This lesson uses two common kinds of inference:
+
+- embeddings: turn text into vectors so you can compare, search, cluster, or retrieve related text
+- generation: produce new text from a prompt, such as a summary or completion
+
+Embeddings are the main path because they are the cleaner first inference workload:
 
 - the output format is easy to validate
 - batching matters immediately
 - the result is reusable for retrieval, clustering, and indexing
 
-Generation is still useful, but it is a supplemental path in this lesson because it adds more model- and prompt-specific variability.
+Generation is still useful, but it is supplemental in this lesson because it adds more model- and prompt-specific variability.
 
 ## Minimal workflow
 
