@@ -127,19 +127,10 @@ python scripts/validate_outputs.py \
 
 Expected result:
 
+- the Slurm log shows `GPU_VISIBLE_COUNT=1` or greater and `RUN_COMPLETE=1`
 - `VALIDATION_OK=1`
-- matching input and output counts
-- a consistent embedding dimension
-
-## How to interpret the result
-
-Look for these signals:
-
-- `GPU_VISIBLE_COUNT` confirms the runtime saw GPUs.
-- output count matching input count confirms a full corpus pass.
-- preserved `id` values confirm safe downstream mapping.
-- a consistent embedding dimension confirms one coherent embedding model wrote the whole file.
-- `run_summary.json` confirms the run is inspectable and reusable.
+- input and output counts match
+- embedding dimension is consistent
 
 Expected embeddings output schema:
 
