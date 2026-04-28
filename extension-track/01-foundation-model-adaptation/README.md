@@ -31,7 +31,7 @@ cd /path/to/LUMI-AI-Guide/extension-track/01-foundation-model-adaptation
 This lesson uses:
 
 - a pretrained text model: `distilbert-base-uncased`
-- a task: binary text classification
+- a task: 4-class news topic classification
 - an input format: JSONL records with `text` and `label`
 
 Unlike training from scratch, adaptation starts from pretrained weights and changes part or all of the model for a new task.
@@ -42,7 +42,7 @@ The key design choice is the adaptation mode:
 - `full`: update the whole model
 - `lora`: keep the base model mostly fixed and train small adapter layers
 
-The baseline uses `head_only` because it is the safest first run. `distilbert-base-uncased`, binary classification, and synthetic JSONL data keep the lesson focused on the adaptation pattern rather than task complexity.
+The baseline uses `head_only` because it is the safest first run. `distilbert-base-uncased` and a small AG News subset keep the lesson focused on the adaptation pattern rather than task complexity.
 
 ## Minimal workflow
 
@@ -65,15 +65,15 @@ source ../../env.sh
 Command:
 
 ```bash
-python data/prepare_sample_data.py --output data/sample_data
+python data/prepare_ag_news.py --output data/ag_news
 ```
 
-This writes `train.jsonl` and `eval.jsonl` in the format expected by the training config.
+This downloads a small AG News subset and writes `train.jsonl` and `eval.jsonl` in the format expected by the training config.
 
 Example record:
 
 ```json
-{"text":"training job completed with stable loss","label":1}
+{"text":"Wall St. Bears Claw Back Into the Black","label":2}
 ```
 
 ### Step 2: Submit the baseline adaptation run
@@ -147,11 +147,13 @@ sbatch jobs/run_single_node.sh
 
 Use this only after the single-GCD path is stable.
 
+This is only a visibility check. It is not a real multi-GPU training run.
+
 ## Troubleshooting
 
 - `GPU_VISIBLE_COUNT=0`: check the partition and runtime setup before debugging the model.
 - `Set CONTAINER in env.sh` or container startup failure: fix `env.sh` first.
-- JSONL key errors or OOM: rebuild the sample data, keep `text` and `label`, and stay with `head_only` before changing batch size or sequence length.
+- dataset download, JSONL key errors, or OOM: rerun data prep, keep `text` and `label`, and stay with `head_only` before changing batch size or sequence length.
 
 ## Where this goes next
 

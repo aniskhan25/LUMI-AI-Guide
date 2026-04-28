@@ -6,7 +6,7 @@ run:
 
 model:
   name: distilbert-base-uncased
-  num_labels: 2
+  num_labels: 4
 
 adaptation:
   mode: head_only  # options: head_only, full, lora
@@ -15,8 +15,8 @@ adaptation:
   lora_dropout: 0.1
 
 data:
-  train_jsonl: data/sample_data/train.jsonl
-  eval_jsonl: data/sample_data/eval.jsonl
+  train_jsonl: data/ag_news/train.jsonl
+  eval_jsonl: data/ag_news/eval.jsonl
   text_key: text
   label_key: label
   max_seq_len: 256

@@ -21,6 +21,5 @@ source ../../env.sh
 
 singularity exec "$CONTAINER" bash -lc "
 set -euo pipefail
-cd '${SLURM_SUBMIT_DIR:-$PWD}'
-python scripts/train.py --config configs/baseline.yaml --run-name baseline-run-1node
+python -c 'import torch; print(f\"GPU_VISIBLE_COUNT={torch.cuda.device_count() if torch.cuda.is_available() else 0}\")'
 "
