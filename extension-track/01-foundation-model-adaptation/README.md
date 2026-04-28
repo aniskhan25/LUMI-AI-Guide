@@ -2,65 +2,80 @@
 
 ## Goal
 
-Reuse the same LUMI job pattern from the core guide, but apply it to one real foundation-model adaptation workflow.
+This lesson introduces the first AI Factory workflow in the extension track: take a pretrained model, adapt it to a small task on LUMI-G, and verify that the result is a usable baseline rather than just a successful batch job.
 
 By the end of this lesson, you should be able to:
 
-- prepare a small JSONL text dataset
-- adapt a pretrained text model on LUMI-G
-- verify GPU visibility, logs, and output artifacts
-- make one safe change to the baseline run
+- explain what foundation-model adaptation means in this guide
+- run a small adaptation workload on LUMI-G
+- interpret the run outputs as adaptation signals, not just job artifacts
+- choose a safe next modification after the baseline succeeds
 
 ## Assumptions
 
 - You completed [1. QuickStart](../../1-quickstart/README.md).
 - You completed [2. Setting up your own environment](../../2-setting-up-environment/README.md).
-- You are comfortable with the single-device baseline before attempting scale-up.
+- You already know how to run Python and submit a batch job on LUMI.
 - `../../env.sh` is configured with a valid `CONTAINER`.
 
 ## Working directory
 
-Run commands in this chapter from:
+Run commands in this lesson from:
 
 ```bash
 cd /path/to/LUMI-AI-Guide/extension-track/01-foundation-model-adaptation
 ```
 
-## What changes from baseline
+## What is new in this lesson
 
-- Baseline you already have: containerized jobs on LUMI, GPU visibility checks, Slurm submission, and artifact verification.
-- This lesson adds: adaptation of a pretrained text model instead of training the Vision Transformer example from scratch.
-- Expected output/artifact: a run directory with a saved checkpoint, `metrics.json`, and `run_summary.json`.
+Earlier lessons established the operational baseline: how to run code on LUMI, how to use the provided software environment, and how to inspect logs and artifacts.
 
-## What stays the same from earlier lessons
+This lesson adds one new capability: adapting a pretrained model for a concrete downstream task.
 
-- Runtime launcher: same LUMI container workflow and `env.sh` contract.
-- Validation habit: check logs first, then confirm expected files.
-- Progression: start with the smallest working path, then extend carefully.
+In this lesson, adaptation means:
 
-If the earlier guide taught you how to run one stable GPU job on LUMI, this lesson teaches you how to reuse that pattern for a foundation-model use case.
+- the model does not start from random weights
+- the pretrained model already knows useful language patterns
+- you change part or all of that pretrained model so it performs a new task
 
-## What this lesson introduces
+That is different from training from scratch, where the model begins with random parameters and must learn everything from the task data alone.
 
-This lesson uses a pretrained NLP model (`distilbert-base-uncased`) for binary text classification.
+## What foundation-model adaptation means here
 
-The important new idea is adaptation:
+This lesson uses:
 
-- You are not training a foundation model from scratch.
-- You start from pretrained weights.
-- You change either only the task head (`head_only`), the full model (`full`), or later a parameter-efficient path such as `lora`.
+- a pretrained text model: `distilbert-base-uncased`
+- a task: binary text classification
+- an input format: JSONL records with `text` and `label`
 
-The default baseline is `head_only`, because it is the safest first run.
+The important design choice is the adaptation mode:
 
-## How this chapter reaches the goal
+- `head_only`: freeze most of the pretrained model and train only the classifier head
+- `full`: update the whole model
+- `lora`: keep the base model mostly fixed and train small adapter layers
 
-1. Generate a small JSONL train/eval dataset.
-2. Run a short adaptation job with the baseline config.
-3. Validate the run directory and GPU visibility record.
-4. Repeat the same workflow through Slurm on LUMI-G.
-5. Make one controlled modification only after the baseline succeeds.
+The baseline starts with `head_only` because it is the lowest-risk way to answer the first question:
 
-## Minimal run checkpoint
+Can I run a valid pretrained-model adaptation workflow on LUMI-G and produce a checkpoint, metrics, and a reproducible output directory?
+
+## Why this baseline was chosen
+
+This lesson is deliberately small.
+
+- `distilbert-base-uncased` is a practical starter model because it is widely supported and light enough for a first adaptation run.
+- Binary text classification is simple enough to keep the focus on the adaptation workflow, not on task complexity.
+- The sample JSONL dataset is synthetic on purpose. It gives you a controlled baseline before you swap in real data.
+- `head_only` reduces the amount of trainable state, which lowers both runtime risk and interpretation noise for the first run.
+
+The lesson is not trying to prove that this is the best possible model or task. It is trying to teach a reusable adaptation pattern on LUMI.
+
+## Minimal workflow
+
+The core workflow has three steps:
+
+1. prepare data
+2. run adaptation
+3. validate outputs
 
 Load the lesson runtime in your shell:
 
@@ -71,21 +86,70 @@ module load pytorch
 source ../../env.sh
 ```
 
-Then, from the lesson directory, run these commands in order:
+### Step 1: Prepare the sample dataset
 
-1. Prepare the sample dataset:
+Command:
 
 ```bash
 python data/prepare_sample_data.py --output data/sample_data
 ```
 
-2. Submit the short baseline run:
+What this does:
+
+- writes `train.jsonl` and `eval.jsonl`
+- creates the minimal text-classification dataset expected by the training config
+
+Why it matters:
+
+- adaptation still needs task-specific data
+- this step makes the dataset contract explicit: one JSON object per line with `text` and `label`
+
+Success signal:
+
+- `data/sample_data/train.jsonl` exists
+- `data/sample_data/eval.jsonl` exists
+
+Example record:
+
+```json
+{"text":"training job completed with stable loss","label":1}
+```
+
+### Step 2: Submit the baseline adaptation run
+
+Command:
 
 ```bash
 sbatch jobs/run_single_gcd.sh
 ```
 
-3. After the batch job finishes successfully, validate outputs:
+What this does:
+
+- starts a short single-GCD baseline run on LUMI-G
+- loads the AI Factory container environment from `env.sh`
+- runs data preparation, training, and validation inside the batch job
+
+Why it matters:
+
+- this is the first lesson where the workload is a pretrained-model adaptation run rather than a generic training smoke test
+- success here means the full adaptation path works end to end on LUMI-G
+
+Success signal in the Slurm output:
+
+- `GPU_VISIBLE_COUNT=1` or greater
+- training step logs appear
+- `EVAL_LOSS=...`
+- `EVAL_ACCURACY=...`
+- `RUN_COMPLETE=1`
+- `VALIDATION_OK=1`
+
+For this short baseline run, `jobs/run_single_gcd.sh` uses `dev-g`.
+
+### Step 3: Re-check the run directory manually
+
+The batch job already runs validation internally, but it is useful to inspect the run again yourself.
+
+Command:
 
 ```bash
 python scripts/validate_run.py \
@@ -93,39 +157,81 @@ python scripts/validate_run.py \
   --min-accuracy 0.0
 ```
 
-Success signal:
+What this does:
 
-- The job output shows `GPU_VISIBLE_COUNT=1` or greater.
-- The training run completes and prints `RUN_COMPLETE=1`.
-- Validation prints `VALIDATION_OK=1`.
+- checks that the run directory exists
+- confirms checkpoint and metrics files are present
+- confirms GPU visibility was recorded in the run summary
 
-Note:
+Why it matters:
 
-- Data preparation and validation do not need a GPU allocation.
-- Device allocation for this lesson happens through `sbatch jobs/run_single_gcd.sh`.
-- Do not use the default system `python3` if it is Python 3.6.
-- Use `python` from the loaded `pytorch` module, which provides the newer interpreter needed by these scripts.
-- Use `module use /appl/local/csc/modulefiles` before `module load pytorch`.
-- The default config requires GPU visibility, which is why training is run through the batch job.
-- For non-LUMI local debugging only, you may temporarily enable CPU fallback in [configs/baseline.yaml](configs/baseline.yaml) or use `--allow-cpu` with the validator.
+- adaptation on LUMI is not only about whether the job finished
+- it is also about whether the job produced artifacts you can use in later lessons
 
-## Optional full-node visibility check
+## How to interpret the result
 
-After the single-GCD baseline succeeds, you can inspect full-node visibility:
+Do not stop at “the job passed.”
 
-```bash
-sbatch jobs/run_single_node.sh
-```
+Read the outputs in this order:
 
-For this short baseline run, `jobs/run_single_gcd.sh` uses `dev-g`.
+### 1) `GPU_VISIBLE_COUNT`
 
-## Baseline contract for this chapter
+What it tells you:
 
-- Use `CONTAINER` from `../../env.sh`.
-- Keep the first run in `adaptation.mode=head_only`.
-- Use the provided JSONL schema: `text` and `label`.
-- Validate artifacts before changing batch size, model, or adaptation mode.
-- Treat single-device success as the prerequisite for any scale-up decision.
+- whether the training script saw GPU devices in the intended runtime
+
+What a good baseline means:
+
+- the software environment and batch launch were compatible with the adaptation workload
+
+### 2) Training loss logs
+
+What they tell you:
+
+- whether optimization is progressing at all
+
+What a good baseline means:
+
+- the model, tokenizer, dataset, and loss path are wired together correctly
+
+You are not looking for perfect convergence here. You are looking for a stable, believable adaptation run.
+
+### 3) `EVAL_LOSS` and `EVAL_ACCURACY`
+
+What they tell you:
+
+- whether the adapted model can run evaluation on held-out data
+
+What a good baseline means:
+
+- the run produced measurable task output, not just a checkpoint file
+
+With the synthetic sample dataset, these metrics are smoke-test indicators, not final model-quality claims.
+
+### 4) Checkpoint contents
+
+Expected layout:
+
+- [assets/expected-output-tree.txt](assets/expected-output-tree.txt)
+
+What it tells you:
+
+- whether the adapted model and tokenizer were saved in a reusable format
+
+What a good baseline means:
+
+- later lessons can consume these outputs for inference, evaluation, or further experimentation
+
+### 5) `metrics.json` and `run_summary.json`
+
+What they tell you:
+
+- the metrics file captures outcome numbers
+- the summary file captures run identity, device, and output location
+
+What a good baseline means:
+
+- the run is inspectable and reproducible enough to compare against later modifications
 
 ## Files that matter
 
@@ -135,36 +241,44 @@ For this short baseline run, `jobs/run_single_gcd.sh` uses `dev-g`.
 - Validation script: [scripts/validate_run.py](scripts/validate_run.py)
 - Single-GCD jobscript: [jobs/run_single_gcd.sh](jobs/run_single_gcd.sh)
 
-## Verification
+## What this successful baseline demonstrates
 
-Confirm all of the following:
+If the lesson works end to end, you have shown that:
 
-- Logs include `GPU_VISIBLE_COUNT=<n>`.
-- Training step logs appear during the run.
-- The output run directory exists.
-- `checkpoint/` contains saved model/tokenizer files.
-- `metrics.json` exists.
-- `run_summary.json` exists.
-- Validation completes successfully.
+- a pretrained model can be loaded in the intended LUMI runtime
+- the task dataset format is valid for the adaptation script
+- the model can be trained and evaluated on LUMI-G
+- the run produces a checkpoint and machine-readable metrics
 
-Expected layout:
+That is the real lesson outcome. The commands are only the mechanism.
 
-- [assets/expected-output-tree.txt](assets/expected-output-tree.txt)
+## What to change next
 
-## Why this works on LUMI-G
+After the first successful run, change one thing at a time.
 
-- The lesson uses the same container-first execution pattern as the earlier guide.
-- LUMI-G MI250X nodes expose GPU/GCD devices to the runtime inside the container.
-- The first baseline stays deliberately small so you can validate the workflow before making topology or scale assumptions.
+Recommended order:
 
-## Recommended first extension after baseline
+1. Replace the sample JSONL files with your own dataset.
+2. Adjust `training.batch_size` or `data.max_seq_len` conservatively.
+3. Compare `adaptation.mode=head_only` with `adaptation.mode=lora`.
+4. Use `jobs/run_single_node.sh` only after the single-GCD baseline is stable.
 
-Change only one thing at a time:
+Why this order:
 
-1. Increase `training.batch_size` conservatively.
-2. Replace the sample JSONL files with your own dataset.
-3. Try `adaptation.mode=lora` only after confirming `peft` is available in your runtime.
-4. Use `jobs/run_single_node.sh` before discussing multi-node adaptation.
+- changing data first tests whether your real task fits the lesson pattern
+- changing batch size or sequence length tests resource behavior
+- trying LoRA tests a more realistic parameter-efficient adaptation path
+- scaling before the single-device path is stable makes failures harder to interpret
+
+## Optional full-node visibility check
+
+After the single-GCD baseline succeeds, you can inspect full-node visibility:
+
+```bash
+sbatch jobs/run_single_node.sh
+```
+
+This is not the main lesson goal. Use it only after the baseline path is already trustworthy.
 
 ## Troubleshooting
 
@@ -212,11 +326,9 @@ Checks:
 python data/prepare_sample_data.py --output data/sample_data
 ```
 
-- Keep the expected schema:
-
-```json
-{"text":"training job completed with stable loss","label":1}
-```
+- Ensure each JSONL record contains exactly the expected keys:
+  - `text`
+  - `label`
 
 ### 4) Out-of-memory
 
@@ -241,6 +353,16 @@ Checks:
 
 - Do not assume simple CPU/GPU numbering alignment on MI250X/GCD topology
 - Start from the single-device baseline and profile before making scaling decisions
+
+## Where this goes next
+
+After you have a successful adapted checkpoint, the natural follow-on questions are:
+
+- How do I run inference or embedding generation from this model?
+- How do I evaluate whether this adaptation is actually good?
+- When is it worth scaling beyond the single-device baseline?
+
+Those questions lead directly into the later extension lessons on inference, evaluation, and topology-aware scaling.
 
 ## Navigation
 
