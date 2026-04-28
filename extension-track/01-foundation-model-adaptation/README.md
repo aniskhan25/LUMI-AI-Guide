@@ -1,4 +1,4 @@
-# 01. Foundation Model Adaptation on LUMI-G
+# 01. Foundation Model Adaptation
 
 ## Goal
 

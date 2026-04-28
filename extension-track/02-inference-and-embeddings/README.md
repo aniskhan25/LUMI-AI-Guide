@@ -1,4 +1,4 @@
-# 02. Inference and Embeddings on LUMI-G
+# 02. Inference and Embeddings
 
 ## Goal
 
@@ -212,5 +212,5 @@ Those questions lead directly into the later lessons on RAG, evaluation, and top
 
 ## Navigation
 
-- Previous extension lesson: [01. Foundation Model Adaptation on LUMI-G](../01-foundation-model-adaptation/README.md)
+- Previous extension lesson: [01. Foundation Model Adaptation](../01-foundation-model-adaptation/README.md)
 - Next extension lesson: [03. RAG on MI250X](../03-rag-and-knowledge-workflows/README.md)
