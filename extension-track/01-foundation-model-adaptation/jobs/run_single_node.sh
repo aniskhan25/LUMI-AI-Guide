@@ -12,8 +12,9 @@
 
 set -euo pipefail
 
-module use /appl/local/containers/ai-modules
-module load lumi-aif-singularity-bindings || module load singularity-AI-bindings
+module purge
+module use /appl/local/laifs/modules
+module load lumi-aif-singularity-bindings
 
 LESSON_DIR="${SLURM_SUBMIT_DIR:-$PWD}"
 REPO_ROOT="$(cd -- "$LESSON_DIR/../.." && pwd)"
