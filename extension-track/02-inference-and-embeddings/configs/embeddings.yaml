@@ -5,11 +5,11 @@ run:
   log_every_batches: 5
 
 model:
-  name: distilbert-base-uncased
+  name: sentence-transformers/all-MiniLM-L6-v2
   trust_remote_code: false
 
 data:
-  input_jsonl: data/sample_corpus.jsonl
+  input_jsonl: data/ag_news_corpus.jsonl
   id_key: id
   text_key: text
   metadata_key: metadata
@@ -21,10 +21,8 @@ inference:
   normalize_embeddings: true
 
 runtime:
-  device_index: 0
   allow_cpu_fallback: false
 
 output:
   embeddings_filename: embeddings.jsonl
   summary_filename: run_summary.json
-

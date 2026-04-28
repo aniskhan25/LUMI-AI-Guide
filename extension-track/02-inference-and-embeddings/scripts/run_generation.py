@@ -1,43 +1,38 @@
 #!/usr/bin/env python3
 """Optional batched generation pipeline for Lesson 02."""
 
-from __future__ import annotations
-
 import argparse
 import json
 import random
 import time
 from pathlib import Path
-from typing import Any, Dict, Iterable, List
 
 import torch
 import yaml
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, required=True)
-    parser.add_argument("--output-dir", type=Path, default=None)
     parser.add_argument("--run-name", type=str, default=None)
-    parser.add_argument("--input-jsonl", type=Path, default=None)
     return parser.parse_args()
 
 
-def load_config(path: Path) -> Dict[str, Any]:
+def load_config(path):
     with path.open("r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
-def set_seed(seed: int) -> None:
+def set_seed(seed):
     random.seed(seed)
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
 
-def read_jsonl(path: Path, max_samples: int) -> List[Dict[str, Any]]:
-    rows: List[Dict[str, Any]] = []
+def read_jsonl(path, max_samples):
+    rows = []
     with path.open("r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -49,20 +44,20 @@ def read_jsonl(path: Path, max_samples: int) -> List[Dict[str, Any]]:
     return rows
 
 
-def batched(items: List[Dict[str, Any]], batch_size: int) -> Iterable[List[Dict[str, Any]]]:
+def batched(items, batch_size):
     for i in range(0, len(items), batch_size):
         yield items[i : i + batch_size]
 
 
-def main() -> None:
+def main():
     args = parse_args()
     cfg = load_config(args.config)
 
     run_name = args.run_name or str(cfg["run"]["run_name"])
-    out_dir = args.output_dir or (Path(str(cfg["run"]["output_dir"])) / run_name)
+    out_dir = Path(str(cfg["run"]["output_dir"])) / run_name
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    input_jsonl = args.input_jsonl or Path(str(cfg["data"]["input_jsonl"]))
+    input_jsonl = Path(str(cfg["data"]["input_jsonl"]))
     outputs_path = out_dir / str(cfg["output"]["outputs_filename"])
     summary_path = out_dir / str(cfg["output"]["summary_filename"])
 
@@ -74,20 +69,13 @@ def main() -> None:
     if not torch.cuda.is_available() and not bool(cfg["runtime"]["allow_cpu_fallback"]):
         raise SystemExit("CUDA device not visible. Set runtime.allow_cpu_fallback=true only for local debugging.")
 
-    if torch.cuda.is_available():
-        device = torch.device(f"cuda:{int(cfg['runtime']['device_index'])}")
-    else:
-        device = torch.device("cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model_name = str(cfg["model"]["name"])
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_name, trust_remote_code=bool(cfg["model"]["trust_remote_code"])
-    )
+    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=bool(cfg["model"]["trust_remote_code"]))
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name, trust_remote_code=bool(cfg["model"]["trust_remote_code"])
-    ).to(device)
+    model = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=bool(cfg["model"]["trust_remote_code"])).to(device)
     model.eval()
 
     rows = read_jsonl(input_jsonl, int(cfg["data"]["max_samples"]))
@@ -133,8 +121,7 @@ def main() -> None:
             for row, seq, prompt_len in zip(batch_rows, generated, prompt_lengths, strict=True):
                 generated_tokens = seq[int(prompt_len) :]
                 text = tokenizer.decode(generated_tokens, skip_special_tokens=True).strip()
-                out = {"id": row[id_key], "prompt": row[prompt_key], "output_text": text}
-                out_f.write(json.dumps(out) + "\n")
+                out_f.write(json.dumps({"id": row[id_key], "prompt": row[prompt_key], "output_text": text}) + "\n")
                 total += 1
 
             if idx % log_every == 0:
@@ -165,4 +152,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
