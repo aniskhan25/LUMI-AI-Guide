@@ -135,7 +135,7 @@ Recommended order:
 1. Replace the sample JSONL files with your own dataset.
 2. Adjust `training.batch_size` or `data.max_seq_len` conservatively.
 3. Compare `adaptation.mode=head_only` with `adaptation.mode=lora`.
-4. Use `jobs/run_single_node.sh` only after the single-GCD baseline is stable.
+4. Try the supplemental DDP run only after the single-GCD baseline is stable.
 
 ## Optional full-node visibility check
 
@@ -148,6 +148,32 @@ sbatch jobs/run_single_node.sh
 Use this only after the single-GCD path is stable.
 
 This is only a visibility check. It is not a real multi-GPU training run.
+
+## Supplemental scaled run
+
+If you want a real single-node multi-GPU version of the same lesson workload, use:
+
+```bash
+sbatch jobs/run_single_node_ddp.sh
+```
+
+This launches 8 processes with `torch.distributed.run` and trains with DDP.
+
+Use it only after the single-GCD baseline succeeds.
+
+Expected output:
+
+- `GPU_VISIBLE_COUNT=8`
+- training logs from rank 0
+- `EVAL_LOSS=...`
+- `EVAL_ACCURACY=...`
+- `RUN_COMPLETE=1`
+
+Outputs are written to:
+
+```bash
+outputs/baseline-run-ddp
+```
 
 ## Troubleshooting
 
