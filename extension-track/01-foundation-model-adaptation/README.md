@@ -113,10 +113,6 @@ Look for these signals:
 - `EVAL_LOSS` and `EVAL_ACCURACY` confirm the run produced measurable task output.
 - `checkpoint/`, `metrics.json`, and `run_summary.json` confirm the result is reusable.
 
-Expected layout:
-
-- [assets/expected-output-tree.txt](assets/expected-output-tree.txt)
-
 ## What this successful baseline demonstrates
 
 If the lesson works end to end, you have shown that:

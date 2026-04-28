@@ -1,8 +1,0 @@
-embeddings-baseline/
-  embeddings.jsonl
-  run_summary.json
-
-generation-baseline/
-  generation_outputs.jsonl
-  run_summary.json
-

@@ -141,10 +141,6 @@ Look for these signals:
 - a consistent embedding dimension confirms one coherent embedding model wrote the whole file.
 - `run_summary.json` confirms the run is inspectable and reusable.
 
-Expected layout:
-
-- [assets/expected-output-tree.txt](assets/expected-output-tree.txt)
-
 Expected embeddings output schema:
 
 ```json
