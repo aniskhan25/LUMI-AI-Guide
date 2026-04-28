@@ -137,18 +137,6 @@ Recommended order:
 3. Compare `adaptation.mode=head_only` with `adaptation.mode=lora`.
 4. Try the supplemental DDP run only after the single-GCD baseline is stable.
 
-## Optional full-node visibility check
-
-After the single-GCD baseline succeeds, you can inspect full-node visibility:
-
-```bash
-sbatch jobs/run_single_node.sh
-```
-
-Use this only after the single-GCD path is stable.
-
-This is only a visibility check. It is not a real multi-GPU training run.
-
 ## Supplemental scaled run
 
 If you want a real single-node multi-GPU version of the same lesson workload, use:
