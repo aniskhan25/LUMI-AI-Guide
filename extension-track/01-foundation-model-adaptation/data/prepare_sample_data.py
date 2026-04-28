@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Generate a small JSONL dataset for lesson smoke testing."""
 
-from __future__ import annotations
-
 import argparse
 import json
 import random
@@ -26,7 +24,7 @@ POSITIVE_TEXTS = [
 ]
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--train-size", type=int, default=200)
@@ -35,20 +33,20 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def make_record(label: int, rnd: random.Random) -> dict:
+def make_record(label, rnd):
     base = rnd.choice(POSITIVE_TEXTS if label == 1 else NEGATIVE_TEXTS)
     noise = rnd.choice(["", " for region A", " at midnight", " in production", " on node 3"])
     return {"text": f"{base}{noise}".strip(), "label": label}
 
 
-def write_jsonl(path: Path, items: list[dict]) -> None:
+def write_jsonl(path, items):
     with path.open("w", encoding="utf-8") as f:
         for row in items:
             f.write(json.dumps(row) + "\n")
 
 
-def build_split(size: int, rnd: random.Random) -> list[dict]:
-    out: list[dict] = []
+def build_split(size, rnd):
+    out = []
     for _ in range(size):
         label = rnd.randint(0, 1)
         out.append(make_record(label, rnd))
@@ -56,7 +54,7 @@ def build_split(size: int, rnd: random.Random) -> list[dict]:
     return out
 
 
-def main() -> None:
+def main():
     args = parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     rnd = random.Random(args.seed)
@@ -76,4 +74,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

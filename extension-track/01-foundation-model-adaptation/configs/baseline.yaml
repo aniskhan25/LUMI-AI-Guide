@@ -31,6 +31,4 @@ training:
   max_eval_samples: 256
 
 runtime:
-  device_index: 0
   allow_cpu_fallback: false
-

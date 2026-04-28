@@ -16,24 +16,11 @@ module purge
 module use /appl/local/laifs/modules
 module load lumi-aif-singularity-bindings
 
-LESSON_DIR="${SLURM_SUBMIT_DIR:-$PWD}"
-REPO_ROOT="$(cd -- "$LESSON_DIR/../.." && pwd)"
-
-source "$REPO_ROOT/env.sh"
+source ../../env.sh
 : "${CONTAINER:?Set CONTAINER in env.sh}"
 
-RUN_NAME="${RUN_NAME:-baseline-run-1node}"
-OUT_DIR="${OUT_DIR:-${SCRATCH_ROOT}/foundation-adaptation/${RUN_NAME}}"
-
-echo "Lesson directory: $LESSON_DIR"
-echo "Output directory: $OUT_DIR"
-
-unset SLURM_MEM_PER_CPU SLURM_MEM_PER_GPU SLURM_MEM_PER_NODE
-
-srun singularity exec "$CONTAINER" bash -lc "
+singularity exec "$CONTAINER" bash -lc "
 set -euo pipefail
-cd '$LESSON_DIR'
-python data/prepare_sample_data.py --output data/sample_data
-python scripts/train.py --config configs/baseline.yaml --output-dir '$OUT_DIR' --run-name '$RUN_NAME'
-python scripts/validate_run.py --run-dir '$OUT_DIR'
+cd '${SLURM_SUBMIT_DIR:-$PWD}'
+python scripts/train.py --config configs/baseline.yaml --run-name baseline-run-1node
 "

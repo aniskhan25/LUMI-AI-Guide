@@ -1,26 +1,23 @@
 #!/usr/bin/env python3
 """Validate expected outputs from the Lesson 01 adaptation run."""
 
-from __future__ import annotations
-
 import argparse
 import json
 from pathlib import Path
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--run-dir", type=Path, required=True)
-    parser.add_argument("--allow-cpu", action="store_true")
     return parser.parse_args()
 
 
-def require_file(path: Path) -> None:
+def require_file(path):
     if not path.is_file():
         raise SystemExit(f"Missing expected file: {path}")
 
 
-def main() -> None:
+def main():
     args = parse_args()
     run_dir = args.run_dir
     if not run_dir.is_dir():
@@ -41,10 +38,8 @@ def main() -> None:
         metrics = json.load(f)
 
     gpu_visible_count = int(summary.get("gpu_visible_count", 0))
-    if gpu_visible_count < 1 and not args.allow_cpu:
-        raise SystemExit(
-            "Validation failed: gpu_visible_count < 1. Pass --allow-cpu only for non-LUMI local checks."
-        )
+    if gpu_visible_count < 1:
+        raise SystemExit("Validation failed: gpu_visible_count < 1")
 
     eval_acc = float(metrics.get("eval_accuracy", 0.0))
 

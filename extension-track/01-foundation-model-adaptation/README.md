@@ -84,7 +84,7 @@ Command:
 sbatch jobs/run_single_gcd.sh
 ```
 
-This runs data preparation, training, and validation inside one batch job.
+This runs training inside one batch job.
 
 Success signal in the Slurm output:
 
@@ -93,9 +93,14 @@ Success signal in the Slurm output:
 - `EVAL_LOSS=...`
 - `EVAL_ACCURACY=...`
 - `RUN_COMPLETE=1`
-- `VALIDATION_OK=1`
 
 For this short baseline run, `jobs/run_single_gcd.sh` uses `dev-g`.
+
+If you want a separate post-run check:
+
+```bash
+python scripts/validate_run.py --run-dir outputs/baseline-run
+```
 
 ## How to interpret the result
 

@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 """Minimal foundation-model adaptation example for Lesson 01."""
 
-from __future__ import annotations
-
 import argparse
 import json
 import random
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
 
 import torch
 import yaml
@@ -30,20 +27,15 @@ class Example:
 
 
 class JsonlTextDataset(Dataset):
-    def __init__(
-        self,
-        records: List[Example],
-        tokenizer: Any,
-        max_seq_len: int,
-    ) -> None:
+    def __init__(self, records, tokenizer, max_seq_len):
         self.records = records
         self.tokenizer = tokenizer
         self.max_seq_len = max_seq_len
 
-    def __len__(self) -> int:
+    def __len__(self):
         return len(self.records)
 
-    def __getitem__(self, idx: int) -> Dict[str, torch.Tensor]:
+    def __getitem__(self, idx):
         row = self.records[idx]
         encoded = self.tokenizer(
             row.text,
@@ -59,28 +51,27 @@ class JsonlTextDataset(Dataset):
         }
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, required=True)
-    parser.add_argument("--output-dir", type=Path, default=None)
     parser.add_argument("--run-name", type=str, default=None)
     return parser.parse_args()
 
 
-def load_config(path: Path) -> Dict[str, Any]:
+def load_config(path):
     with path.open("r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
-def set_seed(seed: int) -> None:
+def set_seed(seed):
     random.seed(seed)
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
 
-def read_jsonl(path: Path, text_key: str, label_key: str, limit: int) -> List[Example]:
-    items: List[Example] = []
+def read_jsonl(path, text_key, label_key, limit):
+    items = []
     with path.open("r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -93,7 +84,7 @@ def read_jsonl(path: Path, text_key: str, label_key: str, limit: int) -> List[Ex
     return items
 
 
-def build_model(cfg: Dict[str, Any]) -> Any:
+def build_model(cfg):
     model = AutoModelForSequenceClassification.from_pretrained(
         cfg["model"]["name"],
         num_labels=int(cfg["model"]["num_labels"]),
@@ -128,7 +119,7 @@ def build_model(cfg: Dict[str, Any]) -> Any:
     return model
 
 
-def evaluate(model: Any, data_loader: DataLoader, device: torch.device) -> Tuple[float, float]:
+def evaluate(model, data_loader, device):
     model.eval()
     total = 0
     correct = 0
@@ -149,12 +140,12 @@ def evaluate(model: Any, data_loader: DataLoader, device: torch.device) -> Tuple
     return avg_loss, accuracy
 
 
-def main() -> None:
+def main():
     args = parse_args()
     cfg = load_config(args.config)
 
     run_name = args.run_name or str(cfg["run"]["run_name"])
-    out_root = args.output_dir or Path(str(cfg["run"]["output_dir"])) / run_name
+    out_root = Path(str(cfg["run"]["output_dir"])) / run_name
     out_root.mkdir(parents=True, exist_ok=True)
     checkpoint_dir = out_root / "checkpoint"
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
@@ -168,8 +159,7 @@ def main() -> None:
         raise SystemExit("CUDA device not visible. Set runtime.allow_cpu_fallback=true only for local debugging.")
 
     if torch.cuda.is_available():
-        device_index = int(cfg["runtime"]["device_index"])
-        device = torch.device(f"cuda:{device_index}")
+        device = torch.device("cuda")
     else:
         device = torch.device("cpu")
 
@@ -250,4 +240,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
