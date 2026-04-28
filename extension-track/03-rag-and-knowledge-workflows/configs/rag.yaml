@@ -4,8 +4,8 @@ run:
   seed: 42
 
 data:
-  corpus_jsonl: data/sample_corpus.jsonl
-  queries_jsonl: data/sample_queries.jsonl
+  corpus_jsonl: data/corpus.jsonl
+  queries_jsonl: data/queries.jsonl
   doc_id_key: doc_id
   title_key: title
   text_key: text
@@ -19,7 +19,7 @@ chunking:
   min_chunk_words: 20
 
 embedding:
-  model_name: distilbert-base-uncased
+  model_name: sentence-transformers/all-MiniLM-L6-v2
   trust_remote_code: false
   batch_size: 16
   max_seq_len: 256
@@ -39,7 +39,6 @@ generation:
   top_p: 1.0
 
 runtime:
-  device_index: 0
   allow_cpu_fallback: false
 
 output:
@@ -49,4 +48,3 @@ output:
   retrieval_results_jsonl: retrieval_results.jsonl
   answers_jsonl: answers.jsonl
   summary_json: run_summary.json
-

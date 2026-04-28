@@ -1,44 +1,34 @@
 #!/usr/bin/env python3
-"""Generate chunk embeddings for Lesson 03 RAG workflow."""
-
-from __future__ import annotations
+"""Generate chunk embeddings for Lesson 03."""
 
 import argparse
 import json
 from pathlib import Path
-from typing import Any, Dict, Iterable, List
 
 import torch
-try:
-    import yaml
-except ImportError as exc:
-    raise SystemExit("pyyaml is required. Install PyYAML or run inside the AI Factory container.") from exc
+import yaml
 from transformers import AutoModel, AutoTokenizer
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, required=True)
-    parser.add_argument("--output-root", type=Path, default=None)
-    parser.add_argument("--run-name", type=str, default=None)
     return parser.parse_args()
 
 
-def load_config(path: Path) -> Dict[str, Any]:
+def load_config(path):
     with path.open("r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
-def run_dir_from(cfg: Dict[str, Any], output_root: Path | None, run_name: str | None) -> Path:
-    name = run_name or str(cfg["run"]["run_name"])
-    root = output_root or Path(str(cfg["run"]["output_dir"]))
-    out = root / name
-    out.mkdir(parents=True, exist_ok=True)
-    return out
+def run_dir_from(cfg):
+    run_dir = Path(str(cfg["run"]["output_dir"])) / str(cfg["run"]["run_name"])
+    run_dir.mkdir(parents=True, exist_ok=True)
+    return run_dir
 
 
-def read_jsonl(path: Path) -> List[Dict[str, Any]]:
-    rows: List[Dict[str, Any]] = []
+def read_jsonl(path):
+    rows = []
     with path.open("r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -47,22 +37,22 @@ def read_jsonl(path: Path) -> List[Dict[str, Any]]:
     return rows
 
 
-def batched(items: List[Dict[str, Any]], batch_size: int) -> Iterable[List[Dict[str, Any]]]:
+def batched(items, batch_size):
     for i in range(0, len(items), batch_size):
         yield items[i : i + batch_size]
 
 
-def mean_pool(last_hidden: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
+def mean_pool(last_hidden, attention_mask):
     mask = attention_mask.unsqueeze(-1).expand(last_hidden.size()).float()
     summed = (last_hidden * mask).sum(dim=1)
     counts = torch.clamp(mask.sum(dim=1), min=1e-9)
     return summed / counts
 
 
-def main() -> None:
+def main():
     args = parse_args()
     cfg = load_config(args.config)
-    run_dir = run_dir_from(cfg, args.output_root, args.run_name)
+    run_dir = run_dir_from(cfg)
 
     chunks_path = run_dir / str(cfg["output"]["chunks_jsonl"])
     embeddings_path = run_dir / str(cfg["output"]["embeddings_jsonl"])
@@ -75,18 +65,11 @@ def main() -> None:
     if not torch.cuda.is_available() and not bool(cfg["runtime"]["allow_cpu_fallback"]):
         raise SystemExit("CUDA device not visible. Set runtime.allow_cpu_fallback=true only for local debugging.")
 
-    if torch.cuda.is_available():
-        device = torch.device(f"cuda:{int(cfg['runtime']['device_index'])}")
-    else:
-        device = torch.device("cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model_name = str(cfg["embedding"]["model_name"])
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_name, trust_remote_code=bool(cfg["embedding"]["trust_remote_code"])
-    )
-    model = AutoModel.from_pretrained(
-        model_name, trust_remote_code=bool(cfg["embedding"]["trust_remote_code"])
-    ).to(device)
+    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=bool(cfg["embedding"]["trust_remote_code"]))
+    model = AutoModel.from_pretrained(model_name, trust_remote_code=bool(cfg["embedding"]["trust_remote_code"])).to(device)
     model.eval()
 
     batch_size = int(cfg["embedding"]["batch_size"])
@@ -97,7 +80,7 @@ def main() -> None:
     dim = None
     with embeddings_path.open("w", encoding="utf-8") as out_f:
         for batch in batched(rows, batch_size):
-            texts = [str(x["chunk_text"]) for x in batch]
+            texts = [str(row["chunk_text"]) for row in batch]
             encoded = tokenizer(
                 texts,
                 padding=True,
@@ -116,8 +99,7 @@ def main() -> None:
                 dim = int(pooled.shape[1])
 
             for row, vector in zip(batch, pooled, strict=True):
-                out = {"chunk_id": row["chunk_id"], "embedding": vector.tolist()}
-                out_f.write(json.dumps(out) + "\n")
+                out_f.write(json.dumps({"chunk_id": row["chunk_id"], "embedding": vector.tolist()}) + "\n")
                 count += 1
 
     print(f"EMBEDDING_COUNT={count}")

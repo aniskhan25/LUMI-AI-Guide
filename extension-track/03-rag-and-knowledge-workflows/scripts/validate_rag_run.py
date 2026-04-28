@@ -1,41 +1,30 @@
 #!/usr/bin/env python3
-"""Validate Lesson 03 RAG artifacts and cross-file consistency."""
-
-from __future__ import annotations
+"""Validate Lesson 03 RAG artifacts."""
 
 import argparse
 import json
 from pathlib import Path
-from typing import Any, Dict, List
 
-try:
-    import yaml
-except ImportError as exc:
-    raise SystemExit("pyyaml is required. Install PyYAML or run inside the AI Factory container.") from exc
+import yaml
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, required=True)
-    parser.add_argument("--output-root", type=Path, default=None)
-    parser.add_argument("--run-name", type=str, default=None)
-    parser.add_argument("--require-gpu", action="store_true")
     return parser.parse_args()
 
 
-def load_config(path: Path) -> Dict[str, Any]:
+def load_config(path):
     with path.open("r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
-def run_dir_from(cfg: Dict[str, Any], output_root: Path | None, run_name: str | None) -> Path:
-    name = run_name or str(cfg["run"]["run_name"])
-    root = output_root or Path(str(cfg["run"]["output_dir"]))
-    return root / name
+def run_dir_from(cfg):
+    return Path(str(cfg["run"]["output_dir"])) / str(cfg["run"]["run_name"])
 
 
-def read_jsonl(path: Path) -> List[Dict[str, Any]]:
-    rows: List[Dict[str, Any]] = []
+def read_jsonl(path):
+    rows = []
     with path.open("r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -44,15 +33,15 @@ def read_jsonl(path: Path) -> List[Dict[str, Any]]:
     return rows
 
 
-def ensure_file(path: Path) -> None:
+def ensure_file(path):
     if not path.is_file():
         raise SystemExit(f"Missing expected file: {path}")
 
 
-def main() -> None:
+def main():
     args = parse_args()
     cfg = load_config(args.config)
-    run_dir = run_dir_from(cfg, args.output_root, args.run_name)
+    run_dir = run_dir_from(cfg)
     if not run_dir.is_dir():
         raise SystemExit(f"Run directory not found: {run_dir}")
 
@@ -64,8 +53,8 @@ def main() -> None:
     answers_path = run_dir / str(cfg["output"]["answers_jsonl"])
     summary_path = run_dir / str(cfg["output"]["summary_json"])
 
-    for p in [corpus_path, queries_path, chunks_path, embeddings_path, retrieval_path, answers_path, summary_path]:
-        ensure_file(p)
+    for path in [corpus_path, queries_path, chunks_path, embeddings_path, retrieval_path, answers_path, summary_path]:
+        ensure_file(path)
 
     corpus = read_jsonl(corpus_path)
     queries = read_jsonl(queries_path)
@@ -87,73 +76,65 @@ def main() -> None:
     if not answers:
         raise SystemExit("Answers are empty")
 
-    doc_ids = {str(x["doc_id"]) for x in corpus}
-    chunk_doc_ids = {str(x["doc_id"]) for x in chunks}
-    if not doc_ids.issubset(chunk_doc_ids):
-        missing = sorted(doc_ids - chunk_doc_ids)
-        raise SystemExit(f"Some corpus docs have no chunks: {missing[:5]}")
-
-    chunk_ids = [str(x["chunk_id"]) for x in chunks]
+    chunk_ids = [str(row["chunk_id"]) for row in chunks]
     if len(chunk_ids) != len(set(chunk_ids)):
-        raise SystemExit("Duplicate chunk_id values found in chunk manifest")
+        raise SystemExit("Duplicate chunk_id values found in chunks.jsonl")
 
-    emb_chunk_ids = [str(x["chunk_id"]) for x in embeddings]
-    if len(emb_chunk_ids) != len(set(emb_chunk_ids)):
-        raise SystemExit("Duplicate chunk_id values found in embeddings file")
-    if set(emb_chunk_ids) != set(chunk_ids):
+    embedding_ids = [str(row["chunk_id"]) for row in embeddings]
+    if set(embedding_ids) != set(chunk_ids):
         raise SystemExit("Mismatch between chunk IDs and embedding IDs")
 
-    first_vec = embeddings[0].get("embedding")
-    if not isinstance(first_vec, list) or len(first_vec) == 0:
+    first_embedding = embeddings[0].get("embedding")
+    if not isinstance(first_embedding, list) or not first_embedding:
         raise SystemExit("First embedding vector is missing or empty")
-    dim = len(first_vec)
-    for i, row in enumerate(embeddings):
-        vec = row.get("embedding")
-        if not isinstance(vec, list) or len(vec) != dim:
-            raise SystemExit(f"Inconsistent embedding dimension at row {i}")
+    embedding_dim = len(first_embedding)
+    for idx, row in enumerate(embeddings):
+        vector = row.get("embedding")
+        if not isinstance(vector, list) or len(vector) != embedding_dim:
+            raise SystemExit(f"Inconsistent embedding dimension at row {idx}")
 
-    query_ids = {str(x["query_id"]) for x in queries}
-    retrieval_query_ids = {str(x["query_id"]) for x in retrieval}
-    answer_query_ids = {str(x["query_id"]) for x in answers}
-    if query_ids != retrieval_query_ids:
-        raise SystemExit("Mismatch between query IDs and retrieval result IDs")
-    if query_ids != answer_query_ids:
-        raise SystemExit("Mismatch between query IDs and answer IDs")
+    query_ids = {str(row["query_id"]) for row in queries}
+    retrieval_ids = {str(row["query_id"]) for row in retrieval}
+    answer_ids = {str(row["query_id"]) for row in answers}
+    if query_ids != retrieval_ids:
+        raise SystemExit("Mismatch between query IDs and retrieval results")
+    if query_ids != answer_ids:
+        raise SystemExit("Mismatch between query IDs and answers")
 
     chunk_id_set = set(chunk_ids)
     for row in retrieval:
         retrieved = row.get("retrieved", [])
-        if not isinstance(retrieved, list) or len(retrieved) == 0:
+        if not isinstance(retrieved, list) or not retrieved:
             raise SystemExit(f"Empty retrieved set for query_id={row.get('query_id')}")
         for item in retrieved:
-            cid = str(item.get("chunk_id", ""))
-            if cid not in chunk_id_set:
-                raise SystemExit(f"Retrieved chunk_id not in chunk manifest: {cid}")
+            chunk_id = str(item.get("chunk_id", ""))
+            if chunk_id not in chunk_id_set:
+                raise SystemExit(f"Retrieved chunk_id not found in chunk manifest: {chunk_id}")
 
     for row in answers:
         answer = str(row.get("answer", "")).strip()
         if not answer:
             raise SystemExit(f"Empty answer text for query_id={row.get('query_id')}")
         evidence = row.get("evidence_chunk_ids", [])
-        if not isinstance(evidence, list) or len(evidence) == 0:
+        if not isinstance(evidence, list) or not evidence:
             raise SystemExit(f"Missing evidence_chunk_ids for query_id={row.get('query_id')}")
-        for cid in evidence:
-            if str(cid) not in chunk_id_set:
-                raise SystemExit(f"Answer references missing chunk_id: {cid}")
+        for chunk_id in evidence:
+            if str(chunk_id) not in chunk_id_set:
+                raise SystemExit(f"Answer references missing chunk_id: {chunk_id}")
 
     with summary_path.open("r", encoding="utf-8") as f:
         summary = json.load(f)
+    if int(summary.get("gpu_visible_count", 0)) < 1:
+        raise SystemExit("Summary reports gpu_visible_count < 1")
     if int(summary.get("query_count", -1)) != len(queries):
         raise SystemExit("Summary query_count does not match queries file")
     if int(summary.get("chunk_count", -1)) != len(chunks):
         raise SystemExit("Summary chunk_count does not match chunks file")
-    if args.require_gpu and int(summary.get("gpu_visible_count", 0)) < 1:
-        raise SystemExit("GPU required but summary reports gpu_visible_count < 1")
 
     print("VALIDATION_OK=1")
     print(f"docs={len(corpus)}")
     print(f"chunks={len(chunks)}")
-    print(f"embedding_dim={dim}")
+    print(f"embedding_dim={embedding_dim}")
     print(f"queries={len(queries)}")
     print(f"answers={len(answers)}")
 

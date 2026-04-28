@@ -1,8 +1,0 @@
-rag-baseline/
-  chunks.jsonl
-  embeddings.jsonl
-  retriever_index.npz
-  retrieval_results.jsonl
-  answers.jsonl
-  run_summary.json
-

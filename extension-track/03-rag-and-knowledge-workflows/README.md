@@ -1,156 +1,159 @@
-# 03. Retrieval-Augmented Generation and Knowledge-Intensive Workflows on LUMI-G
+# 03. Retrieval-Augmented Generation
 
-This lesson is the first end-to-end application pattern in the extension track: build a grounded RAG workflow over a document corpus.
+## Goal
 
-## What This Lesson Enables
+Build a small grounded RAG workflow on LUMI and inspect how evidence flows from documents to answers.
 
-Run a complete RAG pipeline that:
+By the end of this lesson, you should be able to:
 
-- ingests a corpus
-- chunks documents with stable IDs
-- generates embeddings
-- builds a retrievable index
-- retrieves top-k evidence
-- generates grounded answers
-- validates output consistency
+- explain what retrieval and generation each do in a RAG pipeline
+- run a batch RAG workflow on LUMI
+- validate that chunks, embeddings, retrieval results, and answers stay aligned
+- make one safe retrieval-oriented modification
 
-## When To Use This Workflow
+## Assumptions
 
-Use this workflow when:
+- You completed [1. QuickStart](../../1-quickstart/README.md).
+- You completed [2. Setting up your own environment](../../2-setting-up-environment/README.md).
+- You already know how to run Python and submit a batch job on LUMI.
+- `../../env.sh` is configured with a valid `CONTAINER`.
 
-- answers must be grounded in a changing corpus
-- full model fine-tuning is unnecessary
-- you need evidence-aware outputs with traceable sources
+## Working directory
 
-Do not use this lesson as:
-
-- an online serving architecture guide
-- a production vector database operations guide
-- a full evaluation science tutorial
-
-## Prerequisites
-
-- Working LUMI account and LUMI-G access
-- AI Factory container environment configured (`CONTAINER` in `env.sh`)
-- Familiarity with onboarding lessons
-- Preferred: completion of extension Lessons 1 and 2
-
-## Workflow At A Glance
-
-```mermaid
-flowchart LR
-  A["Corpus JSONL"] --> B["Chunking + metadata"]
-  B --> C["Chunk embeddings"]
-  C --> D["Retriever index"]
-  D --> E["Top-k retrieval"]
-  E --> F["Grounded prompt assembly"]
-  F --> G["Answer generation"]
-  G --> H["Answers + evidence + validation"]
-```
-
-## Minimal Working Example
-
-Work from:
+Run commands in this lesson from:
 
 ```bash
 cd /path/to/LUMI-AI-Guide/extension-track/03-rag-and-knowledge-workflows
 ```
 
-1. Prepare sample corpus and query set:
+## What RAG means here
+
+This lesson uses three ideas together:
+
+- chunking: split documents into smaller retrievable passages
+- retrieval: find the most relevant chunks for a query
+- generation: write an answer from the retrieved evidence
+
+RAG combines retrieval and generation so answers stay grounded in a document corpus rather than relying only on model memory.
+
+## Why this baseline looks this way
+
+The lesson uses:
+
+- a small curated corpus of policy- and operations-style documents
+- a matching query set with answers that should be recoverable from the corpus
+- a simple local index rather than a vector database
+
+This keeps the main question clear:
+
+Can I preserve IDs across chunking, embeddings, retrieval, and answers, and can I trace each answer back to retrieved evidence?
+
+## Minimal workflow
+
+The main path has three steps:
+
+1. prepare the corpus
+2. run the batch pipeline
+3. validate the artifacts
+
+Load the lesson runtime in your shell:
 
 ```bash
-python scripts/prepare_corpus.py --output data
+module purge
+module use /appl/local/csc/modulefiles
+module load pytorch
+source ../../env.sh
 ```
 
-2. Run chunking:
+### Step 1: Prepare the corpus
+
+Command:
 
 ```bash
-python scripts/chunk_corpus.py --config configs/rag.yaml
+python data/prepare_corpus.py --output data
 ```
 
-3. Embed chunks:
+This writes:
 
-```bash
-python scripts/embed_chunks.py --config configs/rag.yaml
+- `data/corpus.jsonl`
+- `data/queries.jsonl`
+
+The corpus rows look like:
+
+```json
+{"doc_id":"doc-001","title":"Cooling System Maintenance","text":"...","metadata":{"domain":"operations","version":"v1"}}
 ```
 
-4. Build retriever index:
+### Step 2: Submit the RAG run
 
-```bash
-python scripts/build_index.py --config configs/rag.yaml
-```
-
-5. Retrieve and generate grounded answers:
-
-```bash
-python scripts/answer_queries.py --config configs/rag.yaml
-```
-
-6. Validate run artifacts:
-
-```bash
-python scripts/validate_rag_run.py --config configs/rag.yaml
-```
-
-7. Canonical LUMI run:
+Command:
 
 ```bash
 sbatch jobs/run_rag_single_node.sh
 ```
 
-## How To Verify It Worked
+This batch job runs:
 
-Check all of these:
+- chunking
+- chunk embeddings
+- local index build
+- retrieval and answer generation
 
-- `chunks.jsonl` exists with non-empty chunk set
-- `embeddings.jsonl` has one embedding per chunk
-- `retriever_index.npz` exists and loads
-- `retrieval_results.jsonl` has one record per query
-- `answers.jsonl` contains `answer` and `evidence_chunk_ids`
-- validation prints `VALIDATION_OK=1`
+Outputs are written to:
 
-Expected outputs: [assets/expected-output-tree.txt](assets/expected-output-tree.txt)  
-Schemas: [data/expected-schema.md](data/expected-schema.md)
+```bash
+outputs/rag-baseline
+```
 
-## Why This Works On LUMI-G
+### Step 3: Validate outputs
 
-- LUMI-G provides MI250X GPUs suitable for embedding and generation steps.
-- Software commonly sees 8 GPU/GCD devices per node; always verify GPU visibility in logs.
-- In this baseline lesson, retrieval/index steps stay lightweight and simple.
+Command:
 
-## Data And Storage Considerations
+```bash
+python scripts/validate_rag_run.py --config configs/rag.yaml
+```
 
-- First run is intentionally local to lesson paths.
-- Preserve stable IDs and metadata from corpus through final answers.
-- For team sharing or staging larger corpora, LUMI-O S3-style workflows are a natural extension.
-- Dataset as a Service can be treated as a future managed-dataset extension point.
+Expected result:
 
-## Common Failure Modes
+- the Slurm log shows `GPU_VISIBLE_COUNT=1` or greater and `RUN_COMPLETE=1`
+- `VALIDATION_OK=1`
+- every query has retrieval results
+- every answer has `evidence_chunk_ids` that point to real chunks
 
-See [troubleshooting/common-failures.md](troubleshooting/common-failures.md).
+Expected answer schema:
 
-## How To Extend
+```json
+{"query_id":"q-001","query":"...","answer":"...","evidence_chunk_ids":["doc-002-c0000"],"generation_backend":"hf_causal"}
+```
 
-After baseline success:
+## What this successful baseline demonstrates
 
-- change chunk size and overlap
-- change retrieval `top_k`
-- swap embedding model
-- add metadata-based retrieval filters
-- compare retrieved-context-only outputs against generated answers
-- stage corpus and outputs in LUMI-O for sharing
+If the lesson works end to end, you have shown that:
 
-## Operational Checklist
+- documents can be chunked into stable retrievable units
+- embeddings and chunk IDs stay aligned
+- retrieval returns traceable evidence for each query
+- generated answers can be tied back to specific chunk IDs
 
-- Corpus schema validated
-- Stable IDs preserved for docs/chunks/queries
-- Chunk manifest created
-- Embeddings complete and aligned with chunk IDs
-- Retriever index built
-- Retrieval results saved for every query
-- Answers include evidence chunk IDs
-- Validation passes with consistent counts
+That is the lesson outcome. The commands are only the mechanism.
 
-## Next Lesson
+## What to change next
 
-Natural next step: evaluation, benchmarking, and trustworthiness for customer AI workflows.
+After the first successful run, change one thing at a time.
+
+Recommended order:
+
+1. Increase or decrease `retrieval.top_k`.
+2. Change `chunking.chunk_words` and `chunking.overlap_words`.
+3. Replace the corpus while preserving the same JSONL keys.
+4. Swap the embedding model before changing the answer model.
+
+## Troubleshooting
+
+- `GPU_VISIBLE_COUNT=0`: check the partition, container, and runtime setup before debugging the model code.
+- `VALIDATION_OK=1` is missing: inspect whether chunk IDs and embedding IDs match before looking at answer quality.
+- weak answers: inspect `retrieval_results.jsonl` first. In RAG, bad retrieval usually matters more than prompt wording.
+
+## Next lesson
+
+Next extension lesson: evaluation and trustworthiness for grounded AI workflows.

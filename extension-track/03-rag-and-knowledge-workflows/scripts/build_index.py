@@ -1,68 +1,57 @@
 #!/usr/bin/env python3
-"""Build a simple retriever index from chunk embeddings."""
-
-from __future__ import annotations
+"""Build a simple local retriever index."""
 
 import argparse
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
 
 import numpy as np
-try:
-    import yaml
-except ImportError as exc:
-    raise SystemExit("pyyaml is required. Install PyYAML or run inside the AI Factory container.") from exc
+import yaml
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, required=True)
-    parser.add_argument("--output-root", type=Path, default=None)
-    parser.add_argument("--run-name", type=str, default=None)
     return parser.parse_args()
 
 
-def load_config(path: Path) -> Dict[str, Any]:
+def load_config(path):
     with path.open("r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
-def run_dir_from(cfg: Dict[str, Any], output_root: Path | None, run_name: str | None) -> Path:
-    name = run_name or str(cfg["run"]["run_name"])
-    root = output_root or Path(str(cfg["run"]["output_dir"]))
-    out = root / name
-    out.mkdir(parents=True, exist_ok=True)
-    return out
+def run_dir_from(cfg):
+    run_dir = Path(str(cfg["run"]["output_dir"])) / str(cfg["run"]["run_name"])
+    run_dir.mkdir(parents=True, exist_ok=True)
+    return run_dir
 
 
-def load_embeddings(path: Path) -> Tuple[List[str], np.ndarray]:
-    ids: List[str] = []
-    vectors: List[List[float]] = []
+def load_embeddings(path):
+    chunk_ids = []
+    vectors = []
     with path.open("r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
                 continue
             row = json.loads(line)
-            ids.append(str(row["chunk_id"]))
+            chunk_ids.append(str(row["chunk_id"]))
             vectors.append([float(x) for x in row["embedding"]])
-    if not ids:
+    if not chunk_ids:
         raise SystemExit(f"No embeddings found in {path}")
-    matrix = np.asarray(vectors, dtype=np.float32)
-    return ids, matrix
+    return chunk_ids, np.asarray(vectors, dtype=np.float32)
 
 
-def normalize_rows(matrix: np.ndarray) -> np.ndarray:
+def normalize_rows(matrix):
     norms = np.linalg.norm(matrix, axis=1, keepdims=True)
     norms[norms == 0] = 1.0
     return matrix / norms
 
 
-def main() -> None:
+def main():
     args = parse_args()
     cfg = load_config(args.config)
-    run_dir = run_dir_from(cfg, args.output_root, args.run_name)
+    run_dir = run_dir_from(cfg)
 
     embeddings_path = run_dir / str(cfg["output"]["embeddings_jsonl"])
     index_path = run_dir / str(cfg["output"]["retriever_index_npz"])
