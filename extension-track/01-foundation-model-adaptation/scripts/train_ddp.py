@@ -61,7 +61,7 @@ def main():
     torch.cuda.set_device(local_rank)
     device = torch.device(f"cuda:{local_rank}")
 
-    set_seed(int(cfg["run"]["seed"]) + rank)
+    set_seed(int(cfg["run"]["seed"]))
 
     run_name = args.run_name
     out_root = Path(str(cfg["run"]["output_dir"])) / run_name
@@ -93,16 +93,19 @@ def main():
     train_ds = JsonlTextDataset(train_rows, tokenizer, int(cfg["data"]["max_seq_len"]))
     eval_ds = JsonlTextDataset(eval_rows, tokenizer, int(cfg["data"]["max_seq_len"]))
 
+    global_batch_size = int(cfg["training"]["batch_size"])
+    local_batch_size = max(1, global_batch_size // world_size)
+
     train_sampler = DistributedSampler(train_ds, shuffle=True)
     eval_sampler = DistributedSampler(eval_ds, shuffle=False)
     train_loader = DataLoader(
         train_ds,
-        batch_size=int(cfg["training"]["batch_size"]),
+        batch_size=local_batch_size,
         sampler=train_sampler,
     )
     eval_loader = DataLoader(
         eval_ds,
-        batch_size=int(cfg["training"]["batch_size"]),
+        batch_size=local_batch_size,
         sampler=eval_sampler,
     )
 
@@ -115,6 +118,10 @@ def main():
     epochs = int(cfg["training"]["num_epochs"])
     log_every = int(cfg["run"]["log_every_steps"])
     step = 0
+    if rank == 0:
+        print(f"GLOBAL_BATCH_SIZE={global_batch_size}")
+        print(f"LOCAL_BATCH_SIZE={local_batch_size}")
+        print(f"WORLD_SIZE={world_size}")
     for epoch in range(epochs):
         train_sampler.set_epoch(epoch)
         model.train()

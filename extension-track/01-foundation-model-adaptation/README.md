@@ -44,6 +44,8 @@ The key design choice is the adaptation mode:
 
 The baseline uses `head_only` because it is the safest first run. `distilbert-base-uncased` and a small AG News subset keep the lesson focused on the adaptation pattern rather than task complexity.
 
+The run is still intentionally small, but it uses two epochs so the metric reflects actual learning more clearly than a one-pass smoke test.
+
 ## Minimal workflow
 
 The core workflow has two steps:
@@ -148,6 +150,8 @@ sbatch jobs/run_single_node_ddp.sh
 This launches 8 processes with `torch.distributed.run` and trains with DDP.
 
 Use it only after the single-GCD baseline succeeds.
+
+The DDP script reduces per-rank batch size so the global batch stays close to the single-GCD baseline. That makes the comparison more meaningful than simply running the same per-rank batch on 8 GPUs.
 
 Expected output:
 
