@@ -34,5 +34,5 @@ set -euo pipefail
 cd '$LESSON_DIR'
 python data/prepare_sample_data.py --output data/sample_data
 python scripts/train.py --config configs/baseline.yaml --output-dir '$OUT_DIR' --run-name '$RUN_NAME'
-python scripts/validate_run.py --run-dir '$OUT_DIR' --min-accuracy 0.0
+python scripts/validate_run.py --run-dir '$OUT_DIR'
 "

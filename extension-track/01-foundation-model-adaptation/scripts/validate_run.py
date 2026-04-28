@@ -12,7 +12,6 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run-dir", type=Path, required=True)
     parser.add_argument("--allow-cpu", action="store_true")
-    parser.add_argument("--min-accuracy", type=float, default=0.0)
     return parser.parse_args()
 
 
@@ -48,10 +47,6 @@ def main() -> None:
         )
 
     eval_acc = float(metrics.get("eval_accuracy", 0.0))
-    if eval_acc < args.min_accuracy:
-        raise SystemExit(
-            f"Validation failed: eval_accuracy={eval_acc:.4f} below min-accuracy={args.min_accuracy:.4f}"
-        )
 
     print(f"VALIDATION_OK=1 run_dir={run_dir}")
     print(f"gpu_visible_count={gpu_visible_count}")
@@ -60,4 +55,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

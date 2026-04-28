@@ -31,12 +31,8 @@ unset SLURM_MEM_PER_CPU SLURM_MEM_PER_GPU SLURM_MEM_PER_NODE
 
 srun singularity exec "$CONTAINER" bash -lc "
 set -euo pipefail
-python - <<'PY'
-import torch
-print(f'GPU_VISIBLE_COUNT={torch.cuda.device_count() if torch.cuda.is_available() else 0}')
-PY
 cd '$LESSON_DIR'
 python data/prepare_sample_data.py --output data/sample_data
 python scripts/train.py --config configs/baseline.yaml --output-dir '$OUT_DIR' --run-name '$RUN_NAME'
-python scripts/validate_run.py --run-dir '$OUT_DIR' --min-accuracy 0.0
+python scripts/validate_run.py --run-dir '$OUT_DIR'
 "
