@@ -37,6 +37,53 @@ def format_failure_samples(rows, title):
     return lines
 
 
+def improvement_lines(baseline, candidate):
+    lines = []
+    metric_names = [
+        "retrieval_hit_rate",
+        "answer_score_mean",
+        "grounded_rate",
+        "completion_rate",
+        "pass_rate",
+    ]
+    for name in metric_names:
+        baseline_value = float(baseline.get(name, 0.0))
+        candidate_value = float(candidate.get(name, 0.0))
+        if candidate_value > baseline_value:
+            lines.append(f"- `{name}` improved by `{candidate_value - baseline_value:.4f}`.")
+        elif candidate_value < baseline_value:
+            lines.append(f"- `{name}` worsened by `{baseline_value - candidate_value:.4f}`.")
+    if not lines:
+        lines.append("- The aggregate metrics were effectively unchanged.")
+    return lines
+
+
+def interpret_result(baseline, candidate, comparison, baseline_failures, candidate_failures):
+    unsupported_baseline = sum(1 for row in baseline_failures if row.get("failure_category") == "answer_unsupported_by_evidence")
+    unsupported_candidate = sum(1 for row in candidate_failures if row.get("failure_category") == "answer_unsupported_by_evidence")
+    weighted_delta = float(comparison["candidate_weighted_score"]) - float(comparison["baseline_weighted_score"])
+    grounded_delta = float(candidate.get("grounded_rate", 0.0)) - float(baseline.get("grounded_rate", 0.0))
+    answer_delta = float(candidate.get("answer_score_mean", 0.0)) - float(baseline.get("answer_score_mean", 0.0))
+
+    if weighted_delta > 0 and grounded_delta >= 0 and unsupported_candidate <= unsupported_baseline:
+        status = "acceptable"
+        reason = "The candidate improved or preserved the important metrics without introducing more unsupported-answer failures in the sampled set."
+    elif weighted_delta > 0 and (grounded_delta < 0 or unsupported_candidate > unsupported_baseline):
+        status = "risky"
+        reason = "The candidate improved the weighted score, but grounding or unsupported-answer behavior got worse."
+    elif weighted_delta <= 0 and answer_delta <= 0:
+        status = "keep baseline"
+        reason = "The candidate did not improve the overall result enough to justify adoption."
+    else:
+        status = "inconclusive"
+        reason = "The aggregate changes are mixed, so the failure samples should drive the next decision."
+
+    return [
+        f"- Interpretation: `{status}`",
+        f"- Why: {reason}",
+    ]
+
+
 def main():
     args = parse_args()
     cfg = load_config(args.config)
@@ -77,9 +124,25 @@ def main():
         f"- Candidate weighted score: `{comparison['candidate_weighted_score']:.4f}`",
         f"- Recommendation: `{comparison['recommendation']}`",
         "",
-        "## Failure Samples",
+        "## Interpretation",
         "",
     ]
+    lines.extend(interpret_result(baseline_summary, candidate_summary, comparison, baseline_failures, candidate_failures))
+    lines.extend(
+        [
+            "",
+            "### Metric Reading",
+            "",
+        ]
+    )
+    lines.extend(improvement_lines(baseline_summary, candidate_summary))
+    lines.extend(
+        [
+            "",
+        "## Failure Samples",
+        "",
+        ]
+    )
     lines.extend(format_failure_samples(baseline_failures, f"Baseline ({baseline_name})"))
     lines.append("")
     lines.extend(format_failure_samples(candidate_failures, f"Candidate ({candidate_name})"))
@@ -88,8 +151,8 @@ def main():
             "",
             "## Decision Notes",
             "",
-            "- Confirm the recommendation matches the important customer risks.",
-            "- Review high-impact failure categories before adopting the candidate.",
+            "- Do not adopt the candidate for a small score gain if the failures become less grounded or harder to explain.",
+            "- Prefer the variant whose failures are safer in the categories that matter most to the task.",
             "- Keep this report with the saved evaluation artifacts.",
         ]
     )

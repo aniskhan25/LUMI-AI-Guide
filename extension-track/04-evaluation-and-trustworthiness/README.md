@@ -11,6 +11,10 @@ By the end of this lesson, you should be able to:
 - inspect both aggregate metrics and concrete failure cases
 - justify a baseline-versus-candidate recommendation from saved artifacts
 
+The practical question in this lesson is:
+
+Should I adopt the candidate change, keep the baseline, or investigate further?
+
 ## Assumptions
 
 - You completed [1. QuickStart](../../1-quickstart/README.md).
@@ -46,6 +50,14 @@ The evaluation set is small and curated on purpose. It gives each query:
 - required terms for lightweight scoring
 
 That makes the results inspectable instead of purely aggregate.
+
+In this lesson, trustworthiness means:
+
+- both variants use the same evaluation set
+- query IDs stay stable across outputs, scores, and failures
+- scoring is reproducible
+- failure cases are inspectable
+- the recommendation can be traced back to saved artifacts
 
 ## Minimal workflow
 
@@ -103,6 +115,10 @@ Expected result:
 - `comparison.json` exists
 - `evaluation_report.md` exists
 
+This is structural success. It means the evaluation pipeline ran correctly.
+
+It does not yet mean the candidate should be adopted.
+
 ### Step 3: Read the decision artifacts
 
 Start with:
@@ -126,16 +142,42 @@ This lesson uses a small operational scorecard:
 
 These are comparison metrics, not universal truth. Their job is to help you compare variants on the same evaluation set.
 
+## How to read the recommendation
+
+A recommendation is stronger when:
+
+- the candidate improves or preserves the important metrics
+- the failure samples do not become riskier in the categories you care most about
+- the improvement is large enough to matter operationally
+
+A recommendation is weaker when:
+
+- the weighted score improves only slightly
+- unsupported or misleading answers become more common
+- failures move into more important categories even if one aggregate metric improves
+
+Use this lesson rule:
+
+Adopt the candidate only if it improves or preserves the important metrics and does not introduce worse failure behavior in the most important categories.
+
+## When metrics disagree
+
+Some common cases:
+
+- better retrieval, worse answer quality:
+  retrieval may be finding more relevant chunks, but the answer step may be using them poorly
+- better weighted score, worse unsupported answers:
+  do not accept a small score gain if the answers become less grounded
+- similar metrics, different failure mix:
+  prefer the variant with safer and more understandable failures, not just the one with a tiny numeric edge
+
 ## Why failure samples matter
 
 Aggregate metrics tell you whether something changed.
 
 Failure samples tell you why.
 
-In this lesson, a recommendation is only credible if both agree:
-
-- the candidate improves or preserves the important metrics
-- the remaining failures are understandable and acceptable
+In this lesson, a recommendation is only credible if both point in the same direction.
 
 ## What this successful baseline demonstrates
 
@@ -145,6 +187,8 @@ If the lesson works end to end, you have shown that:
 - outputs, scores, and failures remain tied to stable query IDs
 - the comparison is reproducible
 - the recommendation is backed by saved artifacts rather than intuition
+
+That is different from saying the candidate is automatically good. The lesson teaches how to justify the decision, not how to guarantee quality from one small scorecard.
 
 ## What to change next
 
