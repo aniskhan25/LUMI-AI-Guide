@@ -1,5 +1,5 @@
 run:
-  run_name: eval-rag-baseline
+  run_name: eval-rag
   output_dir: ../outputs
 
 paths:
@@ -18,11 +18,6 @@ variants:
 
 metrics:
   min_answer_score: 0.5
-  pass_condition:
-    min_retrieval_hit_rate: 0.6
-    min_answer_score_mean: 0.5
-    min_grounded_rate: 0.5
-    min_completion_rate: 0.95
 
 comparison:
   baseline_variant: baseline

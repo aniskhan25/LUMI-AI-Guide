@@ -1,6 +1,0 @@
-comparison_description: "Controlled comparison: top_k=3 (baseline) vs top_k=5 (candidate)"
-notes:
-  - "Change one factor only."
-  - "Use the same evaluation set and scoring schema for both variants."
-  - "Review aggregate metrics and sampled failure cases before final decision."
-

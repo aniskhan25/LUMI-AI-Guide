@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""Run baseline/candidate workflow and produce evaluation-ready system outputs."""
-
-from __future__ import annotations
+"""Run one evaluation variant and produce evaluation-ready outputs."""
 
 import argparse
 import copy
@@ -9,32 +7,29 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
 
 from _common import dump_yaml, load_config, read_jsonl, resolve_path, resolve_run_dir, write_jsonl
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--variant", type=str, default="baseline")
-    parser.add_argument("--output-root", type=Path, default=None)
-    parser.add_argument("--run-name", type=str, default=None)
-    parser.add_argument("--skip-rag-run", action="store_true")
     return parser.parse_args()
 
 
-def run_cmd(cmd: List[str], cwd: Path) -> None:
+def run_cmd(cmd, cwd):
     subprocess.run(cmd, cwd=str(cwd), check=True)
 
 
-def main() -> None:
+def main():
     args = parse_args()
     cfg = load_config(args.config)
-    run_root = resolve_run_dir(cfg, args.config, args.output_root, args.run_name)
+    run_root = resolve_run_dir(cfg, args.config)
 
     if args.variant not in cfg["variants"]:
         raise SystemExit(f"Unknown variant: {args.variant}")
+
     variant_cfg = cfg["variants"][args.variant]
     variant_name = str(variant_cfg["name"])
     variant_dir = run_root / variant_name
@@ -54,94 +49,42 @@ def main() -> None:
     write_jsonl(eval_queries_path, query_rows)
 
     rag_cfg_effective = copy.deepcopy(rag_cfg)
+    rag_cfg_effective["run"]["output_dir"] = str((variant_dir / "rag_artifacts").resolve())
+    rag_cfg_effective["run"]["run_name"] = "rag"
+    rag_cfg_effective["data"]["queries_jsonl"] = str(eval_queries_path.resolve())
     rag_cfg_effective["retrieval"]["top_k"] = int(variant_cfg["top_k"])
     rag_cfg_effective_path = variant_dir / "rag_config_effective.yaml"
     dump_yaml(rag_cfg_effective_path, rag_cfg_effective)
 
-    rag_output_root = variant_dir / "rag_artifacts"
-    rag_run_name = "rag"
-    rag_run_dir = rag_output_root / rag_run_name
+    py = sys.executable
+    run_cmd([py, "scripts/chunk_corpus.py", "--config", str(rag_cfg_effective_path)], cwd=rag_dir)
+    run_cmd([py, "scripts/embed_chunks.py", "--config", str(rag_cfg_effective_path)], cwd=rag_dir)
+    run_cmd([py, "scripts/build_index.py", "--config", str(rag_cfg_effective_path)], cwd=rag_dir)
+    run_cmd([py, "scripts/answer_queries.py", "--config", str(rag_cfg_effective_path)], cwd=rag_dir)
 
-    if not args.skip_rag_run:
-        py = sys.executable
-        run_cmd(
-            [
-                py,
-                "scripts/chunk_corpus.py",
-                "--config",
-                str(rag_cfg_effective_path),
-                "--output-root",
-                str(rag_output_root),
-                "--run-name",
-                rag_run_name,
-            ],
-            cwd=rag_dir,
-        )
-        run_cmd(
-            [
-                py,
-                "scripts/embed_chunks.py",
-                "--config",
-                str(rag_cfg_effective_path),
-                "--output-root",
-                str(rag_output_root),
-                "--run-name",
-                rag_run_name,
-            ],
-            cwd=rag_dir,
-        )
-        run_cmd(
-            [
-                py,
-                "scripts/build_index.py",
-                "--config",
-                str(rag_cfg_effective_path),
-                "--output-root",
-                str(rag_output_root),
-                "--run-name",
-                rag_run_name,
-            ],
-            cwd=rag_dir,
-        )
-        run_cmd(
-            [
-                py,
-                "scripts/answer_queries.py",
-                "--config",
-                str(rag_cfg_effective_path),
-                "--output-root",
-                str(rag_output_root),
-                "--run-name",
-                rag_run_name,
-                "--queries-jsonl",
-                str(eval_queries_path),
-            ],
-            cwd=rag_dir,
-        )
-
+    rag_run_dir = Path(str(rag_cfg_effective["run"]["output_dir"])) / str(rag_cfg_effective["run"]["run_name"])
     answers_path = rag_run_dir / str(rag_cfg_effective["output"]["answers_jsonl"])
     retrieval_path = rag_run_dir / str(rag_cfg_effective["output"]["retrieval_results_jsonl"])
     summary_path = rag_run_dir / str(rag_cfg_effective["output"]["summary_json"])
 
-    answers_rows = read_jsonl(answers_path) if answers_path.is_file() else []
-    retrieval_rows = read_jsonl(retrieval_path) if retrieval_path.is_file() else []
-    answers_by_id = {str(x["query_id"]): x for x in answers_rows}
-    retrieval_by_id = {str(x["query_id"]): x for x in retrieval_rows}
+    answers_rows = read_jsonl(answers_path)
+    retrieval_rows = read_jsonl(retrieval_path)
+    answers_by_id = {str(row["query_id"]): row for row in answers_rows}
+    retrieval_by_id = {str(row["query_id"]): row for row in retrieval_rows}
 
-    system_outputs: List[Dict[str, Any]] = []
+    system_outputs = []
     for item in eval_set:
-        qid = str(item["query_id"])
-        answer_row = answers_by_id.get(qid, {})
-        retrieval_row = retrieval_by_id.get(qid, {})
+        query_id = str(item["query_id"])
+        answer_row = answers_by_id.get(query_id, {})
+        retrieval_row = retrieval_by_id.get(query_id, {})
         retrieved = retrieval_row.get("retrieved", [])
-        evidence_ids = answer_row.get("evidence_chunk_ids", [])
         system_outputs.append(
             {
-                "query_id": qid,
+                "query_id": query_id,
                 "question": item["question"],
                 "answer": answer_row.get("answer", ""),
-                "evidence_chunk_ids": evidence_ids,
-                "retrieved_chunk_ids": [x.get("chunk_id", "") for x in retrieved],
+                "evidence_chunk_ids": answer_row.get("evidence_chunk_ids", []),
+                "retrieved_chunk_ids": [row.get("chunk_id", "") for row in retrieved],
                 "variant": variant_name,
                 "generation_backend": answer_row.get("generation_backend", ""),
             }
@@ -150,10 +93,8 @@ def main() -> None:
     outputs_path = variant_dir / "system_outputs.jsonl"
     write_jsonl(outputs_path, system_outputs)
 
-    rag_summary: Dict[str, Any] = {}
-    if summary_path.is_file():
-        with summary_path.open("r", encoding="utf-8") as f:
-            rag_summary = json.load(f)
+    with summary_path.open("r", encoding="utf-8") as f:
+        rag_summary = json.load(f)
 
     metadata = {
         "variant": variant_name,
@@ -175,4 +116,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -1,152 +1,168 @@
-# 04. Evaluation, Benchmarking, and Trustworthiness for Customer AI Workflows on LUMI-G
+# 04. Evaluation and Trustworthiness
 
-This lesson teaches the first system-level quality pattern in the extension track: evaluate whether a workflow is good enough for customer use.
+## Goal
 
-## What This Lesson Enables
+Evaluate two controlled workflow variants on the same dataset and produce evidence for a deployment decision.
 
-Run a repeatable evaluation pipeline that:
+By the end of this lesson, you should be able to:
 
-- executes a baseline and a controlled variant
-- scores outputs with a compact metric set
-- extracts structured failure cases
-- produces a decision-oriented report
+- explain what evaluation, comparison, and trustworthiness mean in this guide
+- run a repeatable evaluation job on LUMI
+- inspect both aggregate metrics and concrete failure cases
+- justify a baseline-versus-candidate recommendation from saved artifacts
 
-## When To Use This Workflow
+## Assumptions
 
-Use this lesson when:
+- You completed [1. QuickStart](../../1-quickstart/README.md).
+- You completed [2. Setting up your own environment](../../2-setting-up-environment/README.md).
+- You already know how to run Python and submit a batch job on LUMI.
+- `../../env.sh` is configured with a valid `CONTAINER`.
 
-- you already have a baseline AI workflow (for example Lesson 3 RAG)
-- stakeholders need evidence of quality and reliability
-- you must compare two variants before adopting one
+## Working directory
 
-Do not use this lesson as:
-
-- a full governance/compliance framework
-- a large-scale red-teaming program
-- production observability architecture
-
-## Prerequisites
-
-- Working LUMI access and AI Factory container setup
-- Completion of onboarding guide
-- Preferred: completion of extension Lessons 1–3
-- Access to this repository and sample evaluation set
-
-## Workflow At A Glance
-
-```mermaid
-flowchart LR
-  A["Evaluation set"] --> B["Run candidate workflow"]
-  B --> C["Score outputs"]
-  C --> D["Extract failures"]
-  D --> E["Compare variants"]
-  E --> F["Decision summary report"]
-```
-
-## Minimal Working Example
-
-Work from:
+Run commands in this lesson from:
 
 ```bash
 cd /path/to/LUMI-AI-Guide/extension-track/04-evaluation-and-trustworthiness
 ```
 
-1. Run baseline variant:
+## What evaluation means here
+
+This lesson uses three ideas together:
+
+- evaluation: measure whether outputs meet the intended task
+- comparison: test one controlled change against a baseline
+- trustworthiness: keep enough evidence to explain the decision later
+
+Here, the controlled change is retrieval depth:
+
+- baseline: `top_k=3`
+- candidate: `top_k=5`
+
+The evaluation set is small and curated on purpose. It gives each query:
+
+- an expected source document
+- a reference answer
+- required terms for lightweight scoring
+
+That makes the results inspectable instead of purely aggregate.
+
+## Minimal workflow
+
+The main path has three steps:
+
+1. run the evaluation job
+2. validate the artifacts
+3. read the comparison and report
+
+Load the lesson runtime in your shell:
 
 ```bash
-python scripts/run_baseline_eval.py --config configs/eval.yaml --variant baseline
+module purge
+module use /appl/local/csc/modulefiles
+module load pytorch
+source ../../env.sh
 ```
 
-2. Run candidate variant:
+### Step 1: Submit the evaluation run
 
-```bash
-python scripts/run_baseline_eval.py --config configs/eval.yaml --variant candidate
-```
-
-3. Score both variants:
-
-```bash
-python scripts/score_outputs.py --config configs/eval.yaml --variant baseline
-python scripts/score_outputs.py --config configs/eval.yaml --variant candidate
-```
-
-4. Extract failure samples:
-
-```bash
-python scripts/extract_failures.py --config configs/eval.yaml --variant baseline
-python scripts/extract_failures.py --config configs/eval.yaml --variant candidate
-```
-
-5. Compare and report:
-
-```bash
-python scripts/compare_variants.py --config configs/eval.yaml
-python scripts/build_report.py --config configs/eval.yaml
-```
-
-6. Canonical Slurm run:
+Command:
 
 ```bash
 sbatch jobs/run_eval_single_node.sh
 ```
 
-## How To Verify It Worked
+This batch job runs:
 
-Check all of these:
+- baseline variant
+- candidate variant
+- scoring
+- failure extraction
+- comparison
+- report generation
 
-- evaluated record count equals evaluation set size
-- scored records exist for both variants
-- failure sample files are non-empty (unless all pass)
-- comparison artifact contains metric deltas
-- final markdown report exists with recommendation
+Outputs are written to:
 
-See [assets/expected-output-tree.txt](assets/expected-output-tree.txt).
+```bash
+outputs/eval-rag
+```
 
-## What To Measure And Why
+### Step 2: Validate outputs
 
-This lesson uses a minimal scorecard:
+Command:
 
-- retrieval hit rate (did evidence match expected source?)
-- answer score (keyword/rubric overlap)
-- grounded rate (answer + evidence consistency proxy)
-- completion rate (non-empty outputs)
+```bash
+python scripts/validate_eval_run.py --config configs/eval.yaml
+```
 
-This is intentionally small and operational.
+Expected result:
 
-## Failure Analysis
+- the Slurm log shows `GPU_VISIBLE_COUNT=1` or greater for the workflow runs
+- `VALIDATION_OK=1`
+- both variants have scored outputs for every evaluation item
+- `comparison.json` exists
+- `evaluation_report.md` exists
 
-Failure categories used in this lesson:
+### Step 3: Read the decision artifacts
 
-- retrieved_wrong_document
-- correct_evidence_answer_wrong
-- answer_unsupported_by_evidence
-- answer_incomplete
-- output_missing_or_empty
+Start with:
 
-## Comparing Two Variants
+- `outputs/eval-rag/comparison.json`
+- `outputs/eval-rag/evaluation_report.md`
 
-Default controlled comparison:
+Then inspect:
 
-- baseline `top_k=3`
-- candidate `top_k=5`
+- `outputs/eval-rag/baseline/failure_samples.jsonl`
+- `outputs/eval-rag/candidate/failure_samples.jsonl`
 
-You can change one factor at a time in `configs/eval.yaml`.
+## What the metrics mean
 
-## Common Failure Modes
+This lesson uses a small operational scorecard:
 
-See [troubleshooting/common-failures.md](troubleshooting/common-failures.md).
+- `retrieval_hit_rate`: did the answer cite chunks from the expected document
+- `answer_score_mean`: how many required reference terms appeared
+- `grounded_rate`: did retrieval and answer content align well enough to count as grounded
+- `completion_rate`: did the system return a non-empty answer
 
-## Operational Checklist
+These are comparison metrics, not universal truth. Their job is to help you compare variants on the same evaluation set.
 
-- evaluation set versioned
-- IDs preserved end-to-end
-- scoring deterministic
-- output count checked
-- sample failures reviewed
-- comparison condition documented
-- summary report saved
+## Why failure samples matter
 
-## Next Lesson
+Aggregate metrics tell you whether something changed.
 
-Suggested next step: synthetic data and data-centric AI workflows on LUMI-G.
+Failure samples tell you why.
 
+In this lesson, a recommendation is only credible if both agree:
+
+- the candidate improves or preserves the important metrics
+- the remaining failures are understandable and acceptable
+
+## What this successful baseline demonstrates
+
+If the lesson works end to end, you have shown that:
+
+- both variants were evaluated on the same dataset
+- outputs, scores, and failures remain tied to stable query IDs
+- the comparison is reproducible
+- the recommendation is backed by saved artifacts rather than intuition
+
+## What to change next
+
+After the first successful run, change one thing at a time.
+
+Recommended order:
+
+1. Change only one retrieval parameter, such as `top_k`.
+2. Review whether metric changes match failure-sample changes.
+3. Replace the evaluation set with your own queries and references.
+4. Add stricter scoring only after the basic workflow is stable.
+
+## Troubleshooting
+
+- missing outputs for one variant: check that both variant directories exist before debugging scoring
+- `VALIDATION_OK=1` is missing: inspect count mismatches and missing files before interpreting metrics
+- weak recommendation quality: inspect `failure_samples.jsonl` before changing the metric weights
+
+## Next lesson
+
+Next extension lesson: synthetic data and data-centric workflows.

@@ -1,34 +1,29 @@
 #!/usr/bin/env python3
-"""Score system outputs against evaluation set and reference answers."""
-
-from __future__ import annotations
+"""Score one variant against the evaluation set and references."""
 
 import argparse
 import json
 from pathlib import Path
-from typing import Any, Dict, List
 
 from _common import load_config, read_jsonl, resolve_path, resolve_run_dir, write_jsonl
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--variant", type=str, default="baseline")
-    parser.add_argument("--output-root", type=Path, default=None)
-    parser.add_argument("--run-name", type=str, default=None)
     return parser.parse_args()
 
 
-def term_score(answer: str, required_terms: List[str]) -> float:
+def term_score(answer, required_terms):
     if not required_terms:
         return 0.0
     answer_l = answer.lower()
-    hits = sum(1 for t in required_terms if t.lower() in answer_l)
+    hits = sum(1 for term in required_terms if term.lower() in answer_l)
     return hits / len(required_terms)
 
 
-def choose_failure_category(completion: int, retrieval_hit: int, answer_score: float, grounded: int, min_score: float) -> str:
+def choose_failure_category(completion, retrieval_hit, answer_score, grounded, min_score):
     if completion == 0:
         return "output_missing_or_empty"
     if retrieval_hit == 0:
@@ -42,13 +37,14 @@ def choose_failure_category(completion: int, retrieval_hit: int, answer_score: f
     return "pass"
 
 
-def main() -> None:
+def main():
     args = parse_args()
     cfg = load_config(args.config)
-    run_root = resolve_run_dir(cfg, args.config, args.output_root, args.run_name)
+    run_root = resolve_run_dir(cfg, args.config)
 
     if args.variant not in cfg["variants"]:
         raise SystemExit(f"Unknown variant: {args.variant}")
+
     variant_name = str(cfg["variants"][args.variant]["name"])
     variant_dir = run_root / variant_name
 
@@ -59,56 +55,54 @@ def main() -> None:
 
     eval_rows = read_jsonl(eval_set_path)
     ref_rows = read_jsonl(ref_path)
-    out_rows = read_jsonl(outputs_path) if outputs_path.is_file() else []
+    out_rows = read_jsonl(outputs_path)
 
-    ref_by_id = {str(x["query_id"]): x for x in ref_rows}
-    out_by_id = {str(x["query_id"]): x for x in out_rows}
+    ref_by_id = {str(row["query_id"]): row for row in ref_rows}
+    out_by_id = {str(row["query_id"]): row for row in out_rows}
 
     min_score = float(cfg["metrics"]["min_answer_score"])
-    scored: List[Dict[str, Any]] = []
+    scored = []
 
     for item in eval_rows:
-        qid = str(item["query_id"])
-        out = out_by_id.get(qid, {})
-        ref = ref_by_id.get(qid, {})
+        query_id = str(item["query_id"])
+        out = out_by_id.get(query_id, {})
+        ref = ref_by_id.get(query_id, {})
         answer = str(out.get("answer", "")).strip()
         evidence_ids = [str(x) for x in out.get("evidence_chunk_ids", [])]
         expected_doc_id = str(item.get("expected_doc_id", ""))
-        retrieval_hit = int(any(cid.startswith(expected_doc_id) for cid in evidence_ids)) if expected_doc_id else 0
+        retrieval_hit = int(any(chunk_id.startswith(expected_doc_id) for chunk_id in evidence_ids)) if expected_doc_id else 0
         completion = int(bool(answer))
         required_terms = [str(x) for x in ref.get("required_terms", [])]
-        a_score = term_score(answer, required_terms) if completion else 0.0
-        grounded = int(retrieval_hit == 1 and a_score > 0.0 and len(evidence_ids) > 0)
-        failure = choose_failure_category(completion, retrieval_hit, a_score, grounded, min_score)
+        answer_score = term_score(answer, required_terms) if completion else 0.0
+        grounded = int(retrieval_hit == 1 and answer_score > 0.0 and len(evidence_ids) > 0)
+        failure_category = choose_failure_category(completion, retrieval_hit, answer_score, grounded, min_score)
 
         scored.append(
             {
-                "query_id": qid,
+                "query_id": query_id,
                 "variant": variant_name,
                 "category": item.get("category", ""),
                 "retrieval_hit": retrieval_hit,
-                "answer_score": a_score,
+                "answer_score": answer_score,
                 "grounded": grounded,
                 "completion": completion,
-                "failure_category": failure,
+                "failure_category": failure_category,
             }
         )
 
     item_count = len(scored)
-    retrieval_hit_rate = sum(x["retrieval_hit"] for x in scored) / max(1, item_count)
-    answer_score_mean = sum(x["answer_score"] for x in scored) / max(1, item_count)
-    grounded_rate = sum(x["grounded"] for x in scored) / max(1, item_count)
-    completion_rate = sum(x["completion"] for x in scored) / max(1, item_count)
-    pass_rate = sum(1 for x in scored if x["failure_category"] == "pass") / max(1, item_count)
+    retrieval_hit_rate = sum(row["retrieval_hit"] for row in scored) / max(1, item_count)
+    answer_score_mean = sum(row["answer_score"] for row in scored) / max(1, item_count)
+    grounded_rate = sum(row["grounded"] for row in scored) / max(1, item_count)
+    completion_rate = sum(row["completion"] for row in scored) / max(1, item_count)
+    pass_rate = sum(1 for row in scored if row["failure_category"] == "pass") / max(1, item_count)
 
     scored_path = variant_dir / "scored_records.jsonl"
     write_jsonl(scored_path, scored)
 
-    gpu_visible_count = None
-    if metadata_path.is_file():
-        with metadata_path.open("r", encoding="utf-8") as f:
-            m = json.load(f)
-        gpu_visible_count = m.get("rag_summary", {}).get("gpu_visible_count")
+    with metadata_path.open("r", encoding="utf-8") as f:
+        metadata = json.load(f)
+    gpu_visible_count = metadata.get("rag_summary", {}).get("gpu_visible_count")
 
     summary = {
         "variant": variant_name,
@@ -132,4 +126,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
