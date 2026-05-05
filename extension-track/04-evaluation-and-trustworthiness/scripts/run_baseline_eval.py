@@ -43,6 +43,7 @@ def main():
     rag_dir = resolve_path(args.config.parent, str(cfg["paths"]["rag_lesson_dir"]))
     rag_config_path = resolve_path(args.config.parent, str(cfg["paths"]["rag_config"]))
     rag_cfg = load_config(rag_config_path)
+    rag_corpus_path = (rag_dir / "data" / "corpus.jsonl").resolve()
 
     eval_queries_path = variant_dir / "eval_queries.jsonl"
     query_rows = [{"query_id": row["query_id"], "query": row["question"]} for row in eval_set]
@@ -51,12 +52,14 @@ def main():
     rag_cfg_effective = copy.deepcopy(rag_cfg)
     rag_cfg_effective["run"]["output_dir"] = str((variant_dir / "rag_artifacts").resolve())
     rag_cfg_effective["run"]["run_name"] = "rag"
+    rag_cfg_effective["data"]["corpus_jsonl"] = str(rag_corpus_path)
     rag_cfg_effective["data"]["queries_jsonl"] = str(eval_queries_path.resolve())
     rag_cfg_effective["retrieval"]["top_k"] = int(variant_cfg["top_k"])
     rag_cfg_effective_path = variant_dir / "rag_config_effective.yaml"
     dump_yaml(rag_cfg_effective_path, rag_cfg_effective)
 
     py = sys.executable
+    run_cmd([py, "data/prepare_corpus.py", "--output", "data"], cwd=rag_dir)
     run_cmd([py, "scripts/chunk_corpus.py", "--config", str(rag_cfg_effective_path)], cwd=rag_dir)
     run_cmd([py, "scripts/embed_chunks.py", "--config", str(rag_cfg_effective_path)], cwd=rag_dir)
     run_cmd([py, "scripts/build_index.py", "--config", str(rag_cfg_effective_path)], cwd=rag_dir)
