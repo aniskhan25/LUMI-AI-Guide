@@ -11,6 +11,10 @@ By the end of this lesson, you should be able to:
 - validate that chunks, embeddings, retrieval results, and answers stay aligned
 - make one safe retrieval-oriented modification
 
+The practical question in this lesson is:
+
+When should I use RAG instead of relying only on direct generation or model adaptation?
+
 ## Assumptions
 
 - You completed [1. QuickStart](../../1-quickstart/README.md).
@@ -36,6 +40,23 @@ This lesson uses three ideas together:
 
 RAG combines retrieval and generation so answers stay grounded in a document corpus rather than relying only on model memory.
 
+Use RAG when:
+
+- answers must be grounded in a changing corpus
+- evidence traceability matters
+- adapting the model would be unnecessary or too expensive
+
+Do not use this lesson to learn model serving or vector database operations. It is about the core grounded-answer pattern.
+
+## RAG vs other patterns
+
+- direct generation:
+  useful when the model can answer from its own knowledge and traceable evidence is not required
+- model adaptation:
+  useful when you need the model itself to learn a task or style, not when you mainly need document grounding
+- RAG:
+  useful when the answer should come from external documents and those documents may change over time
+
 ## Why this baseline looks this way
 
 The lesson uses:
@@ -47,6 +68,19 @@ The lesson uses:
 This keeps the main question clear:
 
 Can I preserve IDs across chunking, embeddings, retrieval, and answers, and can I trace each answer back to retrieved evidence?
+
+## Main quality levers
+
+The main choices that control RAG behavior in this lesson are:
+
+- chunk size and overlap:
+  too small and the evidence loses context; too large and retrieval becomes less precise
+- retrieval `top_k`:
+  too low and the right evidence may be missed; too high and the answer step may see too much noise
+- embedding model:
+  retrieval quality depends on how well the chunk and query vectors capture meaning
+- evidence-to-answer handoff:
+  even with good retrieval, the answer can still be weak if it does not stay close to the retrieved evidence
 
 ## Minimal workflow
 
@@ -120,6 +154,10 @@ Expected result:
 - every query has retrieval results
 - every answer has `evidence_chunk_ids` that point to real chunks
 
+This is structural success. It means the RAG pipeline ran correctly and the artifacts are aligned.
+
+It does not yet mean the answers are good.
+
 Expected answer schema:
 
 ```json
@@ -136,6 +174,30 @@ If the lesson works end to end, you have shown that:
 - generated answers can be tied back to specific chunk IDs
 
 That is the lesson outcome. The commands are only the mechanism.
+
+## How to diagnose a weak answer
+
+When an answer looks weak, inspect `retrieval_results.jsonl` and `answers.jsonl` together.
+
+Ask these questions in order:
+
+1. Was the right chunk retrieved?
+2. Was enough evidence retrieved?
+3. Did the answer stay within the retrieved evidence?
+4. Is the failure mainly retrieval, generation, or both?
+
+Use this lesson rule:
+
+If the retrieved evidence is wrong, fix retrieval before touching the answer model.
+
+In practice:
+
+- wrong chunk retrieved:
+  revisit chunking, embedding choice, or `top_k`
+- right chunk retrieved but weak answer:
+  inspect the evidence-to-answer step before changing retrieval
+- too many noisy chunks:
+  reduce `top_k` or tighten chunking so the answer sees less irrelevant context
 
 ## What to change next
 
