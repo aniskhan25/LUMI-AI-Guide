@@ -11,6 +11,10 @@ By the end of this lesson, you should be able to:
 - interpret the run outputs as adaptation signals, not just job artifacts
 - choose a safe next modification after the baseline succeeds
 
+The practical question in this lesson is:
+
+When should I adapt the model itself instead of relying on prompting, retrieval, or another unchanged-model workflow?
+
 ## Assumptions
 
 - You completed [1. QuickStart](../../1-quickstart/README.md).
@@ -36,11 +40,37 @@ This lesson uses:
 
 Unlike training from scratch, adaptation starts from pretrained weights and changes part or all of the model for a new task.
 
+Use adaptation when:
+
+- the model must learn a task boundary or label mapping
+- prompting alone would be too unstable or indirect
+- the desired behavior should live in the model checkpoint itself
+
+Do not use this lesson when you mainly need answers grounded in external documents. That is a better fit for RAG.
+
+## Adaptation vs other patterns
+
+- prompting or fixed-model inference:
+  useful when the model already knows the task well enough and you do not need to change its weights
+- RAG:
+  useful when the answer should come from external documents rather than from the model alone
+- adaptation:
+  useful when the model itself needs to learn the task more directly
+
 The key design choice is the adaptation mode:
 
 - `head_only`: train only the classifier head
 - `full`: update the whole model
 - `lora`: keep the base model mostly fixed and train small adapter layers
+
+The main tradeoff is:
+
+- `head_only`:
+  fastest and lowest risk, but may be too weak if the task needs deeper representation changes
+- `lora`:
+  a good next step when `head_only` is too limited but full fine-tuning is unnecessary
+- `full`:
+  the most flexible, but also the highest-risk and highest-cost option
 
 The baseline uses `head_only` because it is the safest first run. `distilbert-base-uncased` and a small AG News subset keep the lesson focused on the adaptation pattern rather than task complexity.
 
@@ -113,6 +143,14 @@ Look for these signals:
 - `EVAL_LOSS` and `EVAL_ACCURACY` confirm the run produced measurable task output.
 - `checkpoint/`, `metrics.json`, and `run_summary.json` confirm the result is reusable.
 
+This is structural and behavioral success. It means:
+
+- the model trained
+- the task wiring is correct
+- the checkpoint can be reused
+
+It does not yet mean the adapted model is broadly good or production-ready.
+
 ## What this successful baseline demonstrates
 
 If the lesson works end to end, you have shown that:
@@ -123,6 +161,28 @@ If the lesson works end to end, you have shown that:
 - the run produces a checkpoint and machine-readable metrics
 
 That is the lesson outcome. The commands are only the mechanism.
+
+## How to diagnose a weak adaptation result
+
+When the result is weaker than expected, ask these questions in order:
+
+1. Is the dataset format correct and does the label mapping make sense?
+2. Is the model seeing enough signal from the task?
+3. Is `head_only` too limited for this task?
+4. Is the run simply too short or too small?
+
+Use this lesson rule:
+
+If the task itself is not being expressed well in the data, do not scale or complicate training first.
+
+In practice:
+
+- flat or weak metrics with obviously correct data:
+  try `lora` before jumping to `full`
+- unstable results:
+  revisit dataset quality and sample balance before changing the model
+- small improvements but not enough:
+  increase training budget or adaptation strength only after the baseline is understood
 
 ## What to change next
 
@@ -146,6 +206,10 @@ sbatch jobs/run_single_node_ddp.sh
 This launches 8 processes with `torch.distributed.run` and trains with DDP.
 
 Use it only after the single-GCD baseline succeeds.
+
+Use this lesson rule:
+
+Scale only after the single-GCD result is good enough to be worth speeding up.
 
 The DDP script reduces per-rank batch size so the global batch stays close to the single-GCD baseline. That makes the comparison more meaningful than simply running the same per-rank batch on 8 GPUs.
 
