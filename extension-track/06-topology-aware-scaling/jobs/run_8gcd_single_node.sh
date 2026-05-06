@@ -12,30 +12,17 @@
 
 set -euo pipefail
 
-module use /appl/local/containers/ai-modules
-module load lumi-aif-singularity-bindings || module load singularity-AI-bindings
+module purge
+module use /appl/local/laifs/modules
+module load lumi-aif-singularity-bindings
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-LESSON_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
-REPO_ROOT="$(cd -- "$LESSON_DIR/../.." && pwd)"
-
-source "$REPO_ROOT/env.sh"
+source ../../env.sh
 : "${CONTAINER:?Set CONTAINER in env.sh}"
 
-OUT_ROOT="${OUT_ROOT:-${SCRATCH_ROOT}/topology-scaling}"
-RUN_NAME="${RUN_NAME:-scaling-8gcd-single-node}"
-
-echo "Lesson directory: $LESSON_DIR"
-echo "Output root: $OUT_ROOT"
-echo "Run name: $RUN_NAME"
-
-srun --cpu-bind=cores --distribution=block:block singularity exec "$CONTAINER" bash -lc "
+singularity exec "$CONTAINER" bash -lc "
 set -euo pipefail
-cd '$LESSON_DIR'
-python -m torch.distributed.run --standalone --nnodes=1 --nproc_per_node=8 scripts/inspect_placement.py \
-  --config configs/single_node.yaml --output-root '$OUT_ROOT' --run-name '$RUN_NAME'
-python -m torch.distributed.run --standalone --nnodes=1 --nproc_per_node=8 scripts/run_workload.py \
-  --config configs/single_node.yaml --output-root '$OUT_ROOT' --run-name '$RUN_NAME'
-python scripts/collect_metrics.py --config configs/single_node.yaml --output-root '$OUT_ROOT' --run-name '$RUN_NAME'
+cd '${SLURM_SUBMIT_DIR:-$PWD}'
+python -m torch.distributed.run --standalone --nnodes=1 --nproc_per_node=8 scripts/inspect_placement.py --config configs/single_node.yaml
+python -m torch.distributed.run --standalone --nnodes=1 --nproc_per_node=8 scripts/run_workload.py --config configs/single_node.yaml
+python scripts/collect_metrics.py --config configs/single_node.yaml
 "
-

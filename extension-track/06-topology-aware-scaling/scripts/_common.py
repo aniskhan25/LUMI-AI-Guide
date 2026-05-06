@@ -1,38 +1,30 @@
 #!/usr/bin/env python3
-"""Shared helpers for Lesson 06 scaling scripts."""
-
-from __future__ import annotations
+"""Shared helpers for Lesson 06."""
 
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, List
 
-try:
-    import yaml
-except ImportError as exc:
-    raise SystemExit("pyyaml is required. Install PyYAML or run inside the AI Factory container.") from exc
+import yaml
 
 
-def load_yaml(path: Path) -> Dict[str, Any]:
+def load_yaml(path):
     with path.open("r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
-def resolve_path(base_dir: Path, raw_path: str) -> Path:
-    p = Path(raw_path)
-    return p if p.is_absolute() else (base_dir / p).resolve()
+def resolve_path(base_dir, raw_path):
+    path = Path(raw_path)
+    return path if path.is_absolute() else (base_dir / path).resolve()
 
 
-def resolve_run_dir(cfg: Dict[str, Any], cfg_path: Path, output_root: Path | None, run_name: str | None) -> Path:
-    name = run_name or str(cfg["run"]["run_name"])
-    root = output_root or resolve_path(cfg_path.parent, str(cfg["run"]["output_dir"]))
-    out = root / name
-    out.mkdir(parents=True, exist_ok=True)
-    return out
+def resolve_run_dir(cfg, cfg_path):
+    run_dir = resolve_path(cfg_path.parent, str(cfg["run"]["output_dir"])) / str(cfg["run"]["run_name"])
+    run_dir.mkdir(parents=True, exist_ok=True)
+    return run_dir
 
 
-def rank_info() -> Dict[str, Any]:
+def rank_info():
     rank = int(os.environ.get("RANK", os.environ.get("SLURM_PROCID", "0")))
     local_rank = int(os.environ.get("LOCAL_RANK", os.environ.get("SLURM_LOCALID", "0")))
     world_size = int(os.environ.get("WORLD_SIZE", "1"))
@@ -43,19 +35,18 @@ def rank_info() -> Dict[str, Any]:
     }
 
 
-def write_json(path: Path, payload: Dict[str, Any]) -> None:
+def write_json(path, payload):
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)
 
 
-def read_json(path: Path) -> Dict[str, Any]:
+def read_json(path):
     with path.open("r", encoding="utf-8") as f:
         return json.load(f)
 
 
-def list_json_files(path: Path, prefix: str) -> List[Path]:
+def list_json_files(path, prefix):
     if not path.is_dir():
         return []
-    return sorted([p for p in path.glob(f"{prefix}*.json") if p.is_file()])
-
+    return sorted([file for file in path.glob(f"{prefix}*.json") if file.is_file()])

@@ -1,27 +1,22 @@
 #!/usr/bin/env python3
 """Capture placement metadata for each rank."""
 
-from __future__ import annotations
-
 import argparse
 import os
 import socket
 from pathlib import Path
-from typing import Any, Dict
 
 from _common import load_yaml, rank_info, resolve_run_dir, write_json
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, required=True)
-    parser.add_argument("--output-root", type=Path, default=None)
-    parser.add_argument("--run-name", type=str, default=None)
     return parser.parse_args()
 
 
-def detect_gpu() -> Dict[str, Any]:
-    info: Dict[str, Any] = {"gpu_visible_count": 0, "torch_available": False}
+def detect_gpu():
+    info = {"gpu_visible_count": 0, "torch_available": False}
     try:
         import torch
 
@@ -32,16 +27,15 @@ def detect_gpu() -> Dict[str, Any]:
     return info
 
 
-def main() -> None:
+def main():
     args = parse_args()
     cfg = load_yaml(args.config)
-    run_dir = resolve_run_dir(cfg, args.config, args.output_root, args.run_name)
+    run_dir = resolve_run_dir(cfg, args.config)
     raw_dir = run_dir / str(cfg["output"]["raw_dir"])
     raw_dir.mkdir(parents=True, exist_ok=True)
 
     info = rank_info()
     rank = int(info["rank"])
-
     payload = {
         **info,
         **detect_gpu(),
@@ -64,4 +58,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

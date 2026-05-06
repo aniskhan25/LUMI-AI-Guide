@@ -1,144 +1,222 @@
-# 06. Topology-Aware Scaling of Advanced AI Workloads on LUMI-G
+# 06. Topology-Aware Scaling
 
-This lesson teaches scaling as a mapping experiment: rank placement, device usage, and communication must match MI250X node topology to improve throughput.
+## Goal
 
-## What This Lesson Enables
+Run a small scaling ladder on LUMI and decide whether adding more GPUs or nodes actually improves useful throughput.
 
-Run a controlled scaling ladder and compare results:
+By the end of this lesson, you should be able to:
 
-- 1 GCD baseline
-- 8 GCD single-node run
-- small multi-node run
-- placement inspection and throughput/efficiency comparison
+- explain when scaling is worth trying and when it is not
+- run a 1-GCD, 8-GCD, and small multi-node comparison
+- validate that rank counts, placement metadata, and summaries align
+- judge whether a scaling result is acceptable, moderate, or poor
 
-## When To Use This Workflow
+The practical question in this lesson is:
 
-Use this workflow when:
+When is it worth scaling beyond one GPU-visible device, and how do I know if topology is helping or hurting?
 
-- one-device throughput is insufficient
-- workload size justifies multi-device or multi-node runs
-- you need evidence that scaling improves useful throughput
+## Assumptions
 
-Do not use this workflow when:
+- You completed [1. QuickStart](../../1-quickstart/README.md).
+- You completed [2. Setting up your own environment](../../2-setting-up-environment/README.md).
+- You already know how to run Python and submit a batch job on LUMI.
+- `../../env.sh` is configured with a valid `CONTAINER`.
 
-- workload is too small to amortize communication
-- bottleneck is storage or input pipeline, not compute
-- baseline single-device run is not yet stable
+## Working directory
 
-## Prerequisites
-
-- Working LUMI access and AI Factory container setup
-- Completion of onboarding guide
-- Preferred: completion of extension Lessons 1 and 2
-- Access to this repository and baseline workload scripts
-
-## Workflow At A Glance
-
-```mermaid
-flowchart LR
-  A["1 GCD baseline"] --> B["8 GCD single-node scaling"]
-  B --> C["2-node scaling"]
-  C --> D["Collect throughput + wall time"]
-  D --> E["Inspect placement metadata"]
-  E --> F["Speedup + efficiency report"]
-```
-
-## Minimal Working Example
-
-Work from:
+Run commands in this lesson from:
 
 ```bash
 cd /path/to/LUMI-AI-Guide/extension-track/06-topology-aware-scaling
 ```
 
-1. Baseline run:
+## What scaling means here
+
+This lesson treats scaling as a mapping experiment:
+
+- more devices should increase useful throughput
+- rank placement should match the node layout
+- communication overhead should stay small enough to justify the extra devices
+
+This is not a general distributed-systems tutorial. It is a practical lesson about reading a scaling result on LUMI.
+
+## Scaling vs other fixes
+
+- baseline optimization:
+  use this first if one-device throughput is still poor
+- data or storage optimization:
+  use this if input delivery is the real bottleneck
+- topology-aware scaling:
+  use this when the single-device workload is already stable and the job is large enough to benefit from more devices
+
+Use this lesson rule:
+
+Do not scale a workload that is still unstable or too small to justify communication overhead.
+
+## Why this baseline looks this way
+
+The lesson compares:
+
+- 1 GCD on 1 node
+- 8 GCDs on 1 node
+- 16 GCDs on 2 nodes
+
+The workload stays effectively the same across runs so the comparison stays meaningful.
+
+The main question is:
+
+Did extra devices improve useful throughput enough to justify the added communication and placement complexity?
+
+## Main quality levers
+
+The main choices that control scaling behavior in this lesson are:
+
+- world size:
+  more ranks increase compute and communication together
+- node count:
+  multi-node runs add network communication, not just more devices
+- rank placement:
+  GPU-visible device order and CPU binding affect scaling outcomes
+- effective workload size:
+  tiny workloads often scale badly because communication dominates
+
+## Minimal workflow
+
+The main path has three steps:
+
+1. run the scaling ladder
+2. validate the summaries
+3. inspect the scaling report
+
+Load the lesson runtime in your shell:
+
+```bash
+module purge
+module use /appl/local/csc/modulefiles
+module load pytorch
+source ../../env.sh
+```
+
+### Step 1: Submit the scaling runs
+
+Commands:
 
 ```bash
 sbatch jobs/run_1gcd.sh
-```
-
-2. Single-node scaling run:
-
-```bash
 sbatch jobs/run_8gcd_single_node.sh
-```
-
-3. Multi-node scaling run:
-
-```bash
 sbatch jobs/run_multi_node.sh
 ```
 
-4. Compare scaling records:
+These produce:
+
+- `outputs/scaling-1gcd`
+- `outputs/scaling-8gcd-single-node`
+- `outputs/scaling-multi-node`
+
+Then build the comparison:
 
 ```bash
-python scripts/compare_scaling.py --compare-config configs/compare.yaml
+python scripts/compare_scaling.py
 ```
 
-## How To Verify It Worked
+### Step 2: Validate outputs
 
-Confirm all of these:
+Command:
 
-- intended GPU count is visible in run metadata
-- rank count matches expected world size
-- placement metadata files exist
-- per-run summary (`run_summary.json`) exists for each configuration
-- comparison report contains speedup and efficiency fields
+```bash
+python scripts/validate_scaling_run.py
+```
 
-Expected outputs: [assets/expected-output-tree.txt](assets/expected-output-tree.txt)
+Expected result:
 
-## LUMI-G Topology That Matters
+- each run directory has placement and metrics records
+- each run has `run_summary.json`
+- `scaling_report.json` and `scaling_report.md` exist
+- `VALIDATION_OK=1`
 
-This lesson is built around these practical facts:
+This is structural success. It means the scaling ladder ran correctly and produced comparable summaries.
 
-- one LUMI-G node appears as 8 GPU-visible GCD devices
-- CPU side has 4 NUMA domains
-- GPU numbering does not map trivially to NUMA numbering
-- placement and binding choices affect scaling outcomes
+It does not yet mean scaling was worthwhile.
 
-## Binding And Distribution Choices
+### Step 3: Inspect the scaling report
 
-Default pattern in this lesson:
+Start with:
 
-- exclusive node allocation
-- explicit rank launch via `torchrun`
-- explicit Slurm distribution and CPU binding for scaled runs
+- `outputs/scaling_report.json`
+- `outputs/scaling_report.md`
 
-Then compare against baseline with the same effective workload assumptions.
+The main fields to read are:
 
-## Measuring Scaling
+- total throughput
+- speedup vs baseline
+- efficiency vs baseline
+- diagnosis
 
-This lesson uses a compact scorecard:
+## How to read the scaling result
 
-- wall time
-- throughput (samples/sec)
-- relative speedup vs baseline
-- scaling efficiency
+A stronger scaling result looks like:
 
-## Comparing Configurations
+- throughput rises clearly as world size grows
+- speedup is meaningful relative to the extra devices
+- efficiency stays reasonably high
+- the diagnosis stays favorable
 
-The default controlled comparison is:
+A weaker scaling result looks like:
 
-- 1 node × 1 GCD
-- 1 node × 8 GCD
-- 2 nodes × 8 GCD per node
+- throughput rises only slightly while device count rises a lot
+- efficiency collapses as communication increases
+- multi-node performance is much worse than single-node scaling
 
-Interpret gains relative to communication overhead and workload size.
+Use this lesson rule:
 
-## Common Failure Modes
+More GPUs are only useful if they improve useful throughput enough to justify the extra communication.
 
-See [troubleshooting/common-failures.md](troubleshooting/common-failures.md).
+## How to diagnose poor scaling
 
-## Operational Checklist
+When scaling looks weak, ask these questions in order:
 
-- baseline run established
-- GPU/rank counts validated
-- binding/distribution settings captured
-- effective workload documented
-- per-run summaries collected
-- scaling report saved
+1. Is the effective workload large enough?
+2. Did the expected world size and node count actually match the run?
+3. Does placement metadata look plausible for the launched ranks?
+4. Is the slowdown mostly appearing at single-node scale or only at multi-node scale?
 
-## Next Lesson
+In practice:
 
-Suggested next step: advanced inference and serving patterns on LUMI-G.
+- weak 8-GCD scaling:
+  inspect placement and workload size before trying multi-node
+- good 8-GCD scaling but weak 2-node scaling:
+  communication overhead is likely dominating across nodes
+- mismatched rank counts or missing placement files:
+  fix the launch first before interpreting throughput
 
+## What this successful baseline demonstrates
+
+If the lesson works end to end, you have shown that:
+
+- the workload can be launched consistently across 1-device, 1-node, and multi-node settings
+- placement metadata and throughput summaries remain comparable
+- speedup and efficiency can be interpreted together
+- topology is part of the result, not just background detail
+
+That is different from saying “more GPUs always help.” The lesson teaches how to test the scaling decision, not how to assume it.
+
+## What to change next
+
+After the first successful run, change one thing at a time.
+
+Recommended order:
+
+1. Increase workload size before changing placement assumptions.
+2. Compare 1 GCD vs 8 GCD carefully before moving to multi-node.
+3. Revisit CPU binding or distribution only after the baseline ladder is understood.
+4. Extend to a larger communication-heavy workload only after the summary metrics make sense.
+
+## Troubleshooting
+
+- missing rank or placement files: fix the launch before reading throughput
+- poor efficiency with tiny workloads: increase the workload before blaming topology
+- multi-node regression after good single-node scaling: inspect cross-node communication assumptions first
+
+## Next lesson
+
+Next extension lesson: advanced inference and serving patterns.

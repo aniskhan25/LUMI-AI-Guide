@@ -1,32 +1,31 @@
 #!/usr/bin/env python3
 """Compare scaling summaries and build a compact report."""
 
-from __future__ import annotations
-
-import argparse
 import json
 from pathlib import Path
-from typing import Any, Dict, List
 
-from _common import load_yaml, read_json, resolve_path
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--compare-config", type=Path, required=True)
-    return parser.parse_args()
+from _common import load_yaml, resolve_path
 
 
-def speedup(base: float, target: float) -> float:
+def load_summary(config_path):
+    cfg = load_yaml(config_path)
+    return cfg, resolve_path(config_path.parent, str(cfg["run"]["output_dir"])) / str(cfg["run"]["run_name"]) / str(cfg["output"]["run_summary_json"])
+
+
+def read_json(path):
+    with path.open("r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def speedup(base, target):
     return target / max(1e-9, base)
 
 
-def efficiency(spd: float, base_world: int, target_world: int) -> float:
-    ratio = target_world / max(1, base_world)
-    return spd / max(1e-9, ratio)
+def efficiency(speedup_value, base_world, target_world):
+    return speedup_value / max(1e-9, target_world / max(1, base_world))
 
 
-def diagnose(eff: float) -> str:
+def diagnose(eff):
     if eff >= 0.8:
         return "good scaling efficiency"
     if eff >= 0.5:
@@ -34,67 +33,79 @@ def diagnose(eff: float) -> str:
     return "poor scaling efficiency; likely communication or mapping bottleneck"
 
 
-def metric_row(label: str, summary: Dict[str, Any], base_thr: float, base_world: int) -> Dict[str, Any]:
-    thr = float(summary["total_throughput_samples_per_sec"])
-    ws = int(summary["world_size"])
-    spd = speedup(base_thr, thr)
-    eff = efficiency(spd, base_world, ws)
+def metric_row(label, summary, base_thr, base_world):
+    throughput = float(summary["total_throughput_samples_per_sec"])
+    world_size = int(summary["world_size"])
+    speedup_value = speedup(base_thr, throughput)
+    efficiency_value = efficiency(speedup_value, base_world, world_size)
     return {
         "label": label,
-        "world_size": ws,
+        "world_size": world_size,
         "node_count": int(summary.get("node_count", 0) or 0),
-        "total_throughput_samples_per_sec": thr,
-        "speedup_vs_baseline": spd,
-        "efficiency_vs_baseline": eff,
-        "diagnosis": diagnose(eff),
+        "total_throughput_samples_per_sec": throughput,
+        "speedup_vs_baseline": speedup_value,
+        "efficiency_vs_baseline": efficiency_value,
+        "diagnosis": diagnose(efficiency_value),
     }
 
 
-def main() -> None:
-    args = parse_args()
-    cfg = load_yaml(args.compare_config)
-    base_dir = args.compare_config.parent
+def main():
+    lesson_dir = Path(__file__).resolve().parents[1]
+    configs_dir = lesson_dir / "configs"
 
-    baseline_summary = read_json(resolve_path(base_dir, str(cfg["paths"]["baseline_summary"])))
-    single_summary = read_json(resolve_path(base_dir, str(cfg["paths"]["single_node_summary"])))
-    multi_summary = read_json(resolve_path(base_dir, str(cfg["paths"]["multi_node_summary"])))
+    baseline_cfg, baseline_summary_path = load_summary(configs_dir / "baseline.yaml")
+    single_cfg, single_summary_path = load_summary(configs_dir / "single_node.yaml")
+    multi_cfg, multi_summary_path = load_summary(configs_dir / "multi_node.yaml")
+
+    baseline_summary = read_json(baseline_summary_path)
+    single_summary = read_json(single_summary_path)
+    multi_summary = read_json(multi_summary_path)
 
     base_thr = float(baseline_summary["total_throughput_samples_per_sec"])
     base_world = int(baseline_summary["world_size"])
 
-    rows: List[Dict[str, Any]] = []
-    rows.append(metric_row(str(cfg["comparison"]["baseline_label"]), baseline_summary, base_thr, base_world))
-    rows.append(metric_row(str(cfg["comparison"]["single_node_label"]), single_summary, base_thr, base_world))
-    rows.append(metric_row(str(cfg["comparison"]["multi_node_label"]), multi_summary, base_thr, base_world))
+    rows = [
+        metric_row("1gcd", baseline_summary, base_thr, base_world),
+        metric_row("8gcd-single-node", single_summary, base_thr, base_world),
+        metric_row("16gcd-multi-node", multi_summary, base_thr, base_world),
+    ]
 
-    out_json = resolve_path(base_dir, str(cfg["comparison"]["report_json"]))
-    out_md = resolve_path(base_dir, str(cfg["comparison"]["report_md"]))
+    outputs_dir = resolve_path((configs_dir / "baseline.yaml").parent, str(baseline_cfg["run"]["output_dir"]))
+    out_json = outputs_dir / "scaling_report.json"
+    out_md = outputs_dir / "scaling_report.md"
 
     payload = {
-        "baseline_summary_path": str(resolve_path(base_dir, str(cfg["paths"]["baseline_summary"]))),
-        "single_node_summary_path": str(resolve_path(base_dir, str(cfg["paths"]["single_node_summary"]))),
-        "multi_node_summary_path": str(resolve_path(base_dir, str(cfg["paths"]["multi_node_summary"]))),
+        "baseline_summary_path": str(baseline_summary_path),
+        "single_node_summary_path": str(single_summary_path),
+        "multi_node_summary_path": str(multi_summary_path),
         "rows": rows,
     }
     out_json.parent.mkdir(parents=True, exist_ok=True)
     with out_json.open("w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)
 
-    lines: List[str] = []
-    lines.append("# Scaling Comparison Report")
-    lines.append("")
-    lines.append("| Configuration | World Size | Nodes | Throughput | Speedup | Efficiency | Diagnosis |")
-    lines.append("|---|---:|---:|---:|---:|---:|---|")
+    lines = [
+        "# Scaling Comparison Report",
+        "",
+        "| Configuration | World Size | Nodes | Throughput | Speedup | Efficiency | Diagnosis |",
+        "|---|---:|---:|---:|---:|---:|---|",
+    ]
     for row in rows:
         lines.append(
             f"| {row['label']} | {row['world_size']} | {row['node_count']} | "
             f"{row['total_throughput_samples_per_sec']:.2f} | {row['speedup_vs_baseline']:.2f} | "
             f"{row['efficiency_vs_baseline']:.2f} | {row['diagnosis']} |"
         )
-    lines.append("")
-    lines.append("## Notes")
-    lines.append("- Keep effective workload assumptions consistent across runs.")
-    lines.append("- Validate placement metadata before interpreting poor scaling.")
+    lines.extend(
+        [
+            "",
+            "## Interpretation",
+            "",
+            "- Prefer the larger configuration only if throughput increases enough to justify the added communication.",
+            "- Validate placement metadata before interpreting poor scaling as a model or framework problem.",
+            "- If single-node scaling is already poor, fix that before trusting multi-node results.",
+        ]
+    )
 
     out_md.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -104,4 +115,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

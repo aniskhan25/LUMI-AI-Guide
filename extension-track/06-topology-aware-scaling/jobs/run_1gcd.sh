@@ -2,7 +2,7 @@
 
 #SBATCH --job-name=scale-1gcd
 #SBATCH --account=project_462000131
-#SBATCH --partition=small-g
+#SBATCH --partition=dev-g
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --gpus-per-node=1
@@ -12,28 +12,17 @@
 
 set -euo pipefail
 
-module use /appl/local/containers/ai-modules
-module load lumi-aif-singularity-bindings || module load singularity-AI-bindings
+module purge
+module use /appl/local/laifs/modules
+module load lumi-aif-singularity-bindings
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-LESSON_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
-REPO_ROOT="$(cd -- "$LESSON_DIR/../.." && pwd)"
-
-source "$REPO_ROOT/env.sh"
+source ../../env.sh
 : "${CONTAINER:?Set CONTAINER in env.sh}"
 
-OUT_ROOT="${OUT_ROOT:-${SCRATCH_ROOT}/topology-scaling}"
-RUN_NAME="${RUN_NAME:-scaling-1gcd}"
-
-echo "Lesson directory: $LESSON_DIR"
-echo "Output root: $OUT_ROOT"
-echo "Run name: $RUN_NAME"
-
-srun singularity exec "$CONTAINER" bash -lc "
+singularity exec "$CONTAINER" bash -lc "
 set -euo pipefail
-cd '$LESSON_DIR'
-python scripts/inspect_placement.py --config configs/baseline.yaml --output-root '$OUT_ROOT' --run-name '$RUN_NAME'
-python scripts/run_workload.py --config configs/baseline.yaml --output-root '$OUT_ROOT' --run-name '$RUN_NAME'
-python scripts/collect_metrics.py --config configs/baseline.yaml --output-root '$OUT_ROOT' --run-name '$RUN_NAME'
+cd '${SLURM_SUBMIT_DIR:-$PWD}'
+python scripts/inspect_placement.py --config configs/baseline.yaml
+python scripts/run_workload.py --config configs/baseline.yaml
+python scripts/collect_metrics.py --config configs/baseline.yaml
 "
-

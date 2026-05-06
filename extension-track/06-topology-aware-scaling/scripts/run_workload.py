@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 """Run a compact scaling workload and emit per-rank metrics."""
 
-from __future__ import annotations
-
 import argparse
 import time
 from pathlib import Path
-from typing import Any, Dict
 
 from _common import load_yaml, rank_info, resolve_run_dir, write_json
 
@@ -16,15 +13,13 @@ except ImportError as exc:
     raise SystemExit("torch is required. Run inside AI Factory container.") from exc
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, required=True)
-    parser.add_argument("--output-root", type=Path, default=None)
-    parser.add_argument("--run-name", type=str, default=None)
     return parser.parse_args()
 
 
-def maybe_init_distributed(world_size: int) -> bool:
+def maybe_init_distributed(world_size):
     if world_size <= 1:
         return False
     if not torch.distributed.is_available():
@@ -34,10 +29,10 @@ def maybe_init_distributed(world_size: int) -> bool:
     return True
 
 
-def main() -> None:
+def main():
     args = parse_args()
     cfg = load_yaml(args.config)
-    run_dir = resolve_run_dir(cfg, args.config, args.output_root, args.run_name)
+    run_dir = resolve_run_dir(cfg, args.config)
     raw_dir = run_dir / str(cfg["output"]["raw_dir"])
     raw_dir.mkdir(parents=True, exist_ok=True)
 
@@ -66,32 +61,27 @@ def main() -> None:
     samples_per_step = int(cfg["workload"]["samples_per_step"])
     steps = int(cfg["workload"]["steps"])
     warmup_steps = int(cfg["workload"]["warmup_steps"])
-    hidden = int(cfg["workload"]["hidden_size"])
-    repeats = int(cfg["workload"]["compute_repeats"])
+    hidden_size = int(cfg["workload"]["hidden_size"])
+    compute_repeats = int(cfg["workload"]["compute_repeats"])
 
-    x = torch.randn(samples_per_step, hidden, device=device)
-    w = torch.randn(hidden, hidden, device=device)
-    b = torch.randn(hidden, device=device)
+    x = torch.randn(samples_per_step, hidden_size, device=device)
+    w = torch.randn(hidden_size, hidden_size, device=device)
+    b = torch.randn(hidden_size, device=device)
 
-    t0 = time.perf_counter()
-    for step in range(steps + warmup_steps):
+    start = time.perf_counter()
+    for _step in range(steps + warmup_steps):
         y = x
-        for _ in range(repeats):
+        for _ in range(compute_repeats):
             y = torch.relu(torch.matmul(y, w) + b)
         if is_distributed:
-            # Simulate communication pressure in scaled runs.
             comm_buf = y.mean(dim=0)
             torch.distributed.all_reduce(comm_buf)
         if device.type == "cuda":
             torch.cuda.synchronize(device)
-    t1 = time.perf_counter()
+    elapsed = max(1e-9, time.perf_counter() - start)
 
-    elapsed = max(1e-9, t1 - t0)
-    effective_steps = max(1, steps)
-    effective_samples = effective_steps * samples_per_step
-    throughput = effective_samples / elapsed
-
-    payload: Dict[str, Any] = {
+    throughput = (max(1, steps) * samples_per_step) / elapsed
+    payload = {
         "rank": rank,
         "local_rank": local_rank,
         "world_size": world_size,
@@ -100,8 +90,8 @@ def main() -> None:
         "steps": steps,
         "warmup_steps": warmup_steps,
         "samples_per_step": samples_per_step,
-        "hidden_size": hidden,
-        "compute_repeats": repeats,
+        "hidden_size": hidden_size,
+        "compute_repeats": compute_repeats,
         "elapsed_seconds": elapsed,
         "throughput_samples_per_sec": throughput,
     }
@@ -121,4 +111,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
