@@ -11,6 +11,10 @@ By the end of this lesson, you should be able to:
 - validate output integrity for a full corpus pass
 - make one safe throughput-oriented modification
 
+The practical question in this lesson is:
+
+When should I turn text into embeddings instead of asking the model to generate text or adapting the model itself?
+
 ## Assumptions
 
 - You completed [1. QuickStart](../../1-quickstart/README.md).
@@ -40,6 +44,15 @@ The main question is no longer “did training run?” It is:
 
 Can I process a corpus on LUMI-G, preserve record IDs, and write structured outputs that downstream systems can trust?
 
+## Embeddings vs other patterns
+
+- embeddings:
+  useful when you need similarity, search, clustering, indexing, or retrieval over text
+- generation:
+  useful when you need the model to produce new text from a prompt
+- adaptation:
+  useful when the model itself must learn a task more directly
+
 ## Why embeddings are the main path
 
 This lesson uses two common kinds of inference:
@@ -54,6 +67,19 @@ Embeddings are the main path because they are the cleaner first inference worklo
 - the result is reusable for retrieval, clustering, and indexing
 
 Generation is still useful, but it is supplemental in this lesson because it adds more model- and prompt-specific variability.
+
+## Main quality levers
+
+The main choices that control embedding usefulness in this lesson are:
+
+- input granularity:
+  each record should represent the unit you want to compare or retrieve later
+- `max_seq_len`:
+  long texts are truncated, so important information can be lost if the limit is too small
+- normalization:
+  useful when downstream similarity depends on cosine-style comparisons
+- embedding model choice:
+  some models are better suited to retrieval-style similarity than others
 
 ## Minimal workflow
 
@@ -132,6 +158,10 @@ Expected result:
 - input and output counts match
 - embedding dimension is consistent
 
+This is structural success. It means the embedding pipeline ran correctly and wrote a consistent vector file.
+
+It does not yet mean the vectors are good for every downstream use.
+
 Expected embeddings output schema:
 
 ```json
@@ -147,6 +177,30 @@ If the lesson works end to end, you have shown that:
 - outputs preserve IDs and remain machine-readable
 - the embedding pipeline is ready for downstream retrieval or analytics
 
+That is different from saying the vectors are automatically good for every retrieval, clustering, or indexing task. Their usefulness still depends on the downstream use case.
+
+## How to diagnose weak embeddings
+
+When downstream behavior is weak, ask these questions in order:
+
+1. Is each input record the right unit of meaning?
+2. Is important content being truncated by `max_seq_len`?
+3. Is the chosen embedding model a good fit for the downstream task?
+4. Is this really a vector-quality issue, or only a throughput issue?
+
+Use this lesson rule:
+
+If the vectors are structurally correct but downstream retrieval is weak, inspect the text records and sequence length before changing throughput settings.
+
+In practice:
+
+- weak retrieval with long inputs:
+  check whether truncation is discarding important context
+- weak retrieval with short clean inputs:
+  reconsider the embedding model or the record boundaries
+- slow but otherwise correct runs:
+  change batch size before changing the representation itself
+
 ## What to change next
 
 After the first successful run, change one thing at a time.
@@ -154,9 +208,10 @@ After the first successful run, change one thing at a time.
 Recommended order:
 
 1. Increase `inference.batch_size` conservatively.
-2. Increase corpus size.
-3. Swap to your own corpus while preserving `id` and `text`.
-4. Try the supplemental generation path.
+2. Adjust `inference.max_seq_len` if the records are longer than the current limit.
+3. Increase corpus size.
+4. Swap to your own corpus while preserving `id` and `text`.
+5. Try the supplemental generation path.
 
 ## Supplemental generation run
 
