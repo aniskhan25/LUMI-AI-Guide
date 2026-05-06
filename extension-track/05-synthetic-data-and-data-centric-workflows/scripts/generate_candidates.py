@@ -1,26 +1,21 @@
 #!/usr/bin/env python3
-"""Generate synthetic candidates from selected weak cases."""
-
-from __future__ import annotations
+"""Generate targeted synthetic candidates from selected weak cases."""
 
 import argparse
 import json
 import random
 from pathlib import Path
-from typing import Any, Dict, List
 
 from _common import load_yaml, read_jsonl, resolve_path, resolve_run_dir, write_jsonl
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--generate-config", type=Path, required=True)
-    parser.add_argument("--output-root", type=Path, default=None)
-    parser.add_argument("--run-name", type=str, default=None)
+    parser.add_argument("--config", type=Path, required=True)
     return parser.parse_args()
 
 
-def detect_gpu(require_gpu: bool, allow_cpu_fallback: bool) -> int:
+def detect_gpu(require_gpu, allow_cpu_fallback):
     try:
         import torch
     except ImportError:
@@ -34,7 +29,7 @@ def detect_gpu(require_gpu: bool, allow_cpu_fallback: bool) -> int:
     return visible
 
 
-def make_question(base: str, style: str) -> str:
+def make_question(base, style):
     if style == "concise":
         return f"Provide a direct answer: {base}"
     if style == "procedural":
@@ -44,7 +39,7 @@ def make_question(base: str, style: str) -> str:
     return base
 
 
-def make_answer(reference: str, style: str, rnd: random.Random) -> str:
+def make_answer(reference, style, rnd):
     lead = {
         "concise": "Key answer:",
         "procedural": "Procedure:",
@@ -58,18 +53,16 @@ def make_answer(reference: str, style: str, rnd: random.Random) -> str:
     return f"{lead} {reference} {rnd.choice(suffixes)}".strip()
 
 
-def main() -> None:
+def main():
     args = parse_args()
-    cfg = load_yaml(args.generate_config)
-    run_dir = resolve_run_dir(cfg, args.generate_config, args.output_root, args.run_name)
+    cfg = load_yaml(args.config)
+    run_dir = resolve_run_dir(cfg, args.config)
 
     selected_path = run_dir / str(cfg["output"]["selected_weak_cases_jsonl"])
     if selected_path.is_file():
         weak_cases = read_jsonl(selected_path)
     else:
-        weak_cases_path = resolve_path(args.generate_config.parent, str(cfg["paths"]["weak_cases_jsonl"]))
-        weak_cases = read_jsonl(weak_cases_path)
-
+        weak_cases = read_jsonl(resolve_path(args.config.parent, str(cfg["paths"]["weak_cases_jsonl"])))
     if not weak_cases:
         raise SystemExit("No weak cases found. Run identify_weak_cases.py first.")
 
@@ -78,16 +71,17 @@ def main() -> None:
     seed = int(cfg["run"]["seed"])
     rnd = random.Random(seed)
 
-    require_gpu = bool(cfg["generation"]["require_gpu"])
-    allow_cpu = bool(cfg["generation"]["allow_cpu_fallback"])
-    gpu_visible_count = detect_gpu(require_gpu, allow_cpu)
+    gpu_visible_count = detect_gpu(
+        bool(cfg["generation"]["require_gpu"]),
+        bool(cfg["generation"]["allow_cpu_fallback"]),
+    )
     print(f"GPU_VISIBLE_COUNT={gpu_visible_count}")
 
-    candidates: List[Dict[str, Any]] = []
+    candidates = []
     for case in weak_cases:
         case_id = str(case["case_id"])
         base_question = str(case["input_text"])
-        ref_answer = str(case["reference_answer"])
+        reference_answer = str(case["reference_answer"])
         gap_label = str(case["gap_label"])
         failure_type = str(case.get("failure_type", "unknown"))
         required_terms = [str(x) for x in case.get("required_terms", [])]
@@ -95,13 +89,13 @@ def main() -> None:
 
         for idx in range(num_per_case):
             style = styles[idx % len(styles)] if styles else "concise"
-            synthetic_id = f"{case_id}-s{idx+1:02d}"
+            synthetic_id = f"{case_id}-s{idx + 1:02d}"
             candidates.append(
                 {
                     "synthetic_id": synthetic_id,
                     "source_case_id": case_id,
                     "generated_input": make_question(base_question, style),
-                    "generated_target": make_answer(ref_answer, style, rnd),
+                    "generated_target": make_answer(reference_answer, style, rnd),
                     "gap_label": gap_label,
                     "failure_type": failure_type,
                     "required_terms": required_terms,
@@ -136,4 +130,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

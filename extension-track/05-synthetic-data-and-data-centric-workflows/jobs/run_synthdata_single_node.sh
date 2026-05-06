@@ -2,7 +2,7 @@
 
 #SBATCH --job-name=aif-synthdata
 #SBATCH --account=project_462000131
-#SBATCH --partition=small-g
+#SBATCH --partition=dev-g
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --gpus-per-node=1
@@ -12,31 +12,20 @@
 
 set -euo pipefail
 
-module use /appl/local/containers/ai-modules
-module load lumi-aif-singularity-bindings || module load singularity-AI-bindings
+module purge
+module use /appl/local/laifs/modules
+module load lumi-aif-singularity-bindings
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-LESSON_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
-REPO_ROOT="$(cd -- "$LESSON_DIR/../.." && pwd)"
-
-source "$REPO_ROOT/env.sh"
+source ../../env.sh
 : "${CONTAINER:?Set CONTAINER in env.sh}"
 
-RUN_NAME="${RUN_NAME:-synthdata-baseline}"
-OUT_ROOT="${OUT_ROOT:-${SCRATCH_ROOT}/synthetic-data-workflows}"
-
-echo "Lesson directory: $LESSON_DIR"
-echo "Run name: $RUN_NAME"
-echo "Output root: $OUT_ROOT"
-
-srun singularity exec "$CONTAINER" bash -lc "
+singularity exec "$CONTAINER" bash -lc "
 set -euo pipefail
-cd '$LESSON_DIR'
-python scripts/identify_weak_cases.py --generate-config configs/generate.yaml --output-root '$OUT_ROOT' --run-name '$RUN_NAME'
-python scripts/generate_candidates.py --generate-config configs/generate.yaml --output-root '$OUT_ROOT' --run-name '$RUN_NAME'
-python scripts/filter_candidates.py --generate-config configs/generate.yaml --filter-config configs/filter.yaml --output-root '$OUT_ROOT' --run-name '$RUN_NAME'
-python scripts/merge_augmented_dataset.py --generate-config configs/generate.yaml --filter-config configs/filter.yaml --output-root '$OUT_ROOT' --run-name '$RUN_NAME'
-python scripts/rerun_downstream_task.py --generate-config configs/generate.yaml --compare-config configs/compare.yaml --output-root '$OUT_ROOT' --run-name '$RUN_NAME'
-python scripts/compare_results.py --generate-config configs/generate.yaml --compare-config configs/compare.yaml --output-root '$OUT_ROOT' --run-name '$RUN_NAME'
+cd '${SLURM_SUBMIT_DIR:-$PWD}'
+python scripts/identify_weak_cases.py --config configs/generate.yaml
+python scripts/generate_candidates.py --config configs/generate.yaml
+python scripts/filter_candidates.py --config configs/generate.yaml
+python scripts/merge_augmented_dataset.py --config configs/generate.yaml
+python scripts/rerun_downstream_task.py --config configs/generate.yaml
+python scripts/compare_results.py --config configs/generate.yaml
 "
-

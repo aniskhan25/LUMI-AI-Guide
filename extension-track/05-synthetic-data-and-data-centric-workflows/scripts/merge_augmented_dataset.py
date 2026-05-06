@@ -1,55 +1,47 @@
 #!/usr/bin/env python3
-"""Merge accepted synthetic records with baseline dataset."""
-
-from __future__ import annotations
+"""Merge accepted synthetic records with the baseline dataset."""
 
 import argparse
 import json
 from pathlib import Path
-from typing import Any, Dict, List
 
 from _common import load_yaml, qa_key, read_jsonl, resolve_path, resolve_run_dir, write_jsonl
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--generate-config", type=Path, required=True)
-    parser.add_argument("--filter-config", type=Path, required=True)
-    parser.add_argument("--output-root", type=Path, default=None)
-    parser.add_argument("--run-name", type=str, default=None)
+    parser.add_argument("--config", type=Path, required=True)
     return parser.parse_args()
 
 
-def main() -> None:
+def main():
     args = parse_args()
-    gcfg = load_yaml(args.generate_config)
-    _ = load_yaml(args.filter_config)
-    run_dir = resolve_run_dir(gcfg, args.generate_config, args.output_root, args.run_name)
+    cfg = load_yaml(args.config)
+    run_dir = resolve_run_dir(cfg, args.config)
 
-    baseline_path = resolve_path(args.generate_config.parent, str(gcfg["paths"]["baseline_dataset_jsonl"]))
-    accepted_path = run_dir / str(gcfg["output"]["accepted_jsonl"])
-
+    baseline_path = resolve_path(args.config.parent, str(cfg["paths"]["baseline_dataset_jsonl"]))
+    accepted_path = run_dir / str(cfg["output"]["accepted_jsonl"])
     baseline_rows = read_jsonl(baseline_path)
     accepted_rows = read_jsonl(accepted_path)
 
     dataset_version = f"{run_dir.name}-augmented-v1"
-    out_rows: List[Dict[str, Any]] = []
+    out_rows = []
     seen = set()
     dropped_duplicates = 0
 
-    for i, row in enumerate(baseline_rows):
-        q = str(row.get("question", "")).strip()
-        a = str(row.get("answer", "")).strip()
-        key = qa_key(q, a)
+    for idx, row in enumerate(baseline_rows):
+        question = str(row.get("question", "")).strip()
+        answer = str(row.get("answer", "")).strip()
+        key = qa_key(question, answer)
         if key in seen:
             dropped_duplicates += 1
             continue
         seen.add(key)
         out_rows.append(
             {
-                "record_id": str(row.get("record_id", f"base-{i+1:04d}")),
-                "question": q,
-                "answer": a,
+                "record_id": str(row.get("record_id", f"base-{idx + 1:04d}")),
+                "question": question,
+                "answer": answer,
                 "gap_label": str(row.get("gap_label", "general")),
                 "source_flag": "original",
                 "dataset_version": dataset_version,
@@ -57,29 +49,29 @@ def main() -> None:
         )
 
     for row in accepted_rows:
-        q = str(row.get("generated_input", "")).strip()
-        a = str(row.get("generated_target", "")).strip()
-        key = qa_key(q, a)
+        question = str(row.get("generated_input", "")).strip()
+        answer = str(row.get("generated_target", "")).strip()
+        key = qa_key(question, answer)
         if key in seen:
             dropped_duplicates += 1
             continue
         seen.add(key)
-        syn_id = str(row.get("synthetic_id", ""))
+        synthetic_id = str(row.get("synthetic_id", ""))
         out_rows.append(
             {
-                "record_id": f"syn-{syn_id}",
-                "question": q,
-                "answer": a,
+                "record_id": f"syn-{synthetic_id}",
+                "question": question,
+                "answer": answer,
                 "gap_label": str(row.get("gap_label", "general")),
                 "source_flag": "synthetic",
                 "dataset_version": dataset_version,
-                "synthetic_id": syn_id,
+                "synthetic_id": synthetic_id,
                 "source_case_id": str(row.get("source_case_id", "")),
                 "provenance": row.get("provenance", {}),
             }
         )
 
-    augmented_path = run_dir / str(gcfg["output"]["augmented_dataset_jsonl"])
+    augmented_path = run_dir / str(cfg["output"]["augmented_dataset_jsonl"])
     write_jsonl(augmented_path, out_rows)
 
     summary = {
@@ -90,7 +82,7 @@ def main() -> None:
         "dataset_version": dataset_version,
         "augmented_dataset_path": str(augmented_path),
     }
-    summary_path = run_dir / str(gcfg["output"]["merge_summary_json"])
+    summary_path = run_dir / str(cfg["output"]["merge_summary_json"])
     with summary_path.open("w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
 
@@ -102,4 +94,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

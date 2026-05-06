@@ -1,39 +1,31 @@
 #!/usr/bin/env python3
-"""Shared helpers for Lesson 05 scripts."""
-
-from __future__ import annotations
+"""Shared helpers for Lesson 05."""
 
 import json
 import re
 from pathlib import Path
-from typing import Any, Dict, Iterable, List
 
-try:
-    import yaml
-except ImportError as exc:
-    raise SystemExit("pyyaml is required. Install PyYAML or run inside the AI Factory container.") from exc
+import yaml
 
 
-def load_yaml(path: Path) -> Dict[str, Any]:
+def load_yaml(path):
     with path.open("r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
-def resolve_path(base_dir: Path, raw_path: str) -> Path:
-    p = Path(raw_path)
-    return p if p.is_absolute() else (base_dir / p).resolve()
+def resolve_path(base_dir, raw_path):
+    path = Path(raw_path)
+    return path if path.is_absolute() else (base_dir / path).resolve()
 
 
-def resolve_run_dir(cfg: Dict[str, Any], cfg_path: Path, output_root: Path | None, run_name: str | None) -> Path:
-    name = run_name or str(cfg["run"]["run_name"])
-    root = output_root or resolve_path(cfg_path.parent, str(cfg["run"]["output_dir"]))
-    out = root / name
-    out.mkdir(parents=True, exist_ok=True)
-    return out
+def resolve_run_dir(cfg, cfg_path):
+    run_dir = resolve_path(cfg_path.parent, str(cfg["run"]["output_dir"])) / str(cfg["run"]["run_name"])
+    run_dir.mkdir(parents=True, exist_ok=True)
+    return run_dir
 
 
-def read_jsonl(path: Path) -> List[Dict[str, Any]]:
-    rows: List[Dict[str, Any]] = []
+def read_jsonl(path):
+    rows = []
     with path.open("r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -42,28 +34,27 @@ def read_jsonl(path: Path) -> List[Dict[str, Any]]:
     return rows
 
 
-def write_jsonl(path: Path, rows: Iterable[Dict[str, Any]]) -> None:
+def write_jsonl(path, rows):
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
         for row in rows:
             f.write(json.dumps(row) + "\n")
 
 
-def normalize_text(text: str) -> str:
+def normalize_text(text):
     text = text.lower().strip()
     text = re.sub(r"\s+", " ", text)
     text = re.sub(r"[^a-z0-9 %.-]", "", text)
     return text
 
 
-def qa_key(question: str, answer: str) -> str:
+def qa_key(question, answer):
     return f"{normalize_text(question)}||{normalize_text(answer)}"
 
 
-def term_overlap_score(text: str, required_terms: List[str]) -> float:
+def term_overlap_score(text, required_terms):
     if not required_terms:
         return 0.0
     text_l = text.lower()
-    hits = sum(1 for t in required_terms if str(t).lower() in text_l)
+    hits = sum(1 for term in required_terms if str(term).lower() in text_l)
     return hits / len(required_terms)
-
