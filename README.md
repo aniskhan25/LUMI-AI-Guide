@@ -58,6 +58,10 @@ Begin with [0. How to use this guide](0-how-to-use-guide/README.md). Then follow
 - [12. Cost and capacity planning on MI250X](extension-track/12-cost-awareness-and-capacity-planning/README.md)
 - [13. Industrial document AI](extension-track/13-industrial-document-ai/README.md)
 
+## Standalone practical guides
+
+- [Scaling-Aware AI on LUMI](scaling-aware-ai/README.md)
+
 ## Further reading
 
 - [LUMI Documentation](https://docs.lumi-supercomputer.eu/)
