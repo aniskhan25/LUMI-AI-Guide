@@ -25,14 +25,31 @@ def main():
     summaries = [read_json(path) for path in summary_files]
     total_records = sum(int(row["records_written"]) for row in summaries)
     total_elapsed = sum(float(row["elapsed_seconds"]) for row in summaries)
-    max_elapsed = max(float(row["elapsed_seconds"]) for row in summaries)
+    elapsed_values = [float(row["elapsed_seconds"]) for row in summaries]
+    max_elapsed = max(elapsed_values)
+    min_elapsed = min(elapsed_values)
+    work_units = [int(row.get("work_units_total", row["records_written"])) for row in summaries]
+    shard_rows = [
+        {
+            "array_index": int(row["array_index"]),
+            "records_written": int(row["records_written"]),
+            "work_units_total": int(row.get("work_units_total", row["records_written"])),
+            "elapsed_seconds": float(row["elapsed_seconds"]),
+            "throughput_records_per_sec": float(row["throughput_records_per_sec"]),
+        }
+        for row in summaries
+    ]
     aggregate = {
         "run_name": str(cfg["run"]["run_name"]),
         "shards_completed": len(summaries),
         "records_written": total_records,
+        "work_units_total": sum(work_units),
         "sum_elapsed_seconds": total_elapsed,
+        "min_shard_elapsed_seconds": min_elapsed,
         "max_shard_elapsed_seconds": max_elapsed,
+        "shard_elapsed_imbalance_ratio": max_elapsed / max(1e-9, min_elapsed),
         "throughput_records_per_sec_by_max_elapsed": total_records / max(1e-9, max_elapsed),
+        "shards": sorted(shard_rows, key=lambda row: row["array_index"]),
         "shard_summary_files": [str(path) for path in summary_files],
     }
     out_path = output_root / str(cfg["output"]["run_summary_json"])
@@ -43,4 +60,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

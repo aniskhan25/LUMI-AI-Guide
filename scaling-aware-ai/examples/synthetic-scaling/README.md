@@ -1,6 +1,6 @@
 # Synthetic Scaling Example
 
-This example is the first runnable vertical slice of Scaling-Aware AI on LUMI.
+This example is the first complete runnable workflow in Scaling-Aware AI on LUMI.
 
 It uses a controlled synthetic workload to compare:
 
@@ -43,4 +43,3 @@ outputs/synthetic-*/raw/metrics_rank*.json
 - how to compare speedup and efficiency
 - how to identify invalid scaling experiments
 - why multi-node scaling should be justified by measured evidence
-

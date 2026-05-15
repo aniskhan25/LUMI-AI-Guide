@@ -83,7 +83,7 @@ Prefer:
 - a later merge step
 - restartable shard naming
 
-## How The Pass 3 Examples Expose This
+## How The Examples Expose This
 
 The DDP training example records `data_wait_fraction`. The default is zero because the data is synthetic, but the config includes `synthetic_data_wait_seconds` so users can simulate input delay and observe how it affects throughput.
 
@@ -92,4 +92,3 @@ The batch inference example writes one output JSONL and one summary JSON per arr
 ## Practical Rule
 
 Compare synthetic and real-data runs before blaming communication.
-

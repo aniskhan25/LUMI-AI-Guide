@@ -4,7 +4,7 @@
 
 The long-form guide should be organized as a practical manual, not a course sequence. Users should be able to read it end to end or jump directly to a diagnosis section.
 
-Recommended top-level structure for Pass 2:
+Recommended top-level structure:
 
 ```text
 guide/
@@ -15,16 +15,17 @@ guide/
   05-workload-taxonomy.md
   06-data-pipeline-scaling.md
   07-workload-specific-examples.md
-  08-launch-patterns.md
-  09-placement-and-binding.md
-  10-scaling-ladders.md
-  11-communication-bottlenecks.md
-  12-profiling-and-observability.md
-  13-interpreting-results.md
-  14-optimization-playbooks.md
-  15-cost-and-capacity.md
-  16-reproducibility.md
-  17-troubleshooting.md
+  08-bottleneck-demonstrations.md
+  09-launch-patterns.md
+  10-placement-and-binding.md
+  11-scaling-ladders.md
+  12-communication-bottlenecks.md
+  13-profiling-and-observability.md
+  14-interpreting-results.md
+  15-optimization-playbooks.md
+  16-cost-and-capacity.md
+  17-reproducibility.md
+  18-troubleshooting.md
 ```
 
 ## Chapter Template
@@ -117,7 +118,15 @@ Compare representative patterns:
 - independent batch inference with job arrays
 - when distributed collectives are unnecessary
 
-### 8. Launch Patterns
+### 8. Bottleneck Demonstrations
+
+Show concept, challenge, observation, and resolution for:
+
+- data starvation in synchronized training
+- shard imbalance in job arrays
+- too-small workloads with poor scaling efficiency
+
+### 9. Launch Patterns
 
 Provide LUMI job launch patterns:
 
@@ -126,7 +135,7 @@ Provide LUMI job launch patterns:
 - two-node 16-GCD
 - job-array pattern for embarrassingly parallel workloads
 
-### 9. Placement and Binding
+### 10. Placement and Binding
 
 Teach users how to record and inspect:
 
@@ -139,7 +148,7 @@ Teach users how to record and inspect:
 - Slurm metadata
 - environment variables
 
-### 10. Scaling Ladders
+### 11. Scaling Ladders
 
 Explain how to design controlled scaling experiments:
 
@@ -149,7 +158,7 @@ Explain how to design controlled scaling experiments:
 - one-variable-at-a-time experiments
 - valid versus invalid comparisons
 
-### 11. Communication Bottlenecks
+### 12. Communication Bottlenecks
 
 Explain distributed communication:
 
@@ -160,7 +169,7 @@ Explain distributed communication:
 - communication/computation ratio
 - single-node versus multi-node differences
 
-### 12. Profiling and Observability
+### 13. Profiling and Observability
 
 Define profiling levels:
 
@@ -168,7 +177,7 @@ Define profiling levels:
 - framework profiling for suspicious stages
 - ROCm/system profiling for deeper diagnosis
 
-### 13. Interpreting Results
+### 14. Interpreting Results
 
 Convert metrics into decisions:
 
@@ -178,7 +187,7 @@ Convert metrics into decisions:
 - higher throughput but poor efficiency
 - inconsistent or invalid results
 
-### 14. Optimization Playbooks
+### 15. Optimization Playbooks
 
 Give symptom-driven recommendations:
 
@@ -190,7 +199,7 @@ Give symptom-driven recommendations:
 - rank imbalance
 - high utilization but poor useful throughput
 
-### 15. Cost and Capacity
+### 16. Cost and Capacity
 
 Connect scaling to GPU-hour use:
 
@@ -201,7 +210,7 @@ Connect scaling to GPU-hour use:
 - stop rules
 - production run planning
 
-### 16. Reproducibility
+### 17. Reproducibility
 
 Define required run artifacts:
 
@@ -214,7 +223,7 @@ Define required run artifacts:
 - logs
 - summaries
 
-### 17. Troubleshooting
+### 18. Troubleshooting
 
 Build a catalog of common failures:
 

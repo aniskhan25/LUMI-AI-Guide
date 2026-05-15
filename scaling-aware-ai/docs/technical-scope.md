@@ -14,7 +14,7 @@ Important platform facts to explain and validate in examples:
 
 ## Initial Framework Scope
 
-Pass 2 should focus on PyTorch first because it is the most direct continuation of the current AI Guide material.
+The initial implementation should focus on PyTorch first because it is the most direct continuation of the current AI Guide material.
 
 Initial framework coverage:
 
@@ -24,6 +24,7 @@ Initial framework coverage:
 - synthetic workload scripts
 - simple model-training example
 - job-array batch inference pattern
+- bottleneck demonstrations for data wait and shard imbalance
 
 Planned later coverage:
 
@@ -149,11 +150,9 @@ The guide should link to official LUMI resources for platform details:
 - LUMI-G batch script examples
 - LUMI training materials on architecture and profiling
 
-## Pass 1 Boundary
+## Current Implementation Scope
 
-Pass 1 defines the product and structure. It does not need to provide runnable scaling scripts.
-
-Pass 2 introduces the first vertical slice:
+The current implementation includes:
 
 - synthetic scaling example
 - placement inspection
@@ -161,7 +160,7 @@ Pass 2 introduces the first vertical slice:
 - comparison report
 - validation command
 
-This vertical slice now lives in:
+These files live in:
 
 - `guide/04-synthetic-scaling-ladder.md`
 - `jobs/`
@@ -169,7 +168,7 @@ This vertical slice now lives in:
 - `configs/synthetic/`
 - `examples/synthetic-scaling/`
 
-Pass 3 adds workload-specific examples:
+The current workload-specific examples live in:
 
 - `guide/05-workload-taxonomy.md`
 - `guide/06-data-pipeline-scaling.md`
@@ -183,3 +182,11 @@ Pass 3 adds workload-specific examples:
 - `scripts/collect_batch_inference.py`
 - `examples/ddp-training/`
 - `examples/batch-inference/`
+
+The bottleneck demonstration material lives in:
+
+- `guide/08-bottleneck-demonstrations.md`
+- `configs/bottlenecks/`
+- `examples/bottlenecks/`
+- `jobs/run_ddp_8gcd_config.sh`
+- `jobs/run_batch_inference_array_config.sh`

@@ -39,11 +39,10 @@ The first runnable example in this guide is a synthetic scaling ladder:
 - 8 GCDs on one node
 - 16 GCDs on two nodes
 
-The synthetic workload is intentionally simple. It performs repeated dense matrix operations and a distributed all-reduce. It is not a model-quality benchmark. Its purpose is to validate launch behavior and teach scaling interpretation before users move to real training or inference workloads.
+The synthetic workload is intentionally simple. It performs repeated dense matrix operations and a distributed all-reduce. It is not a model-quality benchmark. Its purpose is to teach the decision process: what to measure at each scale, what the result means, and whether the next larger run is justified.
 
 ## What To Read Next
 
 - Read [LUMI-G mental model](02-lumi-g-mental-model.md) before interpreting topology effects.
 - Read [scaling metrics](03-scaling-metrics.md) before comparing results.
-- Follow [synthetic scaling ladder](04-synthetic-scaling-ladder.md) to run the Pass 2 workflow.
-
+- Follow [scaling decision ladder](04-synthetic-scaling-ladder.md) to understand when to move up, stop, or fix the current scale.

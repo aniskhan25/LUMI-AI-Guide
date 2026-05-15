@@ -83,25 +83,31 @@ def main():
 
     batch_size = int(cfg["inference"]["batch_size"])
     input_dim = int(cfg["inference"]["input_dim"])
-    output_dim = int(cfg["inference"]["output_dim"])
     compute_repeats = int(cfg["inference"]["compute_repeats"])
+    work_units_key = str(cfg["data"].get("work_units_key", ""))
+    work_unit_sleep_seconds = float(cfg["inference"].get("work_unit_sleep_seconds", 0.0))
     text_key = str(cfg["data"]["text_key"])
     id_key = str(cfg["data"]["id_key"])
 
     torch.manual_seed(int(cfg["run"]["seed"]) + array_index)
-    weight = torch.randn(input_dim, output_dim, device=device)
+    weight = torch.randn(input_dim, input_dim, device=device)
     output_jsonl = raw_dir / f"outputs_shard{array_index}.jsonl"
 
     start = time.perf_counter()
     total = 0
+    work_units_total = 0
     with output_jsonl.open("w", encoding="utf-8") as out_f:
         for batch_rows in batched(shard, batch_size):
+            batch_work_units = 0
+            if work_units_key:
+                batch_work_units = sum(int(row.get(work_units_key, 1)) for row in batch_rows)
+                work_units_total += batch_work_units
+                if work_unit_sleep_seconds > 0:
+                    time.sleep(batch_work_units * work_unit_sleep_seconds)
             x = torch.randn(len(batch_rows), input_dim, device=device)
             y = x
             for _ in range(compute_repeats):
                 y = torch.relu(y @ weight)
-                if y.shape[1] != input_dim:
-                    y = torch.randn(len(batch_rows), input_dim, device=device)
             sync(device)
             scores = y.mean(dim=1).detach().cpu().tolist()
             for row, score in zip(batch_rows, scores, strict=True):
@@ -112,6 +118,7 @@ def main():
                             "input_chars": len(str(row[text_key])),
                             "score": float(score),
                             "array_index": array_index,
+                            "work_units": int(row.get(work_units_key, 1)) if work_units_key else 1,
                         }
                     )
                     + "\n"
@@ -130,6 +137,9 @@ def main():
         "records_available": len(rows),
         "records_in_shard": len(shard),
         "records_written": total,
+        "work_units_total": work_units_total if work_units_key else total,
+        "work_units_key": work_units_key,
+        "work_unit_sleep_seconds": work_unit_sleep_seconds,
         "batch_size": batch_size,
         "elapsed_seconds": elapsed,
         "throughput_records_per_sec": total / elapsed,
@@ -145,4 +155,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

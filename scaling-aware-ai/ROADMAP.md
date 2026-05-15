@@ -1,8 +1,6 @@
 # Roadmap
 
-## Pass 1: Product Definition
-
-Status: complete.
+## Completed: Product Definition
 
 Deliverables:
 
@@ -14,13 +12,11 @@ Deliverables:
 - roadmap
 - contribution guidance
 
-## Pass 2: First Runnable Vertical Slice
-
-Status: complete.
+## Completed: Synthetic Scaling Ladder
 
 Goal:
 
-Create the first useful, runnable version of the guide.
+Create the first useful, runnable workflow in the guide.
 
 Deliverables:
 
@@ -38,6 +34,7 @@ Deliverables:
 - `scripts/validate_scaling_run.py`
 - `configs/synthetic/*.yaml`
 - `templates/scaling-report.md`
+- `templates/scale-decision-record.md`
 
 Acceptance criteria:
 
@@ -47,9 +44,7 @@ Acceptance criteria:
 - validation detects missing outputs or mismatched world sizes
 - the guide explains how to interpret good, poor, and invalid results
 
-## Pass 3: Workload-Specific Expansion
-
-Status: complete.
+## Completed: Workload-Specific Expansion
 
 Goal:
 
@@ -63,14 +58,16 @@ Candidate additions:
 - job-array pattern for embarrassingly parallel AI workloads
 - checkpoint timing example
 - data format and input pipeline discussion
+- bottleneck demonstrations with induced challenge and resolution
 
 Acceptance criteria:
 
 - users can distinguish distributed training problems from data pipeline problems
 - examples include workload-specific metrics
 - recommendations identify when distributed scaling is unnecessary
+- users can observe at least one bottleneck and compare it with a corrected run
 
-## Pass 4: Profiling and Diagnosis
+## Future Work: Profiling and Diagnosis
 
 Goal:
 
@@ -90,7 +87,7 @@ Acceptance criteria:
 - users can identify likely bottleneck category before changing launch scripts
 - profiling guidance is staged from low overhead to high detail
 
-## Pass 5: Production Planning
+## Future Work: Production Planning
 
 Goal:
 

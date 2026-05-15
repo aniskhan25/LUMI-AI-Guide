@@ -34,6 +34,10 @@ Scripts should:
 - avoid hidden dependencies on the original AI Guide lesson order
 - avoid hard-coded project accounts in reusable examples where possible
 - document any LUMI-specific environment assumptions
+- stay small enough that a reader can understand the bottleneck being demonstrated
+- avoid extra knobs unless they directly support an observation in the guide
+
+Prefer one clear script over a reusable mini-framework. These examples are teaching tools first.
 
 ## Job Script Standard
 
@@ -60,4 +64,3 @@ Before merging a substantial guide change, check:
 - Are outputs named consistently?
 - Are LUMI-specific assumptions explicit?
 - Are links to official LUMI documentation used for platform facts?
-
