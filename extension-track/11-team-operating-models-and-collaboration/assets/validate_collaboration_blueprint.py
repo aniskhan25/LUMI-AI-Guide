@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 """Validate required sections and ownership fields for Lesson 11 templates."""
 
-from __future__ import annotations
-
 import argparse
-from pathlib import Path
 
 
 REQUIRED_BLUEPRINT_SECTIONS = [
@@ -21,28 +18,32 @@ REQUIRED_MATRIX_HEADERS = [
 ]
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--blueprint", type=Path, required=True, help="Path to team-operating-model markdown")
-    parser.add_argument("--matrix", type=Path, required=True, help="Path to responsibility-matrix markdown")
+    parser.add_argument("--blueprint", required=True, help="Path to team-operating-model markdown")
+    parser.add_argument("--matrix", required=True, help="Path to responsibility-matrix markdown")
     return parser.parse_args()
 
 
-def check_required(path: Path, required: list[str]) -> list[str]:
+def check_required(path, required):
     text = path.read_text(encoding="utf-8")
     return [x for x in required if x not in text]
 
 
-def main() -> None:
+def main():
     args = parse_args()
+    from pathlib import Path
 
-    if not args.blueprint.is_file():
+    blueprint = Path(args.blueprint)
+    matrix = Path(args.matrix)
+
+    if not blueprint.is_file():
         raise SystemExit(f"Blueprint file not found: {args.blueprint}")
-    if not args.matrix.is_file():
+    if not matrix.is_file():
         raise SystemExit(f"Matrix file not found: {args.matrix}")
 
-    missing_blueprint = check_required(args.blueprint, REQUIRED_BLUEPRINT_SECTIONS)
-    missing_matrix = check_required(args.matrix, REQUIRED_MATRIX_HEADERS)
+    missing_blueprint = check_required(blueprint, REQUIRED_BLUEPRINT_SECTIONS)
+    missing_matrix = check_required(matrix, REQUIRED_MATRIX_HEADERS)
 
     if missing_blueprint or missing_matrix:
         print("VALIDATION_OK=0")
@@ -57,7 +58,7 @@ def main() -> None:
         raise SystemExit(1)
 
     print("VALIDATION_OK=1")
-    print(f"Blueprint and matrix look complete: {args.blueprint} | {args.matrix}")
+    print(f"Blueprint and matrix look complete: {blueprint} | {matrix}")
 
 
 if __name__ == "__main__":

@@ -54,7 +54,7 @@ Begin with [0. How to use this guide](0-how-to-use-guide/README.md). Then follow
 - [08. Reference Architectures](extension-track/08-reference-architectures/README.md)
 - [09. Sensitive Data and Trustworthy Operations](extension-track/09-sensitive-data-and-trustworthy-operations/README.md)
 - [10. MLOps and Lifecycle Management](extension-track/10-mlops-and-lifecycle-management/README.md)
-- [11. Team collaboration on AI Factory](extension-track/11-team-operating-models-and-collaboration/README.md)
+- [11. Team Operating Models and Collaboration](extension-track/11-team-operating-models-and-collaboration/README.md)
 - [12. Cost and capacity planning on MI250X](extension-track/12-cost-awareness-and-capacity-planning/README.md)
 - [13. Industrial document AI](extension-track/13-industrial-document-ai/README.md)
 
