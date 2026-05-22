@@ -1,96 +1,110 @@
 #!/usr/bin/env python3
 """Compare batched and service-style summaries and produce decision report."""
 
-from __future__ import annotations
-
-import argparse
 from pathlib import Path
-from typing import Any, Dict, List
 
 from _common import load_yaml, read_json, resolve_path, write_json
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--compare-config", type=Path, required=True)
-    return parser.parse_args()
+def choose_recommendation(batched, service):
+    if float(batched.get("completion_rate", 0.0)) < 1.0 <= float(service.get("completion_rate", 0.0)):
+        return "service"
+    if float(service.get("completion_rate", 0.0)) < 1.0 <= float(batched.get("completion_rate", 0.0)):
+        return "batched"
+
+    if float(batched.get("throughput_rps", 0.0)) >= float(service.get("throughput_rps", 0.0)) and float(
+        batched.get("p95_latency_ms", 0.0)
+    ) <= float(service.get("p95_latency_ms", 0.0)):
+        return "batched"
+
+    if float(service.get("p95_latency_ms", 0.0)) < float(batched.get("p95_latency_ms", 0.0)) and float(
+        service.get("completion_rate", 0.0)
+    ) >= float(batched.get("completion_rate", 0.0)):
+        return "service"
+
+    return "inconclusive"
 
 
-def choose_recommendation(priority: str, batched: Dict[str, Any], service: Dict[str, Any]) -> str:
-    b_t = float(batched.get("throughput_rps", 0.0))
-    s_t = float(service.get("throughput_rps", 0.0))
-    b_l = float(batched.get("p95_latency_ms", 0.0))
-    s_l = float(service.get("p95_latency_ms", 0.0))
+def interpretation_lines(batched, service, recommendation):
+    lines = []
+    if float(batched["throughput_rps"]) > float(service["throughput_rps"]):
+        lines.append("- Batched mode delivered higher throughput on this request set.")
+    elif float(service["throughput_rps"]) > float(batched["throughput_rps"]):
+        lines.append("- Service-style mode delivered higher throughput on this request set.")
 
-    if priority == "throughput_first":
-        return "batched" if b_t >= s_t else "service"
-    if priority == "latency_first":
-        return "batched" if b_l <= s_l else "service"
+    if float(batched["p95_latency_ms"]) < float(service["p95_latency_ms"]):
+        lines.append("- Batched mode had lower p95 latency in this controlled run.")
+    elif float(service["p95_latency_ms"]) < float(batched["p95_latency_ms"]):
+        lines.append("- Service-style mode had lower p95 latency in this controlled run.")
 
-    # balanced
-    b_score = b_t / max(1e-9, b_l)
-    s_score = s_t / max(1e-9, s_l)
-    return "batched" if b_score >= s_score else "service"
+    if recommendation == "batched":
+        lines.append("- Batched mode is the better fit when queued throughput is the dominant requirement.")
+    elif recommendation == "service":
+        lines.append("- Service-style mode is the better fit when lower turnaround inside one allocation matters more.")
+    else:
+        lines.append("- The result is inconclusive; tune batch size or concurrency and rerun the same request set.")
+
+    return lines
 
 
-def main() -> None:
-    args = parse_args()
-    cfg = load_yaml(args.compare_config)
-    base_dir = args.compare_config.parent
+def main():
+    lesson_dir = Path(__file__).resolve().parents[1]
+    configs_dir = lesson_dir / "configs"
+    inference_cfg = load_yaml(configs_dir / "inference.yaml")
+    service_cfg = load_yaml(configs_dir / "service.yaml")
 
-    batched_summary_path = resolve_path(base_dir, str(cfg["paths"]["batched_summary"]))
-    service_summary_path = resolve_path(base_dir, str(cfg["paths"]["service_summary"]))
+    outputs_dir = resolve_path(configs_dir, str(inference_cfg["run"]["output_dir"]))
+    batched_summary_path = outputs_dir / str(inference_cfg["run"]["run_name"]) / str(inference_cfg["output"]["summary_json"])
+    service_summary_path = outputs_dir / str(service_cfg["run"]["run_name"]) / str(service_cfg["output"]["summary_json"])
 
     batched = read_json(batched_summary_path)
     service = read_json(service_summary_path)
-
-    priority = str(cfg["comparison"]["recommendation_priority"])
-    recommendation = choose_recommendation(priority, batched, service)
+    recommendation = choose_recommendation(batched, service)
 
     deltas = {
         "throughput_rps_delta_service_minus_batched": float(service["throughput_rps"]) - float(batched["throughput_rps"]),
         "p95_latency_ms_delta_service_minus_batched": float(service["p95_latency_ms"]) - float(batched["p95_latency_ms"]),
         "completion_rate_delta_service_minus_batched": float(service["completion_rate"]) - float(batched["completion_rate"]),
+        "error_rate_delta_service_minus_batched": float(service["error_rate"]) - float(batched["error_rate"]),
     }
 
     payload = {
-        "batched_label": str(cfg["comparison"]["batched_label"]),
-        "service_label": str(cfg["comparison"]["service_label"]),
-        "priority": priority,
         "batched_summary_path": str(batched_summary_path),
         "service_summary_path": str(service_summary_path),
         "deltas": deltas,
         "recommendation": recommendation,
     }
 
-    report_json = resolve_path(base_dir, str(cfg["comparison"]["report_json"]))
-    report_md = resolve_path(base_dir, str(cfg["comparison"]["report_md"]))
+    report_json = outputs_dir / "advanced-inference-comparison.json"
+    report_md = outputs_dir / "advanced-inference-comparison.md"
     write_json(report_json, payload)
 
-    lines: List[str] = []
-    lines.append("# Advanced Inference Comparison Report")
-    lines.append("")
-    lines.append(f"- Recommendation priority: `{priority}`")
-    lines.append(f"- Recommendation: `{recommendation}`")
-    lines.append("")
-    lines.append("| Metric | Batched | Service | Delta (service-batched) |")
-    lines.append("|---|---:|---:|---:|")
-    lines.append(
-        f"| throughput_rps | {float(batched['throughput_rps']):.4f} | {float(service['throughput_rps']):.4f} | {deltas['throughput_rps_delta_service_minus_batched']:+.4f} |"
+    lines = [
+        "# Advanced Inference Comparison Report",
+        "",
+        f"- Recommendation: `{recommendation}`",
+        "",
+        "| Metric | Batched | Service | Delta (service-batched) |",
+        "|---|---:|---:|---:|",
+        f"| throughput_rps | {float(batched['throughput_rps']):.4f} | {float(service['throughput_rps']):.4f} | {deltas['throughput_rps_delta_service_minus_batched']:+.4f} |",
+        f"| p95_latency_ms | {float(batched['p95_latency_ms']):.2f} | {float(service['p95_latency_ms']):.2f} | {deltas['p95_latency_ms_delta_service_minus_batched']:+.2f} |",
+        f"| completion_rate | {float(batched['completion_rate']):.4f} | {float(service['completion_rate']):.4f} | {deltas['completion_rate_delta_service_minus_batched']:+.4f} |",
+        f"| error_rate | {float(batched['error_rate']):.4f} | {float(service['error_rate']):.4f} | {deltas['error_rate_delta_service_minus_batched']:+.4f} |",
+        "",
+        "## Interpretation",
+        "",
+    ]
+    lines.extend(interpretation_lines(batched, service, recommendation))
+    lines.extend(
+        [
+            "",
+            "## Notes",
+            "",
+            "- Batched mode is for queued bulk work where throughput is the main objective.",
+            "- Service-style mode is for repeated internal requests inside one scheduled allocation, not a public always-on endpoint.",
+            "- If throughput and latency disagree, treat the result as an operating-pattern tradeoff, not a single winner.",
+        ]
     )
-    lines.append(
-        f"| p95_latency_ms | {float(batched['p95_latency_ms']):.2f} | {float(service['p95_latency_ms']):.2f} | {deltas['p95_latency_ms_delta_service_minus_batched']:+.2f} |"
-    )
-    lines.append(
-        f"| completion_rate | {float(batched['completion_rate']):.4f} | {float(service['completion_rate']):.4f} | {deltas['completion_rate_delta_service_minus_batched']:+.4f} |"
-    )
-    lines.append("")
-    lines.append("## Notes")
-    lines.append("- Batched mode is usually better for throughput-centric bulk processing.")
-    lines.append("- Service-style mode is usually better for internal repeated-request loops with lower turnaround needs.")
-    lines.append("- Use cloud-native path only when always-on endpoint lifecycle dominates.")
-
-    report_md.parent.mkdir(parents=True, exist_ok=True)
     report_md.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     print(f"REPORT_JSON={report_json}")
@@ -100,4 +114,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

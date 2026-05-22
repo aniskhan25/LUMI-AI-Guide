@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 """Run service-style inference loop inside one scheduled allocation."""
 
-from __future__ import annotations
-
 import argparse
 import itertools
 import time
 from pathlib import Path
-from typing import Any, Dict, List
 
 from _common import (
     detect_gpu,
@@ -24,24 +21,20 @@ from _common import (
 )
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, required=True)
-    parser.add_argument("--output-root", type=Path, default=None)
-    parser.add_argument("--run-name", type=str, default=None)
-    parser.add_argument("--batch-size", type=int, default=None)
-    parser.add_argument("--concurrency", type=int, default=None)
     return parser.parse_args()
 
 
-def chunk(rows: List[Dict[str, Any]], n: int) -> List[List[Dict[str, Any]]]:
+def chunk(rows, n):
     return [rows[i : i + n] for i in range(0, len(rows), n)]
 
 
-def main() -> None:
+def main():
     args = parse_args()
     cfg = load_yaml(args.config)
-    run_dir = resolve_run_dir(cfg, args.config, args.output_root, args.run_name)
+    run_dir = resolve_run_dir(cfg, args.config)
 
     req_path = resolve_path(args.config.parent, str(cfg["paths"]["requests_jsonl"]))
     requests = read_jsonl(req_path)
@@ -49,8 +42,8 @@ def main() -> None:
         raise SystemExit(f"No requests found in {req_path}")
 
     service_cfg = cfg["service"]
-    batch_size = args.batch_size or int(service_cfg["batch_size"])
-    concurrency = args.concurrency or int(service_cfg["concurrency"])
+    batch_size = int(service_cfg["batch_size"])
+    concurrency = int(service_cfg["concurrency"])
     poll_interval_ms = int(service_cfg["poll_interval_ms"])
     max_new_tokens = int(service_cfg["max_new_tokens"])
     model_id = str(cfg["model"]["model_id"])
@@ -68,8 +61,8 @@ def main() -> None:
 
     queue_batches = chunk(requests, batch_size)
     worker_cycle = itertools.cycle(range(concurrency))
-    responses: List[Dict[str, Any]] = []
-    errors: List[Dict[str, Any]] = []
+    responses = []
+    errors = []
 
     batch_id = 0
     for batch in queue_batches:
@@ -147,4 +140,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 """Run high-throughput batched inference over a request set."""
 
-from __future__ import annotations
-
 import argparse
 from pathlib import Path
-from typing import Any, Dict, List
 
 from _common import (
     detect_gpu,
@@ -22,30 +19,27 @@ from _common import (
 )
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, required=True)
-    parser.add_argument("--output-root", type=Path, default=None)
-    parser.add_argument("--run-name", type=str, default=None)
-    parser.add_argument("--batch-size", type=int, default=None)
     return parser.parse_args()
 
 
-def chunk(rows: List[Dict[str, Any]], n: int) -> List[List[Dict[str, Any]]]:
+def chunk(rows, n):
     return [rows[i : i + n] for i in range(0, len(rows), n)]
 
 
-def main() -> None:
+def main():
     args = parse_args()
     cfg = load_yaml(args.config)
-    run_dir = resolve_run_dir(cfg, args.config, args.output_root, args.run_name)
+    run_dir = resolve_run_dir(cfg, args.config)
 
     req_path = resolve_path(args.config.parent, str(cfg["paths"]["requests_jsonl"]))
     requests = read_jsonl(req_path)
     if not requests:
         raise SystemExit(f"No requests found in {req_path}")
 
-    batch_size = args.batch_size or int(cfg["inference"]["batch_size"])
+    batch_size = int(cfg["inference"]["batch_size"])
     max_new_tokens = int(cfg["inference"]["max_new_tokens"])
     concurrency = int(cfg["inference"]["concurrency"])
     model_id = str(cfg["model"]["model_id"])
@@ -62,8 +56,8 @@ def main() -> None:
 
     write_jsonl(requests_copy, requests)
 
-    responses: List[Dict[str, Any]] = []
-    errors: List[Dict[str, Any]] = []
+    responses = []
+    errors = []
     batch_id = 0
 
     for b in chunk(requests, batch_size):
@@ -136,4 +130,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

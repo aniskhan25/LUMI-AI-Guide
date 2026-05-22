@@ -1,146 +1,280 @@
-# 07. Advanced Inference and Serving Patterns on LUMI-G
+# 07. Advanced Inference and Serving
 
-This lesson teaches how to package model inference into repeatable high-throughput patterns on LUMI-G.
+## Goal
 
-## What This Lesson Enables
+Compare two repeated-inference operating patterns on LUMI and decide whether a queued batched path or a service-style loop is the better fit.
 
-Run and compare two inference patterns:
+By the end of this lesson, you should be able to:
 
-- batched inference for bulk request sets
-- service-style request loop inside a scheduled GPU job
+- explain the difference between batched inference and a service-style loop
+- run one controlled comparison of both patterns on LUMI
+- validate that requests, responses, errors, and metrics stay aligned
+- justify which pattern better fits the request pattern you tested
 
-Both paths produce structured request/response artifacts and throughput/latency summaries.
+The practical question in this lesson is:
 
-## When To Use This Workflow
+When should I use batched inference, and when should I keep a service-style loop inside a scheduled LUMI job?
 
-Use this lesson when:
+## Assumptions
 
-- you need repeated internal inference at scale
-- throughput and response quality both matter
-- you must choose batch-style vs service-style execution
+- You completed [1. QuickStart](../../1-quickstart/README.md).
+- You completed [2. Setting up your own environment](../../2-setting-up-environment/README.md).
+- You already know how to run Python and submit a batch job on LUMI.
+- `../../env.sh` is configured with a valid `CONTAINER`.
 
-Do not use this lesson for:
+## Working directory
 
-- public internet-facing APIs
-- enterprise gateway/auth architecture
-- full cloud-native autoscaling operations
-
-## Prerequisites
-
-- Working LUMI access with AI Factory container setup
-- Completion of onboarding lessons
-- Preferred: completion of extension Lessons 2, 3, and 6
-- Access to this repository and sample request set
-
-## Workflow At A Glance
-
-```mermaid
-flowchart LR
-  A["Request JSONL"] --> B["Batching / concurrency"]
-  B --> C["Inference engine on LUMI-G"]
-  C --> D["Response JSONL + errors"]
-  D --> E["Latency + throughput metrics"]
-  E --> F["Operating summary and comparison"]
-```
-
-## Minimal Working Example
-
-Work from:
+Run commands in this lesson from:
 
 ```bash
 cd /path/to/LUMI-AI-Guide/extension-track/07-advanced-inference-and-serving
 ```
 
-1. Run batched inference:
+## What the two patterns mean here
+
+- batched inference:
+  process a queued request set in larger groups to maximize throughput
+- service-style loop:
+  keep one allocation alive and process repeated internal requests in smaller groups for lower turnaround inside that allocation
+
+This lesson does not cover:
+
+- public internet-facing APIs
+- gateway or auth architecture
+- autoscaling platforms
+- always-on production serving stacks
+
+This is a scheduled-job lesson, not a cloud serving lesson.
+
+## Why this lesson uses a synthetic model path
+
+The code uses a synthetic/template inference function on purpose.
+
+That choice keeps the lesson focused on:
+
+- request accounting
+- batch size and concurrency behavior
+- latency and throughput measurement
+- output integrity
+- operating-pattern comparison
+
+It does not claim to benchmark a real inference stack such as vLLM, TGI, or a production endpoint.
+
+Use this lesson as an operating-pattern tutorial, not a serving benchmark.
+
+## When to use each pattern
+
+Use batched inference when:
+
+- requests are already queued
+- throughput matters more than per-request turnaround
+- you want a simple, repeatable offline path
+
+Use a service-style loop when:
+
+- repeated internal requests arrive during one allocation window
+- lower turnaround matters more than peak throughput
+- you still want to stay inside a scheduled HPC job model
+
+Use a different architecture entirely when:
+
+- the endpoint must always be available
+- public access, authentication, or gateway concerns dominate
+- you need autoscaling or broader service lifecycle management
+
+## Main quality levers
+
+The main choices that control behavior in this lesson are:
+
+- batch size:
+  larger batches usually improve throughput until memory or queueing costs dominate
+- concurrency:
+  more concurrent work can improve utilization, but can also raise contention and instability
+- request size:
+  longer prompts or larger token budgets change both latency and throughput
+- completion rate:
+  faster throughput is not useful if more requests fail
+- latency target:
+  p95 latency is often the more useful operating number than average latency
+
+These are the levers to reason about before changing model code or hardware.
+
+## What the scripts produce
+
+Each run writes:
+
+- `requests.jsonl`
+- `responses.jsonl`
+- `errors.jsonl`
+- `run_metadata.json`
+- `metrics.json`
+- `summary.json`
+
+The main run directories are:
+
+- `outputs/advanced-inference-batched`
+- `outputs/advanced-inference-service`
+
+The comparison step writes:
+
+- `outputs/advanced-inference-comparison.json`
+- `outputs/advanced-inference-comparison.md`
+
+The critical integrity rule is simple:
+
+Every request must appear exactly once as either a response or an error.
+
+## Minimal workflow
+
+Load the lesson runtime in your shell:
 
 ```bash
-python scripts/run_batched_inference.py --config configs/inference.yaml
+module purge
+module use /appl/local/csc/modulefiles
+module load pytorch
+source ../../env.sh
 ```
 
-2. Run service-style loop:
+### Step 1: Submit the two runs
 
-```bash
-python scripts/run_service_loop.py --config configs/service.yaml
-```
-
-3. Collect metrics:
-
-```bash
-python scripts/collect_metrics.py --config configs/inference.yaml --mode batched
-python scripts/collect_metrics.py --config configs/service.yaml --mode service
-```
-
-4. Build summary comparison:
-
-```bash
-python scripts/summarize_results.py --compare-config configs/compare.yaml
-```
-
-5. Canonical Slurm jobs:
+Commands:
 
 ```bash
 sbatch jobs/run_batched_inference.sh
 sbatch jobs/run_service_style_inference.sh
 ```
 
-## How To Verify It Worked
+What they do:
 
-Confirm all of these:
+- `run_batched_inference.sh`:
+  runs the queued batched path and writes metrics for the batched configuration
+- `run_service_style_inference.sh`:
+  runs the service-style loop and writes metrics for the service configuration
 
-- model metadata file indicates GPU visibility
-- request and response counts match (or explicit error records exist)
-- `request_id` joins cleanly across requests/responses/errors
-- latency and throughput summaries exist
-- comparison report contains at least one controlled configuration delta
+### Step 2: Build the comparison
 
-Expected outputs: [assets/expected-output-tree.txt](assets/expected-output-tree.txt)
+Command:
 
-## Which Serving Pattern To Choose
+```bash
+python scripts/summarize_results.py
+```
 
-Use batch-style when:
+This compares:
 
-- processing large queued corpora
-- maximizing throughput is primary goal
+- throughput
+- p95 latency
+- completion rate
+- error rate
 
-Use service-style loop when:
+and writes a simple recommendation.
 
-- repeated internal requests arrive during one allocation
-- you need lower turnaround than offline-only batch
+### Step 3: Validate outputs
 
-Consider cloud-native alternatives when:
+Command:
 
-- continuously available endpoints are required
-- broader web-platform integration is mandatory
+```bash
+python scripts/validate_inference_run.py
+```
 
-## Throughput And Latency Tradeoffs
+Expected result:
 
-- Larger batches usually increase throughput but can raise per-request latency.
-- Higher concurrency can improve utilization until memory or scheduling contention appears.
-- Stable request/response logging is required to interpret performance changes.
+- both run directories exist
+- requests, responses, errors, metadata, metrics, and summaries exist
+- request coverage is complete in both runs
+- `advanced-inference-comparison.json` and `.md` exist
+- `VALIDATION_OK=1`
 
-## Output And Logging Design
+This is structural success. It means the two operating patterns were run and compared correctly.
 
-This lesson requires:
+It does not yet mean one pattern is universally better.
 
-- stable `request_id`
-- status for each request (`ok` or `error`)
-- response payload and processing timestamps
-- run metadata with model, batch, concurrency, and GPU visibility
+## How to read the result
 
-## Common Failure Modes
+Start with:
 
-See [troubleshooting/common-failures.md](troubleshooting/common-failures.md).
+- `outputs/advanced-inference-batched/summary.json`
+- `outputs/advanced-inference-service/summary.json`
+- `outputs/advanced-inference-comparison.md`
 
-## Operational Checklist
+The main numbers are:
 
-- request schema validated
-- IDs preserved end-to-end
-- container and GPU visibility confirmed
-- batch/concurrency settings documented
-- output counts checked
-- metrics and summary report saved
+- `throughput_rps`
+- `p95_latency_ms`
+- `completion_rate`
+- `error_rate`
 
-## Next Lesson
+A stronger batched result looks like:
 
-Suggested next step: reference architectures for customer AI systems on LUMI AI Factory.
+- clearly higher throughput
+- acceptable latency for the use case
+- no completion-rate regression
 
+A stronger service-style result looks like:
+
+- materially lower p95 latency or turnaround
+- stable completion rate
+- acceptable throughput for the request arrival pattern
+
+Use this lesson rule:
+
+Do not choose a pattern on throughput alone if it causes a meaningful latency or completion-rate regression.
+
+## How to diagnose a weak result
+
+When the comparison looks weak or inconclusive, ask:
+
+1. Is the request set large enough to produce a meaningful comparison?
+2. Is the real issue batch size or concurrency rather than the operating pattern itself?
+3. Did error rate rise as concurrency increased?
+4. Is GPU visibility missing, making the comparison invalid?
+5. Is the workflow really a serving problem, or just an offline scheduling problem?
+
+Interpretation:
+
+- poor batched throughput:
+  inspect batch size before redesigning the pattern
+- poor service-style stability:
+  inspect concurrency before concluding the pattern is wrong
+- equal metrics on both paths:
+  the request pattern may be too small or too simple to distinguish them
+
+## What this lesson does and does not prove
+
+If the lesson works end to end, it shows that:
+
+- request IDs can be tracked end to end
+- metrics and integrity checks can be compared across two operating patterns
+- a queued batch path and a service-style loop can be evaluated on the same request set
+- the pattern choice can be justified with saved artifacts
+
+It does not prove:
+
+- that this synthetic path predicts a real production inference engine
+- that one pattern will always win on every workload
+- that a service-style loop on LUMI replaces a public serving platform
+
+## What to change next
+
+After the first successful run, change one thing at a time.
+
+Recommended order:
+
+1. Increase request-set size before changing architecture conclusions.
+2. Tune batch size before tuning concurrency.
+3. Tune concurrency only after output integrity and error rate stay stable.
+4. Move to a real inference backend only after the operating-pattern comparison is understood.
+
+## Troubleshooting
+
+- `gpu_visible_count=0`:
+  fix the launch or container binding before trusting the numbers
+- missing request coverage:
+  inspect `errors.jsonl` and ID handling before interpreting performance
+- higher throughput with much worse p95 latency:
+  treat it as a tradeoff, not an automatic win
+- higher concurrency with higher error rate:
+  back off concurrency before changing the serving pattern
+
+## Next lesson
+
+Next extension lesson: reference architectures for customer AI systems on LUMI AI Factory.

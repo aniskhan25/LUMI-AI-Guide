@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 """Shared helpers for Lesson 07 inference scripts."""
 
-from __future__ import annotations
-
 import json
 import math
 import os
 import time
 from pathlib import Path
-from typing import Any, Dict, Iterable, List
 
 try:
     import yaml
@@ -16,26 +13,25 @@ except ImportError as exc:
     raise SystemExit("pyyaml is required. Install PyYAML or run inside the AI Factory container.") from exc
 
 
-def load_yaml(path: Path) -> Dict[str, Any]:
+def load_yaml(path):
     with path.open("r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
-def resolve_path(base_dir: Path, raw_path: str) -> Path:
+def resolve_path(base_dir, raw_path):
     p = Path(raw_path)
     return p if p.is_absolute() else (base_dir / p).resolve()
 
 
-def resolve_run_dir(cfg: Dict[str, Any], cfg_path: Path, output_root: Path | None, run_name: str | None) -> Path:
-    name = run_name or str(cfg["run"]["run_name"])
-    root = output_root or resolve_path(cfg_path.parent, str(cfg["run"]["output_dir"]))
-    out = root / name
+def resolve_run_dir(cfg, cfg_path):
+    root = resolve_path(cfg_path.parent, str(cfg["run"]["output_dir"]))
+    out = root / str(cfg["run"]["run_name"])
     out.mkdir(parents=True, exist_ok=True)
     return out
 
 
-def read_jsonl(path: Path) -> List[Dict[str, Any]]:
-    rows: List[Dict[str, Any]] = []
+def read_jsonl(path):
+    rows = []
     with path.open("r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -44,25 +40,25 @@ def read_jsonl(path: Path) -> List[Dict[str, Any]]:
     return rows
 
 
-def write_jsonl(path: Path, rows: Iterable[Dict[str, Any]]) -> None:
+def write_jsonl(path, rows):
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
         for row in rows:
             f.write(json.dumps(row) + "\n")
 
 
-def write_json(path: Path, payload: Dict[str, Any]) -> None:
+def write_json(path, payload):
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)
 
 
-def read_json(path: Path) -> Dict[str, Any]:
+def read_json(path):
     with path.open("r", encoding="utf-8") as f:
         return json.load(f)
 
 
-def detect_gpu(require_gpu: bool, allow_cpu_fallback: bool) -> Dict[str, Any]:
+def detect_gpu(require_gpu, allow_cpu_fallback):
     out = {"gpu_visible_count": 0, "device": "cpu", "torch_available": False}
     try:
         import torch
@@ -83,7 +79,7 @@ def now_ms() -> int:
     return int(time.time() * 1000)
 
 
-def percentile(values: List[float], p: float) -> float:
+def percentile(values, p):
     if not values:
         return 0.0
     sorted_vals = sorted(values)
@@ -97,7 +93,7 @@ def percentile(values: List[float], p: float) -> float:
     return float(d0 + d1)
 
 
-def synthetic_infer(prompt: str, max_new_tokens: int) -> str:
+def synthetic_infer(prompt, max_new_tokens):
     prompt_clean = " ".join(prompt.strip().split())
     if not prompt_clean:
         return ""
@@ -105,7 +101,7 @@ def synthetic_infer(prompt: str, max_new_tokens: int) -> str:
     return f"Processed response: {head}"
 
 
-def maybe_gpu_compute(batch_size: int, device: str) -> None:
+def maybe_gpu_compute(batch_size, device):
     if not device.startswith("cuda"):
         time.sleep(0.002 * max(1, batch_size))
         return
@@ -122,7 +118,7 @@ def maybe_gpu_compute(batch_size: int, device: str) -> None:
         time.sleep(0.003 * max(1, batch_size))
 
 
-def getenv_rank_context() -> Dict[str, Any]:
+def getenv_rank_context():
     return {
         "hostname": os.environ.get("HOSTNAME", ""),
         "slurm_job_id": os.environ.get("SLURM_JOB_ID", ""),
