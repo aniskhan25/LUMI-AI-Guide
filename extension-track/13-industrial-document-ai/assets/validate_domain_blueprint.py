@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 """Validate required sections for Lesson 13 domain templates."""
 
-from __future__ import annotations
-
 import argparse
-from pathlib import Path
 
 
 REQUIRED_USE_CASE_SECTIONS = [
@@ -22,28 +19,32 @@ REQUIRED_SCHEMA_HEADERS = [
 ]
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--use-case", type=Path, required=True, help="Path to domain use-case brief markdown")
-    parser.add_argument("--schema", type=Path, required=True, help="Path to technical corpus schema markdown")
+    parser.add_argument("--use-case", required=True, help="Path to domain use-case brief markdown")
+    parser.add_argument("--schema", required=True, help="Path to technical corpus schema markdown")
     return parser.parse_args()
 
 
-def find_missing(path: Path, required: list[str]) -> list[str]:
+def find_missing(path, required):
     text = path.read_text(encoding="utf-8")
     return [entry for entry in required if entry not in text]
 
 
-def main() -> None:
+def main():
     args = parse_args()
+    from pathlib import Path
 
-    if not args.use_case.is_file():
+    use_case = Path(args.use_case)
+    schema = Path(args.schema)
+
+    if not use_case.is_file():
         raise SystemExit(f"Use-case file not found: {args.use_case}")
-    if not args.schema.is_file():
+    if not schema.is_file():
         raise SystemExit(f"Schema file not found: {args.schema}")
 
-    missing_use_case = find_missing(args.use_case, REQUIRED_USE_CASE_SECTIONS)
-    missing_schema = find_missing(args.schema, REQUIRED_SCHEMA_HEADERS)
+    missing_use_case = find_missing(use_case, REQUIRED_USE_CASE_SECTIONS)
+    missing_schema = find_missing(schema, REQUIRED_SCHEMA_HEADERS)
 
     if missing_use_case or missing_schema:
         print("VALIDATION_OK=0")
@@ -58,7 +59,7 @@ def main() -> None:
         raise SystemExit(1)
 
     print("VALIDATION_OK=1")
-    print(f"Domain templates are complete: {args.use_case} | {args.schema}")
+    print(f"Domain templates are complete: {use_case} | {schema}")
 
 
 if __name__ == "__main__":
