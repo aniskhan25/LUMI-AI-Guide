@@ -12,7 +12,7 @@ This track extends the onboarding lessons with advanced, AI Factory-oriented wor
 - [06. Scaling on MI250X](06-topology-aware-scaling/README.md)
 - [07. Advanced Inference and Serving](07-advanced-inference-and-serving/README.md)
 - [08. Reference Architectures](08-reference-architectures/README.md)
-- [09. Sensitive data and trustworthy AI](09-sensitive-data-and-trustworthy-operations/README.md)
+- [09. Sensitive Data and Trustworthy Operations](09-sensitive-data-and-trustworthy-operations/README.md)
 - [10. MLOps on LUMI AI Factory](10-mlops-and-lifecycle-management/README.md)
 - [11. Team collaboration on AI Factory](11-team-operating-models-and-collaboration/README.md)
 - [12. Cost and capacity planning on MI250X](12-cost-awareness-and-capacity-planning/README.md)
