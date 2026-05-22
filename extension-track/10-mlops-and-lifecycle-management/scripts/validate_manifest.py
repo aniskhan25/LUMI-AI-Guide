@@ -1,20 +1,16 @@
 #!/usr/bin/env python3
 """Validate required fields for Lesson 10 run manifests."""
 
-from __future__ import annotations
-
 import argparse
-from pathlib import Path
-from typing import Any, Dict, List, Tuple
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--manifest", type=Path, required=True, help="Path to run manifest YAML file")
+    parser.add_argument("--manifest", required=True, help="Path to run manifest YAML file")
     return parser.parse_args()
 
 
-def _coerce_scalar(value: str) -> Any:
+def _coerce_scalar(value):
     v = value.strip()
     if v in {"null", "None", "~"}:
         return None
@@ -25,9 +21,9 @@ def _coerce_scalar(value: str) -> Any:
     return v.strip('"').strip("'")
 
 
-def parse_simple_yaml(text: str) -> Dict[str, Any]:
-    data: Dict[str, Any] = {}
-    current_section: str | None = None
+def parse_simple_yaml(text):
+    data = {}
+    current_section = None
     for raw in text.splitlines():
         line = raw.rstrip("\n")
         if not line.strip() or line.lstrip().startswith("#"):
@@ -57,8 +53,8 @@ def parse_simple_yaml(text: str) -> Dict[str, Any]:
     return data
 
 
-def get_nested(data: Dict[str, Any], path: str) -> Tuple[bool, Any]:
-    cur: Any = data
+def get_nested(data, path):
+    cur = data
     for part in path.split("."):
         if not isinstance(cur, dict) or part not in cur:
             return False, None
@@ -66,7 +62,7 @@ def get_nested(data: Dict[str, Any], path: str) -> Tuple[bool, Any]:
     return True, cur
 
 
-def load_manifest(path: Path) -> Dict[str, Any]:
+def load_manifest(path):
     text = path.read_text(encoding="utf-8")
 
     try:
@@ -81,7 +77,7 @@ def load_manifest(path: Path) -> Dict[str, Any]:
     return parse_simple_yaml(text)
 
 
-def validate_manifest(data: Dict[str, Any]) -> List[str]:
+def validate_manifest(data):
     required = [
         "run_id",
         "lifecycle_state",
@@ -96,7 +92,7 @@ def validate_manifest(data: Dict[str, Any]) -> List[str]:
         "promotion.status",
     ]
 
-    missing: List[str] = []
+    missing = []
     for key in required:
         ok, value = get_nested(data, key)
         if not ok or value in {None, ""}:
@@ -105,12 +101,15 @@ def validate_manifest(data: Dict[str, Any]) -> List[str]:
     return missing
 
 
-def main() -> None:
+def main():
     args = parse_args()
-    if not args.manifest.is_file():
+    from pathlib import Path
+
+    manifest = Path(args.manifest)
+    if not manifest.is_file():
         raise SystemExit(f"Manifest not found: {args.manifest}")
 
-    data = load_manifest(args.manifest)
+    data = load_manifest(manifest)
     missing = validate_manifest(data)
 
     if missing:
@@ -121,7 +120,7 @@ def main() -> None:
         raise SystemExit(1)
 
     print("VALIDATION_OK=1")
-    print(f"Manifest is complete: {args.manifest}")
+    print(f"Manifest is complete: {manifest}")
 
 
 if __name__ == "__main__":

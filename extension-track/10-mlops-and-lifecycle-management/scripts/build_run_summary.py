@@ -1,23 +1,19 @@
 #!/usr/bin/env python3
 """Build a compact lifecycle summary from a Lesson 10 run manifest."""
 
-from __future__ import annotations
-
 import argparse
 import json
-from pathlib import Path
-from typing import Any, Dict, List, Tuple
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--manifest", type=Path, required=True, help="Path to run manifest YAML file")
-    parser.add_argument("--output", type=Path, default=None, help="Output markdown summary path")
-    parser.add_argument("--json-output", type=Path, default=None, help="Optional JSON summary path")
+    parser.add_argument("--manifest", required=True, help="Path to run manifest YAML file")
+    parser.add_argument("--output", default=None, help="Output markdown summary path")
+    parser.add_argument("--json-output", default=None, help="Optional JSON summary path")
     return parser.parse_args()
 
 
-def _coerce_scalar(value: str) -> Any:
+def _coerce_scalar(value):
     v = value.strip()
     if v in {"null", "None", "~"}:
         return None
@@ -28,9 +24,9 @@ def _coerce_scalar(value: str) -> Any:
     return v.strip('"').strip("'")
 
 
-def parse_simple_yaml(text: str) -> Dict[str, Any]:
-    data: Dict[str, Any] = {}
-    current_section: str | None = None
+def parse_simple_yaml(text):
+    data = {}
+    current_section = None
     for raw in text.splitlines():
         line = raw.rstrip("\n")
         if not line.strip() or line.lstrip().startswith("#"):
@@ -60,8 +56,8 @@ def parse_simple_yaml(text: str) -> Dict[str, Any]:
     return data
 
 
-def get_nested(data: Dict[str, Any], path: str, default: Any = "") -> Any:
-    cur: Any = data
+def get_nested(data, path, default=""):
+    cur = data
     for part in path.split("."):
         if not isinstance(cur, dict) or part not in cur:
             return default
@@ -69,7 +65,7 @@ def get_nested(data: Dict[str, Any], path: str, default: Any = "") -> Any:
     return cur
 
 
-def load_manifest(path: Path) -> Dict[str, Any]:
+def load_manifest(path):
     text = path.read_text(encoding="utf-8")
 
     try:
@@ -84,7 +80,7 @@ def load_manifest(path: Path) -> Dict[str, Any]:
     return parse_simple_yaml(text)
 
 
-def completeness(data: Dict[str, Any]) -> Tuple[int, int, List[str]]:
+def completeness(data):
     required = [
         "run_id",
         "lifecycle_state",
@@ -98,7 +94,7 @@ def completeness(data: Dict[str, Any]) -> Tuple[int, int, List[str]]:
         "evaluation.benchmark_id",
         "promotion.status",
     ]
-    missing: List[str] = []
+    missing = []
     for field in required:
         value = get_nested(data, field, default=None)
         if value in {None, ""}:
@@ -106,7 +102,7 @@ def completeness(data: Dict[str, Any]) -> Tuple[int, int, List[str]]:
     return len(required) - len(missing), len(required), missing
 
 
-def build_markdown(data: Dict[str, Any], score: Tuple[int, int, List[str]]) -> str:
+def build_markdown(data, score):
     passed, total, missing = score
 
     run_id = get_nested(data, "run_id")
@@ -127,7 +123,7 @@ def build_markdown(data: Dict[str, Any], score: Tuple[int, int, List[str]]) -> s
     gate = get_nested(data, "evaluation.summary.pass_gate")
     promotion = get_nested(data, "promotion.status")
 
-    lines: List[str] = []
+    lines = []
     lines.append("# Run Lifecycle Summary")
     lines.append("")
     lines.append(f"- run_id: `{run_id}`")
@@ -165,19 +161,22 @@ def build_markdown(data: Dict[str, Any], score: Tuple[int, int, List[str]]) -> s
     return "\n".join(lines) + "\n"
 
 
-def main() -> None:
+def main():
     args = parse_args()
-    if not args.manifest.is_file():
+    from pathlib import Path
+
+    manifest = Path(args.manifest)
+    if not manifest.is_file():
         raise SystemExit(f"Manifest not found: {args.manifest}")
 
-    data = load_manifest(args.manifest)
+    data = load_manifest(manifest)
     score = completeness(data)
     summary_md = build_markdown(data, score)
 
-    output_md = args.output or (args.manifest.parent / "run-summary.md")
+    output_md = Path(args.output) if args.output else (manifest.parent / "run-summary.md")
     output_md.write_text(summary_md, encoding="utf-8")
 
-    output_json = args.json_output or (args.manifest.parent / "run-summary.json")
+    output_json = Path(args.json_output) if args.json_output else (manifest.parent / "run-summary.json")
     output_payload = {
         "run_id": get_nested(data, "run_id", ""),
         "lifecycle_state": get_nested(data, "lifecycle_state", ""),
