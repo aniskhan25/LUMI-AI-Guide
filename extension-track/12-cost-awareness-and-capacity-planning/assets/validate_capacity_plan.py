@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 """Validate required sections for Lesson 12 planning templates."""
 
-from __future__ import annotations
-
 import argparse
-from pathlib import Path
 
 
 REQUIRED_PROFILE_SECTIONS = [
@@ -22,28 +19,32 @@ REQUIRED_RUN_PLAN_HEADERS = [
 ]
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--profile", type=Path, required=True, help="Path to workload-profile markdown")
-    parser.add_argument("--run-plan", type=Path, required=True, help="Path to staged-run-plan markdown")
+    parser.add_argument("--profile", required=True, help="Path to workload-profile markdown")
+    parser.add_argument("--run-plan", required=True, help="Path to staged-run-plan markdown")
     return parser.parse_args()
 
 
-def missing_items(path: Path, required: list[str]) -> list[str]:
+def missing_items(path, required):
     text = path.read_text(encoding="utf-8")
     return [item for item in required if item not in text]
 
 
-def main() -> None:
+def main():
     args = parse_args()
+    from pathlib import Path
 
-    if not args.profile.is_file():
+    profile = Path(args.profile)
+    run_plan = Path(args.run_plan)
+
+    if not profile.is_file():
         raise SystemExit(f"Profile file not found: {args.profile}")
-    if not args.run_plan.is_file():
+    if not run_plan.is_file():
         raise SystemExit(f"Run plan file not found: {args.run_plan}")
 
-    missing_profile = missing_items(args.profile, REQUIRED_PROFILE_SECTIONS)
-    missing_plan = missing_items(args.run_plan, REQUIRED_RUN_PLAN_HEADERS)
+    missing_profile = missing_items(profile, REQUIRED_PROFILE_SECTIONS)
+    missing_plan = missing_items(run_plan, REQUIRED_RUN_PLAN_HEADERS)
 
     if missing_profile or missing_plan:
         print("VALIDATION_OK=0")
@@ -58,7 +59,7 @@ def main() -> None:
         raise SystemExit(1)
 
     print("VALIDATION_OK=1")
-    print(f"Planning templates are complete: {args.profile} | {args.run_plan}")
+    print(f"Planning templates are complete: {profile} | {run_plan}")
 
 
 if __name__ == "__main__":

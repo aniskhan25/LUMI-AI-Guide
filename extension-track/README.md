@@ -15,5 +15,5 @@ This track extends the onboarding lessons with advanced, AI Factory-oriented wor
 - [09. Sensitive Data and Trustworthy Operations](09-sensitive-data-and-trustworthy-operations/README.md)
 - [10. MLOps and Lifecycle Management](10-mlops-and-lifecycle-management/README.md)
 - [11. Team Operating Models and Collaboration](11-team-operating-models-and-collaboration/README.md)
-- [12. Cost and capacity planning on MI250X](12-cost-awareness-and-capacity-planning/README.md)
+- [12. Cost Awareness and Capacity Planning](12-cost-awareness-and-capacity-planning/README.md)
 - [13. Industrial document AI](13-industrial-document-ai/README.md)
