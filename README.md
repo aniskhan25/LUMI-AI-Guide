@@ -1,76 +1,36 @@
 # LUMI AI Guide
 
-This repository is a practical guide for moving machine learning training workloads to LUMI using a runnable Vision Transformer example in PyTorch.
+A practical guide for running AI training on LUMI, built around a runnable Vision Transformer example in PyTorch.
 
-All Python and shell scripts referenced in this guide are part of this repository: [LUMI-AI-Guide](https://github.com/Lumi-supercomputer/LUMI-AI-Guide/tree/main). The workflow starts from [`1-quickstart/visiontransformer.py`](1-quickstart/visiontransformer.py) and scales up chapter by chapter.
+The official container for all lessons:
 
-## Goal
+```
+/appl/local/laifs/containers/lumi-multitorch-latest.sif
+```
 
-Provide a clear core path from first single-GPU execution to distributed training, then optional experiment-tracking extensions on LUMI.
+## Core lessons
 
-## Requirements
+- [1. Getting Started on LUMI](1-quickstart/README.md)
+- [2. Data on LUMI](2-data/README.md)
+- [3. Multi-GPU and Multi-Node Training](3-multi-gpu-and-node/README.md)
+- [4. Monitoring and Profiling](4-monitoring-and-profiling/README.md)
+- [5. Experiment Tracking](5-experiment-tracking/README.md)
 
-Before starting, ensure you have:
+## Before you start
 
-- basic familiarity with Python and machine learning workflows
-- a LUMI user account and basic command-line/Slurm usage
-- a project with available GPU hours if you want to run the examples
+- You need a LUMI user account and a project with GPU hours — run `lumi-workspaces` to check
+- Update `PROJECT_ACCOUNT` and `LUMI_USER` in `env.sh` before submitting any jobs
+- Clone this repository to `/project` or `/scratch`, not `$HOME`
 
-## Important account note
+## Extension track
 
-This guide keeps `#SBATCH --account=...` lines inside job scripts for simple copy-run commands.
-Before submitting jobs, replace those account values with your own LUMI project account.
-
-## Start here
-
-Begin with [0. How to use this guide](0-how-to-use-guide/README.md). Then follow core lessons `1` to `6`, and continue with optional lessons `7` to `9` if needed.
-
-## Core lessons (recommended order)
-
-- [0. How to use this guide](0-how-to-use-guide/README.md)
-- [1. QuickStart](1-quickstart/README.md)
-- [2. Setting up your own environment](2-setting-up-environment/README.md)
-- [3. File formats for training data](3-file-formats/README.md)
-- [4. Data Storage Options](4-data-storage/README.md)
-- [5. Multi-GPU and Multi-Node Training](5-multi-gpu-and-node/README.md)
-- [6. Monitoring and Profiling jobs](6-monitoring-and-profiling/README.md)
-
-## Optional lessons (experiment tracking)
-
-- [7. TensorBoard visualization](7-tensorboard-visualization/README.md)
-- [8. MLflow visualization](8-mlflow-visualization/README.md)
-- [9. W&B visualization](9-wandb-visualization/README.md)
-
-## Extension track (advanced AI Factory workflows)
+Advanced topics for users who have completed the core lessons:
 
 - [Extension track index](extension-track/README.md)
-- [01. Foundation model adaptation on LUMI-G](extension-track/01-foundation-model-adaptation/README.md)
-- [02. Inference and embeddings on MI250X](extension-track/02-inference-and-embeddings/README.md)
-- [03. RAG on MI250X](extension-track/03-rag-and-knowledge-workflows/README.md)
-- [04. Evaluation and trustworthiness on MI250X](extension-track/04-evaluation-and-trustworthiness/README.md)
-- [05. Synthetic data on MI250X](extension-track/05-synthetic-data-and-data-centric-workflows/README.md)
-- [06. Scaling on MI250X](extension-track/06-topology-aware-scaling/README.md)
-- [07. Advanced Inference and Serving](extension-track/07-advanced-inference-and-serving/README.md)
-- [08. Reference Architectures](extension-track/08-reference-architectures/README.md)
-- [09. Sensitive Data and Trustworthy Operations](extension-track/09-sensitive-data-and-trustworthy-operations/README.md)
-- [10. MLOps and Lifecycle Management](extension-track/10-mlops-and-lifecycle-management/README.md)
-- [11. Team Operating Models and Collaboration](extension-track/11-team-operating-models-and-collaboration/README.md)
-- [12. Cost Awareness and Capacity Planning](extension-track/12-cost-awareness-and-capacity-planning/README.md)
-- [13. Industrial Document AI](extension-track/13-industrial-document-ai/README.md)
-
-## Standalone practical guides
-
-- [Scaling-Aware AI on LUMI](scaling-aware-ai/README.md)
 
 ## Further reading
 
 - [LUMI Documentation](https://docs.lumi-supercomputer.eu/)
-- [LUMI AI Factory Services](https://docs.lumi-supercomputer.eu/software/local/lumi-aif/)
-- [LUMI software library, PyTorch](https://lumi-supercomputer.github.io/LUMI-EasyBuild-docs/p/PyTorch/)
-- [LUMI software library, TensorFlow](https://lumi-supercomputer.github.io/LUMI-EasyBuild-docs/t/TensorFlow/)
-- [LUMI software library, Jax](https://lumi-supercomputer.github.io/LUMI-EasyBuild-docs/j/jax/)
-- [Workshop material - Moving your AI training jobs to LUMI](https://lumi-supercomputer.github.io/LUMI-training-materials/ai-20240529/)
-
-## Navigation
-
-- Next: [0. How to use this guide](0-how-to-use-guide/README.md)
+- [Scaling-Aware AI on LUMI](https://github.com/aniskhan25/scaling-aware-ai)
+- [Container extension guide](https://github.com/aniskhan25/Extending-containers-on-LUMI/blob/main/README.org)
+- [LUMI AI workshop materials](https://lumi-supercomputer.github.io/LUMI-training-materials/ai-20240529/)
