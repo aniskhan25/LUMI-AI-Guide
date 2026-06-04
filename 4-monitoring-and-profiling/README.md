@@ -45,4 +45,4 @@ For deeper hardware-level analysis (memory bandwidth, cache hit rates, instructi
 
 ## Next
 
-[5. Experiment Tracking](../7-tensorboard-visualization/README.md)
+[5. Experiment Tracking](../5-experiment-tracking/README.md)

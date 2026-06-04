@@ -87,4 +87,4 @@ For more on distributed training on LUMI, see the [LUMI AI guide](https://docs.l
 
 ## Next
 
-[4. Monitoring and Profiling](../6-monitoring-and-profiling/README.md)
+[4. Monitoring and Profiling](../4-monitoring-and-profiling/README.md)

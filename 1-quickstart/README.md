@@ -49,4 +49,4 @@ For general LUMI help, see the [LUMI documentation](https://docs.lumi-supercompu
 
 ## Next
 
-[2. Data: formats and storage](../3-file-formats/README.md)
+[2. Data on LUMI](../2-data/README.md)

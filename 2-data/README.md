@@ -77,4 +77,4 @@ The script copies data into `/tmp`, runs training, then copies the model checkpo
 
 ## Next
 
-[3. Multi-GPU and Multi-Node Training](../5-multi-gpu-and-node/README.md)
+[3. Multi-GPU and Multi-Node Training](../3-multi-gpu-and-node/README.md)
