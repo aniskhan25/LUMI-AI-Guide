@@ -1,6 +1,0 @@
-# Packages used by scripts under 3-file-formats/
-h5py==3.12.1
-lmdb==1.5.1
-msgpack
-six
-tqdm

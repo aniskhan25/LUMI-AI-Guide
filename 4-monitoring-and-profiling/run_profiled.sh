@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=quickstart-vit
+#SBATCH --job-name=profiled-vit
 #SBATCH --account=project_462000131
 #SBATCH --partition=small-g
 
@@ -18,6 +18,6 @@ module use /appl/local/containers/ai-modules
 module load singularity-AI-bindings
 
 source ../env.sh
+: "${CONTAINER:?Set CONTAINER in ../env.sh}"
 
-: "${CONTAINER:?Set CONTAINER in env.sh}"
-singularity exec "$CONTAINER" python visiontransformer.py
+time srun singularity exec "$CONTAINER" python visiontransformer_profiled.py
