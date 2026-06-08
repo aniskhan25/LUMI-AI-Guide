@@ -80,4 +80,4 @@ Results appear at [wandb.ai](https://wandb.ai). W&B also automatically captures 
 
 ## Next
 
-You have completed the core guide. For advanced topics — fine-tuning, inference, RAG, scaling patterns — see the [extension track](../extension-track/README.md).
+[6. Foundation Model Adaptation](../6-foundation-model-adaptation/README.md)

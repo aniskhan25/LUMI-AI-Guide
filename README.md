@@ -15,6 +15,7 @@ The official container for all lessons:
 - [3. Multi-GPU and Multi-Node Training](3-multi-gpu-and-node/README.md)
 - [4. Monitoring and Profiling](4-monitoring-and-profiling/README.md)
 - [5. Experiment Tracking](5-experiment-tracking/README.md)
+- [6. Foundation Model Adaptation](6-foundation-model-adaptation/README.md)
 
 ## Before you start
 

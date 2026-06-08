@@ -1,9 +1,41 @@
 # 3. Multi-GPU and Multi-Node Training
 
+## LUMI-G node topology
+
+Understanding the hardware layout helps you set up jobs correctly and interpret scaling results.
+
+A full LUMI-G node exposes:
+
+- **8 GPU-visible devices (GCDs)** — 4 AMD MI250X modules, each with 2 Graphic Compute Dies
+- **56 CPU cores** — 1 AMD EPYC Trento, 4 NUMA domains
+- **4 Slingshot NICs** — one per MI250X module, used for inter-node communication
+
+Two facts matter immediately for scaling:
+
+1. The two GCDs inside one MI250X communicate over a fast in-package Infinity Fabric link. GCDs across different MI250X modules use slower cross-package links.
+2. Each scaling step changes the communication pattern: `1 GCD → 8 GCDs (one node) → multi-node` each add a new communication layer, not just more devices.
+
+This is why CPU-GPU binding matters — each rank should be pinned to the CPU cores in the same NUMA domain as its GPU. The `srun` scripts in this lesson handle this with `--cpu-bind=mask_cpu`.
+
+For more detail see the [LUMI-G hardware overview](https://docs.lumi-supercomputer.eu/hardware/lumig/) and [distribution and binding guide](https://docs.lumi-supercomputer.eu/runjobs/scheduled-jobs/distribution-binding/).
+
 ## When to scale
 
 - **Multi-GPU (single node)**: your model fits on one GPU but training is too slow — use DDP to parallelise across all 8 GCDs on a node.
 - **Multi-node**: your dataset or model requires more memory or compute than one node can provide — extend DDP or switch to DeepSpeed.
+- **Don't scale yet**: if your single-GPU utilisation is low or your data pipeline is the bottleneck, fix that first — more GPUs won't help.
+
+## GPU-hour planning
+
+LUMI bills by GPU-hours consumed. Before scaling up, use a staged approach:
+
+| Stage | Purpose | Partition |
+|---|---|---|
+| Debug (1 GCD) | Confirm the script runs end-to-end | `dev-g` |
+| Baseline (1 node) | Measure single-node throughput | `small-g` |
+| Scale test (multi-node) | Check whether more nodes improve throughput enough | `standard-g` |
+
+Move to the next stage only after the current one answers its question. Jumping straight to multi-node before a stable single-node baseline is the most common way to waste GPU-hours on LUMI.
 
 ## Launch method: `srun` vs `torchrun`
 
