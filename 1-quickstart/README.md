@@ -26,6 +26,9 @@ Already set as the default in `../env.sh`. If you need extra packages, see the [
 
 ```bash
 sbatch run_base.sh
+```
+
+```bash
 cat slurm-<jobid>.out
 ```
 
