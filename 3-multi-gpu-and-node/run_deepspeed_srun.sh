@@ -14,22 +14,11 @@
 
 set -euo pipefail
 
-module purge
-module use /appl/local/laifs/modules
-module load lumi-aif-singularity-bindings
-
-# MIOpen and PyTorch cache — must be writable per-job directories
-MIOPEN_DIR=$(mktemp -d)
-export MIOPEN_CUSTOM_CACHE_DIR=$MIOPEN_DIR/cache
-export MIOPEN_USER_DB=$MIOPEN_DIR/config
-export TORCH_HOME="/scratch/${SLURM_JOB_ACCOUNT}/${USER}/torch_home"
-mkdir -p "$TORCH_HOME"
+source ../setup.sh
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-source ../env.sh
-: "${CONTAINER:?Set CONTAINER in ../env.sh}"
 
 export NCCL_SOCKET_IFNAME=hsn0,hsn1,hsn2,hsn3
 export NCCL_NET_GDR_LEVEL=PHB
