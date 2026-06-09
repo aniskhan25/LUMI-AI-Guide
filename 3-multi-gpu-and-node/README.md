@@ -32,7 +32,7 @@ LUMI bills by GPU-hours consumed. Before scaling up, use a staged approach:
 | Stage | Purpose | Partition |
 |---|---|---|
 | Debug (1 GCD) | Confirm the script runs end-to-end | `dev-g` |
-| Baseline (1 node) | Measure single-node throughput | `small-g` |
+| Baseline (1 node, 8 GCDs) | Measure single-node throughput | `standard-g` |
 | Scale test (multi-node) | Check whether more nodes improve throughput enough | `standard-g` |
 
 Move to the next stage only after the current one answers its question. Jumping straight to multi-node before a stable single-node baseline is the most common way to waste GPU-hours on LUMI.
@@ -43,8 +43,8 @@ Two launchers are available. **`srun` is recommended on LUMI** because it enable
 
 | | `srun` | `torchrun` |
 |---|---|---|
-| CPU-GPU binding | ✓ via `--cpu-bind` | requires code changes |
-| Rank management | Slurm-native (`$SLURM_PROCID`) | handled by torchrun |
+| CPU-GPU binding | ✓ via `--cpu-bind=mask_cpu` | ✓ via `--numa-binding=exclusive` |
+| Rank management | SLURM-native (`$SLURM_PROCID`) | handled by torchrun |
 | Recommended on LUMI | ✓ | |
 
 ## PyTorch DDP
