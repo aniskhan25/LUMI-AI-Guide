@@ -13,7 +13,6 @@
 #SBATCH --time=00:10:00
 
 source ../setup.sh
-cd "$SLURM_SUBMIT_DIR"
 
 srun singularity exec -B demo.squashfs:/data:image-src=/ "$CONTAINER" \
   python read_squashfs.py

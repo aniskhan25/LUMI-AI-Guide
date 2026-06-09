@@ -13,7 +13,6 @@
 #SBATCH --time=00:15:00
 
 source ../setup.sh
-cd "$SLURM_SUBMIT_DIR"
 
 singularity exec "$CONTAINER" python - <<'PY'
 import platform

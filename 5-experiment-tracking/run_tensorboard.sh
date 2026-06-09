@@ -15,7 +15,6 @@
 set -euo pipefail
 
 source ../setup.sh
-cd "$SLURM_SUBMIT_DIR"
 
 
 export NCCL_SOCKET_IFNAME=hsn0,hsn1,hsn2,hsn3
