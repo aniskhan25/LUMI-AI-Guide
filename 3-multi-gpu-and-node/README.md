@@ -98,21 +98,9 @@ sbatch run_deepspeed_torchrun_n4.sh
 
 Before requesting more nodes, measure whether your workload benefits from the GPUs you already have. [Scaling-Aware AI on LUMI](https://github.com/aniskhan25/scaling-aware-ai) walks through a structured approach — baseline experiments, bottleneck diagnosis (data starvation, load imbalance, communication overhead), and a clear decision framework for when multi-node is justified.
 
-## RCCL environment variables
-
-All job scripts set these — required for correct inter-node communication on LUMI:
-
-```bash
-export NCCL_SOCKET_IFNAME=hsn0,hsn1,hsn2,hsn3  # use Slingshot interconnect
-export NCCL_NET_GDR_LEVEL=PHB                   # enable GPU Direct RDMA
-```
-
-Without `NCCL_SOCKET_IFNAME`, RCCL will fail to find the correct network interface and inter-node communication will not work.
-
 ## Troubleshooting
 
 - **Hangs at startup**: check that `MASTER_ADDR` and `MASTER_PORT` are set and reachable from all nodes
-- **Slow inter-node performance**: confirm the RCCL variables above are set
 - **Out of memory**: try DeepSpeed ZeRO stage 2 or 3 in `ds_config.json`
 
 For more on distributed training on LUMI, see the [LUMI AI guide](https://docs.lumi-supercomputer.eu/software/ai/).
