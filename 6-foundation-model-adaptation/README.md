@@ -58,4 +58,11 @@ Once the single-GPU baseline is stable, the same script can be wrapped with `tor
 
 ## Next
 
-You have completed the core guide. For advanced topics — inference pipelines, RAG, evaluation, scaling patterns — see the [extension track](../extension-track/README.md).
+You have completed the core guide.
+
+A natural next step is running the fine-tuned model at scale — for batch inference or to build embeddings for search and RAG. The extension track starts there:
+
+- [EXT-02: Inference and embeddings on MI250X](../extension-track/02-inference-and-embeddings/README.md) — batch-embed a corpus or generate outputs with a HuggingFace model
+- [EXT-03: RAG on MI250X](../extension-track/03-rag-and-knowledge-workflows/README.md) — chunk, embed, index, and query a document corpus
+
+For evaluation, synthetic data, and advanced serving patterns see the full [extension track index](../extension-track/README.md).
