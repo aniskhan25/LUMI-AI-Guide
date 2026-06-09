@@ -15,6 +15,7 @@
 set -euo pipefail
 
 source ../setup.sh
+cd "$SLURM_SUBMIT_DIR"
 
 time srun singularity run "$CONTAINER" \
   python -m torch.distributed.run --numa-binding=exclusive \

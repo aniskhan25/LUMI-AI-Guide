@@ -15,6 +15,7 @@
 set -euo pipefail
 
 source ../setup.sh
+cd "$SLURM_SUBMIT_DIR"
 
 export MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
 export MASTER_PORT="1${SLURM_JOB_ID:0-4}"
