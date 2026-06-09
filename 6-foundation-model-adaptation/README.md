@@ -1,10 +1,10 @@
 # 6. Foundation Model Adaptation
 
-Fine-tune a pretrained model on LUMI for a downstream task. This is the right approach when you need the model to learn a specific task boundary or label mapping that prompting alone cannot reliably produce.
+Fine-tune a pretrained model on LUMI for a downstream task. Use adaptation when prompting alone is too unstable or the desired behaviour should live in the checkpoint itself.
 
 ## Prerequisites
 
-This lesson requires `transformers` and `datasets` from HuggingFace. Check whether they are available in the container:
+Check that `transformers` and `datasets` are available in the container:
 
 ```bash
 singularity exec "$CONTAINER" python -c "import transformers, datasets; print('OK')"
@@ -12,57 +12,60 @@ singularity exec "$CONTAINER" python -c "import transformers, datasets; print('O
 
 If not, extend the container first — see the [container extension guide](https://github.com/aniskhan25/Extending-containers-on-LUMI/blob/main/README.org).
 
+## Prepare the data
+
+```bash
+singularity exec "$CONTAINER" python data/prepare_ag_news.py --output data/ag_news
+```
+
+This writes `data/ag_news/train.jsonl` and `data/ag_news/eval.jsonl` (AG News, 4-class news topic classification).
+
 ## Adaptation modes
 
-Three modes are available in `finetune.py`:
+Edit `configs/baseline.yaml` to choose the adaptation mode:
 
 | Mode | What trains | When to use |
 |---|---|---|
-| `head_only` | Classifier head only | First run — fastest, lowest risk |
+| `head_only` | Classifier head only | Start here — fastest, lowest risk |
 | `lora` | Small adapter layers (requires `peft`) | When head_only is not enough |
 | `full` | All parameters | Maximum flexibility, highest cost |
 
-Start with `head_only`. Move to `lora` or `full` only after the baseline succeeds.
-
 ## Run
 
+Single GCD:
+
 ```bash
-sbatch run_finetune.sh             # head_only (default)
-sbatch run_finetune.sh lora        # lora adapters
-sbatch run_finetune.sh full        # full fine-tuning
+sbatch run_finetune.sh
 ```
 
-The script fine-tunes `distilbert-base-uncased` on a subset of AG News (4-class news topic classification). On success you will see:
+Scale to a full node (8 GCDs) once the single-GCD baseline is stable:
+
+```bash
+sbatch run_finetune_ddp.sh
+```
+
+On success you will see:
 
 ```
-Eval accuracy: 0.xxxx
+EVAL_LOSS=...
+EVAL_ACCURACY=...
 RUN_COMPLETE=1
-Checkpoint saved to outputs/finetune-head_only/checkpoint
 ```
 
-Metrics are written to `outputs/finetune-<mode>/metrics.json`.
+The checkpoint is saved to `outputs/baseline-run/checkpoint/`.
 
 ## Bring your own data
 
-Replace the `load_dataset("ag_news")` call in `finetune.py` with your own dataset. The script expects samples with `text` (string) and `label` (int) fields. Adjust `num_labels` in the model initialisation to match your class count.
-
-## Scaling to multiple GPUs
-
-Once the single-GPU baseline is stable, the same script can be wrapped with `torch.distributed.run` using the DDP patterns from [L3](../3-multi-gpu-and-node/README.md). Scale only after the single-GPU run is working correctly.
+Replace `data/prepare_ag_news.py` with your own data preparation script. The training scripts expect JSONL with `text` (string) and `label` (int) fields. Update `num_labels` in `configs/baseline.yaml` to match your class count.
 
 ## Troubleshooting
 
 - **`import transformers` fails**: extend the container as described above
-- **CUDA out of memory**: reduce `--batch_size` or `--max_len`, or switch to `lora`
+- **CUDA out of memory**: reduce `batch_size` in `configs/baseline.yaml`, or switch to `lora`
 - **Poor accuracy with `head_only`**: try `lora` before increasing batch size or epochs
 
 ## Next
 
-You have completed the core guide.
+A natural next step is running the adapted model at scale — for batch inference or to build embeddings for search and RAG:
 
-A natural next step is running the fine-tuned model at scale — for batch inference or to build embeddings for search and RAG. The extension track starts there:
-
-- [EXT-02: Inference and embeddings on MI250X](../extension-track/02-inference-and-embeddings/README.md) — batch-embed a corpus or generate outputs with a HuggingFace model
-- [EXT-03: RAG on MI250X](../extension-track/03-rag-and-knowledge-workflows/README.md) — chunk, embed, index, and query a document corpus
-
-For evaluation, synthetic data, and advanced serving patterns see the full [extension track index](../extension-track/README.md).
+- [7. Inference and Embeddings](../7-inference-and-embeddings/README.md) — batch-embed a corpus or generate outputs with a HuggingFace model

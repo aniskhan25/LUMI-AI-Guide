@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=finetune
+#SBATCH --job-name=embeddings
 #SBATCH --account=project_462000131
 #SBATCH --partition=small-g
 
@@ -21,4 +21,4 @@ source ../env.sh
 : "${CONTAINER:?Set CONTAINER in ../env.sh}"
 
 srun singularity exec "$CONTAINER" \
-  python train.py --config configs/baseline.yaml
+  python run_embeddings.py --config configs/embeddings.yaml

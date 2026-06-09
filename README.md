@@ -16,6 +16,7 @@ The official container for all lessons:
 - [4. Monitoring and Profiling](4-monitoring-and-profiling/README.md)
 - [5. Experiment Tracking](5-experiment-tracking/README.md)
 - [6. Foundation Model Adaptation](6-foundation-model-adaptation/README.md)
+- [7. Inference and Embeddings](7-inference-and-embeddings/README.md)
 
 ## Before you start
 
