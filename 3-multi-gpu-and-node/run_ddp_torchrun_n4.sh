@@ -15,17 +15,10 @@ set -euo pipefail
 
 source ../setup.sh
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
-
-
-export NCCL_SOCKET_IFNAME=hsn0,hsn1,hsn2,hsn3
-export NCCL_NET_GDR_LEVEL=PHB
-
 export MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
 export MASTER_PORT="1${SLURM_JOB_ID:0-4}"
 
-srun singularity exec "$CONTAINER" bash -c '
+srun singularity run "$CONTAINER" bash -c '
   python -m torch.distributed.run --numa-binding=exclusive \
     --nnodes="$SLURM_JOB_NUM_NODES" --nproc_per_node=8 \
     --rdzv_id="$SLURM_JOB_ID" --rdzv_backend=c10d --rdzv_endpoint="$MASTER_ADDR:$MASTER_PORT" \
