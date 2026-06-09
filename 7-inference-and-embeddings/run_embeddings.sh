@@ -2,7 +2,7 @@
 
 #SBATCH --job-name=embeddings
 #SBATCH --account=project_462000131
-#SBATCH --partition=small-g
+#SBATCH --partition=dev-g
 
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
