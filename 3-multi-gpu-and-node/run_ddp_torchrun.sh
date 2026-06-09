@@ -24,5 +24,5 @@ export NCCL_SOCKET_IFNAME=hsn0,hsn1,hsn2,hsn3
 export NCCL_NET_GDR_LEVEL=PHB
 
 time srun singularity exec "$CONTAINER" \
-  python -m torch.distributed.run \
+  python -m torch.distributed.run --numa-binding=exclusive \
   --standalone --nnodes=1 --nproc_per_node=8 visiontransformer_ddp.py
