@@ -31,6 +31,6 @@ print(f"Saved {len(dataset)} images to {out_dir}")
 PY
 
 echo "Packing into $SQUASHFS_FILE ..."
-mksquashfs "$DATASET_DIR" "$SQUASHFS_FILE" -noappend
+mksquashfs "$DATASET_DIR" "$SQUASHFS_FILE" -noappend -no-xattrs
 
 echo "Done. Submit the job with: sbatch run_squashfs.sh"
