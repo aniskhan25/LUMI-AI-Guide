@@ -9,7 +9,11 @@ export CONTAINER="${CONTAINER:-/appl/local/laifs/containers/lumi-multitorch-late
 # Derived paths — change only if your project layout differs
 export SCRATCH_ROOT="${SCRATCH_ROOT:-/scratch/${PROJECT_ACCOUNT}/${USER}}"
 
-# Point the HIP/ROCm runtime's temp files to the per-job local NVMe scratch.
-# Without this, the HIP user file database (.ufdb.txt) is written to /tmp
-# inside the container, which may not be writable, causing an abort.
-export SINGULARITYENV_TMPDIR="${LOCAL_SCRATCH:-/tmp}"
+# Bind the per-job local NVMe scratch over /tmp inside the container.
+# HIP writes its runtime files (.ufdb.txt) to /tmp and hardcodes that path —
+# setting TMPDIR is not enough. Bind-mounting a writable directory over /tmp
+# is the correct fix. SINGULARITY_BIND is read automatically by every
+# singularity exec call, so no job script changes are needed.
+if [ -n "${LOCAL_SCRATCH:-}" ]; then
+    export SINGULARITY_BIND="${SINGULARITY_BIND:+${SINGULARITY_BIND},}${LOCAL_SCRATCH}:/tmp"
+fi
