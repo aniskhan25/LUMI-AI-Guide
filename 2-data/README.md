@@ -21,50 +21,42 @@ For more on storage costs, quotas, and optional Lustre striping tuning, see the 
 
 Avoid storing datasets as millions of loose files on Lustre — this degrades filesystem performance for all users.
 
-### SquashFS
+## SquashFS demo
 
-Pack a directory into a single `.squashfs` file, then mount it read-only inside the container:
+SquashFS packs a directory into a single file that Singularity mounts read-only inside the container. No small-file pressure on Lustre during training.
 
-```bash
-mksquashfs /your/dataset/ dataset.squashfs
-```
+**Step 1** — generate synthetic images and pack them (run on the login node):
 
 ```bash
-singularity exec -B dataset.squashfs:/data:image-src=/ "$CONTAINER" python train.py
+bash prepare_squashfs.sh
 ```
 
-Inside `train.py`, read from `/data` as a normal directory.
+This writes 100 synthetic images to `$SCRATCH_ROOT/squashfs-demo/images/` and packs them into `demo.squashfs`.
 
-### WebDataset
+**Step 2** — submit a job that mounts and reads the archive:
 
-Store samples as tar shards and stream them during training:
-
-```python
-import webdataset as wds
-
-dataset = wds.WebDataset("/scratch/<project>/data/shard-{000000..000999}.tar") \
-    .decode("pil") \
-    .to_tuple("jpg", "cls")
+```bash
+sbatch run_squashfs.sh
 ```
 
-Works well on Lustre because reads are large and sequential.
-
-### HuggingFace datasets
-
-```python
-from datasets import load_from_disk
-
-dataset = load_from_disk("/scratch/<project>/data/my-dataset")
+```bash
+cat slurm-<jobid>.out
 ```
 
-Save once with `dataset.save_to_disk(...)`, reload across jobs. Supports streaming for datasets too large to fit in memory.
+Look for `SQUASHFS READ OK`. In your own training scripts, read from `/data` inside the container as a normal directory.
 
-## RAMfs example
+For WebDataset and HuggingFace datasets formats, see the [LUMI documentation](https://docs.lumi-supercomputer.eu/storage/).
+
+## RAMfs demo
 
 For single-node jobs where your dataset fits in node memory, copying to `/tmp` before training eliminates all Lustre I/O during the run.
 
 ```bash
 sbatch run_ramfs.sh
+```
+
+```bash
+cat slurm-<jobid>.out
 ```
 
 The script copies data into `/tmp`, runs training, then copies the model checkpoint out before the job ends. See `run_ramfs.sh` for the pattern.
