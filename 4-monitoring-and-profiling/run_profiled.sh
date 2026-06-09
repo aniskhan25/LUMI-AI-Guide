@@ -14,8 +14,8 @@
 
 set -euo pipefail
 
-module use /appl/local/containers/ai-modules
-module load singularity-AI-bindings
+module use /appl/local/laifs/modules
+module load lumi-aif-singularity-bindings
 
 source ../env.sh
 : "${CONTAINER:?Set CONTAINER in ../env.sh}"

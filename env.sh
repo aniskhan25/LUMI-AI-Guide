@@ -9,11 +9,12 @@ export CONTAINER="${CONTAINER:-/appl/local/laifs/containers/lumi-multitorch-late
 # Derived paths — change only if your project layout differs
 export SCRATCH_ROOT="${SCRATCH_ROOT:-/scratch/${PROJECT_ACCOUNT}/${USER}}"
 
-# Bind the per-job local NVMe scratch over /tmp inside the container.
-# HIP writes its runtime files (.ufdb.txt) to /tmp and hardcodes that path —
-# setting TMPDIR is not enough. Bind-mounting a writable directory over /tmp
-# is the correct fix. SINGULARITY_BIND is read automatically by every
-# singularity exec call, so no job script changes are needed.
-if [ -n "${LOCAL_SCRATCH:-}" ]; then
-    export SINGULARITY_BIND="${SINGULARITY_BIND:+${SINGULARITY_BIND},}${LOCAL_SCRATCH}:/tmp"
-fi
+# MIOpen cache — must be a writable per-job directory, not the container default.
+# Without this the HIP runtime aborts with a filesystem permissions error.
+MIOPEN_DIR=$(mktemp -d)
+export MIOPEN_CUSTOM_CACHE_DIR=$MIOPEN_DIR/cache
+export MIOPEN_USER_DB=$MIOPEN_DIR/config
+
+# PyTorch model cache — keep downloaded weights on scratch, not $HOME.
+export TORCH_HOME="${TORCH_HOME:-${SCRATCH_ROOT}/torch_home}"
+mkdir -p "$TORCH_HOME"

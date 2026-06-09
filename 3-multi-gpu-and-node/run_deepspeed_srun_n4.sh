@@ -14,8 +14,8 @@
 
 set -euo pipefail
 
-module use /appl/local/containers/ai-modules
-module load singularity-AI-bindings
+module use /appl/local/laifs/modules
+module load lumi-aif-singularity-bindings
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
