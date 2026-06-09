@@ -13,5 +13,6 @@
 #SBATCH --time=01:00:00
 
 source ../setup.sh
+cd "$SLURM_SUBMIT_DIR"
 
 singularity exec "$CONTAINER" python visiontransformer.py

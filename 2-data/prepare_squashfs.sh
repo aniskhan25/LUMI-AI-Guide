@@ -9,6 +9,7 @@
 set -euo pipefail
 
 source ../setup.sh
+cd "$SLURM_SUBMIT_DIR"
 
 DATASET_DIR="${SCRATCH_ROOT}/squashfs-demo/images"
 SQUASHFS_FILE="$(pwd)/demo.squashfs"

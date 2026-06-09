@@ -15,6 +15,7 @@
 set -euo pipefail
 
 source ../setup.sh
+cd "$SLURM_SUBMIT_DIR"
 
 
 srun singularity exec "$CONTAINER" \

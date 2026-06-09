@@ -12,6 +12,7 @@
 set -euo pipefail
 
 source ../setup.sh
+cd "$SLURM_SUBMIT_DIR"
 
 
 : "${SCRATCH_ROOT:?Set SCRATCH_ROOT in env.sh}"

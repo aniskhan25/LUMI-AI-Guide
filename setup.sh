@@ -13,11 +13,6 @@ module purge
 module use /appl/local/laifs/modules
 module load lumi-aif-singularity-bindings
 
-# --- Working directory ---
-# Change to the directory containing the job script, regardless of where
-# sbatch was submitted from. BASH_SOURCE[1] is the calling job script.
-cd -- "$(cd -- "$(dirname -- "${BASH_SOURCE[1]}")" && pwd)"
-
 # --- MIOpen and PyTorch cache ---
 # Must be writable per-job directories; MIOpen aborts if it cannot set
 # permissions on its runtime files.
