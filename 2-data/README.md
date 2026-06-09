@@ -4,17 +4,11 @@
 
 | Filesystem | Use for | Notes |
 |---|---|---|
-| `/scratch` (LUMI-P) | Active training data | Default choice. Set Lustre striping for large files. |
+| `/scratch` (LUMI-P) | Active training data | Default choice for most workloads. |
 | LUMI-F | I/O-bound workloads | ~10x higher bandwidth than LUMI-P, but 3x the storage cost. |
 | `/tmp` (RAMfs) | Node-local fast access | Fastest, but local to one node. Data is lost when the job ends — copy outputs out before exit. |
 
-Set Lustre striping on your data directory before writing large files:
-
-```bash
-lfs setstripe --stripe-count 32 --stripe-size 4m /scratch/<project>/<user>/data/
-```
-
-For more on storage costs and quotas, see the [LUMI storage documentation](https://docs.lumi-supercomputer.eu/storage/).
+For more on storage costs, quotas, and optional Lustre striping tuning, see the [LUMI storage documentation](https://docs.lumi-supercomputer.eu/storage/).
 
 ## What format to use
 
