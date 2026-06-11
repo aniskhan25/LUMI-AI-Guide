@@ -1,6 +1,6 @@
 # LUMI AI Guide
 
-> **Disclaimer:** This is not the official LUMI AI guide. For the official documentation, see [docs.lumi-supercomputer.eu/software/ai](https://docs.lumi-supercomputer.eu/software/ai/).
+> **Disclaimer:** This is not the official LUMI AI guide. For the official guide, see [github.com/Lumi-supercomputer/LUMI-AI-Guide](https://github.com/Lumi-supercomputer/LUMI-AI-Guide).
 
 A practical guide for running AI training on LUMI, built around a runnable Vision Transformer example in PyTorch.
 
