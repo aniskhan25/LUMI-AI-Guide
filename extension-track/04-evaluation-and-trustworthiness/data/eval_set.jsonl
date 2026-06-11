@@ -1,7 +1,0 @@
-{"query_id":"q-001","question":"What actions are required when a high severity security incident occurs?","expected_doc_id":"doc-002","category":"security-operations"}
-{"query_id":"q-002","question":"How long are customer support transcripts retained and how are deletions handled?","expected_doc_id":"doc-003","category":"data-governance"}
-{"query_id":"q-003","question":"What checks must a model pass before deployment?","expected_doc_id":"doc-004","category":"mlops"}
-{"query_id":"q-004","question":"What approvals are needed for high-value procurement requests?","expected_doc_id":"doc-005","category":"finance"}
-{"query_id":"q-005","question":"What are the API latency and availability objectives?","expected_doc_id":"doc-008","category":"platform-slo"}
-{"query_id":"q-006","question":"What should operators do when coolant temperature remains above threshold?","expected_doc_id":"doc-001","category":"operations"}
-
