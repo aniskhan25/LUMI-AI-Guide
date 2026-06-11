@@ -1,0 +1,30 @@
+run:
+  run_name: generation-baseline
+  output_dir: outputs
+  seed: 42
+  log_every_batches: 5
+
+model:
+  name: distilgpt2
+  trust_remote_code: false
+
+data:
+  input_jsonl: data/ag_news_generation_inputs.jsonl
+  id_key: id
+  prompt_key: prompt
+  max_samples: 0  # 0 means no limit
+
+inference:
+  batch_size: 8
+  max_input_length: 256
+  max_new_tokens: 64
+  do_sample: false
+  temperature: 1.0
+  top_p: 1.0
+
+runtime:
+  allow_cpu_fallback: false
+
+output:
+  outputs_filename: generation_outputs.jsonl
+  summary_filename: run_summary.json

@@ -2,7 +2,7 @@
 
 #SBATCH --job-name=quickstart-vit
 #SBATCH --account=project_462000131
-#SBATCH --partition=small-g
+#SBATCH --partition=dev-g
 
 #SBATCH --nodes=1
 #SBATCH --gpus-per-node=1
@@ -12,12 +12,6 @@
 
 #SBATCH --time=01:00:00
 
-set -euo pipefail
+source ../setup.sh
 
-module use /appl/local/containers/ai-modules
-module load singularity-AI-bindings
-
-source ../env.sh
-
-: "${CONTAINER:?Set CONTAINER in env.sh}"
-singularity exec -B ../resources/visiontransformer-env.sqsh:/user-software:image-src=/ "$CONTAINER" /user-software/bin/python visiontransformer.py
+singularity exec "$CONTAINER" python visiontransformer.py

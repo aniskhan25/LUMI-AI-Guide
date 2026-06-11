@@ -1,0 +1,29 @@
+run:
+  run_name: advanced-inference-batched
+  output_dir: ../outputs
+
+model:
+  model_id: synthetic-service-model-v1
+  mode: template  # template, transformers
+
+runtime:
+  require_gpu: true
+  allow_cpu_fallback: false
+
+inference:
+  batch_size: 8
+  max_new_tokens: 64
+  temperature: 0.0
+  concurrency: 1
+
+paths:
+  requests_jsonl: ../data/sample_requests.jsonl
+
+output:
+  requests_copy_jsonl: requests.jsonl
+  responses_jsonl: responses.jsonl
+  errors_jsonl: errors.jsonl
+  run_metadata_json: run_metadata.json
+  metrics_json: metrics.json
+  summary_json: summary.json
+

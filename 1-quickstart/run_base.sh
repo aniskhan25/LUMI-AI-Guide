@@ -2,7 +2,7 @@
 
 #SBATCH --job-name=quickstart-base
 #SBATCH --account=project_462000131
-#SBATCH --partition=small-g
+#SBATCH --partition=dev-g
 
 #SBATCH --nodes=1
 #SBATCH --gpus-per-node=1
@@ -12,12 +12,7 @@
 
 #SBATCH --time=00:15:00
 
-module use /appl/local/containers/ai-modules
-module load singularity-AI-bindings
-
-source ../env.sh
-
-: "${CONTAINER:?Set CONTAINER in env.sh}"
+source ../setup.sh
 
 singularity exec "$CONTAINER" python - <<'PY'
 import platform
