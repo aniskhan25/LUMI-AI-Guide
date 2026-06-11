@@ -55,4 +55,4 @@ Both scripts read JSONL input configured in the YAML file. For embeddings the ex
 
 ## Next
 
-You have completed the core guide. For advanced topics — RAG pipelines, evaluation, synthetic data, scaling patterns — see the [extension track](../extension-track/README.md).
+You have completed the core guide.

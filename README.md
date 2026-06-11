@@ -24,12 +24,6 @@ The official container for all lessons:
 - Update `PROJECT_ACCOUNT` and `LUMI_USER` in `env.sh` before submitting any jobs
 - Clone this repository to `/project` or `/scratch`, not `$HOME`
 
-## Extension track
-
-Advanced topics for users who have completed the core lessons:
-
-- [Extension track index](extension-track/README.md)
-
 ## Further reading
 
 - [LUMI Documentation](https://docs.lumi-supercomputer.eu/)
