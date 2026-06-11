@@ -4,9 +4,10 @@ Fine-tune a pretrained model on LUMI for a downstream task. Use adaptation when 
 
 ## Prerequisites
 
-Check that `transformers` and `datasets` are available in the container:
+Source the environment first, then check that `transformers` and `datasets` are available in the container:
 
 ```bash
+source ../setup.sh
 singularity exec "$CONTAINER" python -c "import transformers, datasets; print('OK')"
 ```
 
@@ -14,8 +15,10 @@ If not, extend the container first — see the [container extension guide](https
 
 ## Prepare the data
 
+Run the data preparation step as a batch job — downloading and processing data on the login node is not allowed on LUMI:
+
 ```bash
-singularity exec "$CONTAINER" python data/prepare_ag_news.py --output data/ag_news
+sbatch prepare_data.sh
 ```
 
 This writes `data/ag_news/train.jsonl` and `data/ag_news/eval.jsonl` (AG News, 4-class news topic classification).
