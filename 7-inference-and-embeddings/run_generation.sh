@@ -17,5 +17,5 @@ set -euo pipefail
 source ../setup.sh
 
 
-srun singularity exec "$CONTAINER" \
+singularity run "$CONTAINER" \
   python run_generation.py --config configs/generation.yaml

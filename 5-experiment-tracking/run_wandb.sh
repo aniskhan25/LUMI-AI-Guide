@@ -23,6 +23,6 @@ export NCCL_NET_GDR_LEVEL=PHB
 # W&B authentication — set your API key before submitting
 : "${WANDB_API_KEY:?Set WANDB_API_KEY in your environment}"
 
-time srun singularity exec "$CONTAINER" \
+time srun singularity run "$CONTAINER" \
   python -m torch.distributed.run \
   --standalone --nnodes=1 --nproc_per_node=8 visiontransformer_ddp_wandb.py

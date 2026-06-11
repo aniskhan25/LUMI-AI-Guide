@@ -17,4 +17,4 @@ set -euo pipefail
 source ../setup.sh
 
 
-time srun singularity exec "$CONTAINER" python visiontransformer_profiled.py
+singularity run "$CONTAINER" python visiontransformer_profiled.py

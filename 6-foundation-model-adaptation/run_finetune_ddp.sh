@@ -17,6 +17,6 @@ set -euo pipefail
 source ../setup.sh
 
 
-srun singularity exec "$CONTAINER" \
+srun singularity run "$CONTAINER" \
   python -m torch.distributed.run --standalone --nnodes=1 --nproc_per_node=8 \
     train_ddp.py --config configs/baseline.yaml --run-name baseline-run-ddp

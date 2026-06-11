@@ -14,5 +14,5 @@
 
 source ../setup.sh
 
-srun singularity exec -B demo.squashfs:/data:image-src=/ "$CONTAINER" \
+singularity run -B demo.squashfs:/data:image-src=/ "$CONTAINER" \
   python read_squashfs.py

@@ -14,13 +14,13 @@ set -euo pipefail
 source ../setup.sh
 
 
-: "${SCRATCH_ROOT:?Set SCRATCH_ROOT in env.sh}"
+: "${SCRATCH_ROOT:?SCRATCH_ROOT not set — source setup.sh first}"
 
 OUT_DIR="$SCRATCH_ROOT/ramfs-demo"
 mkdir -p "$OUT_DIR"
 
 # Pattern: run inside /tmp (RAMfs), copy outputs out before job ends
-srun singularity exec "$CONTAINER" bash -c "
+singularity run "$CONTAINER" bash -c "
   set -euo pipefail
   python /dev/stdin <<'PY'
 import torch
