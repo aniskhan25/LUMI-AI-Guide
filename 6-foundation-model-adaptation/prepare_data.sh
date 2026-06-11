@@ -2,9 +2,8 @@
 
 #SBATCH --job-name=prepare-ag-news
 #SBATCH --account=project_462000131
-#SBATCH --partition=small-g
+#SBATCH --partition=small
 
-#SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=8G
