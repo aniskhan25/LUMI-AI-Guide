@@ -15,7 +15,7 @@ If not, extend the container first — see the [container extension guide](https
 
 ## Prepare the data
 
-Run the data preparation step as a batch job — downloading and processing data on the login node is not allowed on LUMI:
+Run the data preparation step as a batch job — downloading and processing data on the login node is discouraged on LUMI:
 
 ```bash
 sbatch prepare_data.sh
