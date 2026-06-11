@@ -4,9 +4,10 @@ Run a HuggingFace model as a batch pipeline on LUMI — either to produce embedd
 
 ## Prerequisites
 
-Check that `transformers` and `sentence-transformers` are available in the container:
+Source the environment first, then check that `transformers` and `sentence-transformers` are available in the container:
 
 ```bash
+source ../setup.sh
 singularity exec "$CONTAINER" python -c "import transformers, sentence_transformers; print('OK')"
 ```
 
@@ -14,8 +15,10 @@ If not, extend the container first — see the [container extension guide](https
 
 ## Prepare the data
 
+Run the data preparation step as a batch job — downloading and processing data on the login node is discouraged on LUMI:
+
 ```bash
-singularity exec "$CONTAINER" python data/prepare_ag_news.py --output data/ag_news
+sbatch prepare_data.sh
 ```
 
 This writes:
