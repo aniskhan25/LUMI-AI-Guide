@@ -38,7 +38,7 @@ def set_cpu_affinity(local_rank):
 set_cpu_affinity(local_rank)
 
 if rank == 0:
-    mlflow.set_tracking_uri("sqlite:///" + os.environ["PWD"] + "/mlruns.db")
+    mlflow.set_tracking_uri(os.environ["PWD"] + "/mlruns")
     mlflow.start_run(run_name=os.getenv("SLURM_JOB_ID", "local"))
 
 transform = transforms.Compose(

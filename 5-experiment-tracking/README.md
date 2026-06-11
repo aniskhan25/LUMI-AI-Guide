@@ -31,7 +31,7 @@ Open source, no account needed. Runs are stored locally (directory or SQLite) an
 import mlflow
 
 if rank == 0:
-    mlflow.set_tracking_uri("sqlite:///" + os.environ["PWD"] + "/mlruns.db")
+    mlflow.set_tracking_uri(os.environ["PWD"] + "/mlruns")
     mlflow.start_run(run_name=os.getenv("SLURM_JOB_ID"))
 
 # in training loop (rank 0 only):
@@ -43,7 +43,13 @@ mlflow.log_metric("accuracy", accuracy, step=epoch)
 sbatch run_mlflow.sh
 ```
 
-To visualise, go to **Apps → MLflow** in the LUMI web interface and point it at your tracking URI.
+To visualise, go to **Apps → MLflow** in the LUMI web interface and point it at the `mlruns/` directory created in the lesson folder, for example:
+
+```
+/scratch/project_462000131/<username>/LUMI-AI-Guide/5-experiment-tracking/mlruns
+```
+
+File-based tracking avoids the MLflow schema version mismatch between the container (MLflow 3.12) and the LUMI dashboard (MLflow 3.11.1).
 
 ## Weights & Biases
 
