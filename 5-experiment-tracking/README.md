@@ -49,7 +49,30 @@ To visualise, go to **Apps → MLflow** in the LUMI web interface and point it a
 /scratch/project_462000131/<username>/LUMI-AI-Guide/5-experiment-tracking/mlruns
 ```
 
-File-based tracking avoids the MLflow schema version mismatch between the container (MLflow 3.12) and the LUMI dashboard (MLflow 3.11.1).
+File-based tracking avoids the MLflow schema version mismatch between the container (MLflow 3.12) and the LUMI dashboard (MLflow 3.11.1). File-based tracking is also preferred over SQLite on Lustre filesystems, where many small random writes perform poorly.
+
+If you specifically need a SQLite database compatible with the LUMI dashboard, downgrade MLflow to 3.11.1 inside a virtual environment layered on the container, then activate it before running:
+
+```bash
+# on a compute node (e.g. sbatch or salloc on small)
+singularity exec "$CONTAINER" python -m venv --system-site-packages mlflow-env
+singularity exec "$CONTAINER" mlflow-env/bin/pip install mlflow==3.11.1
+```
+
+Then in `run_mlflow.sh`, replace the `singularity run` call with:
+
+```bash
+srun singularity run "$CONTAINER" bash -c '
+  source mlflow-env/bin/activate
+  python -m torch.distributed.run --standalone --nnodes=1 --nproc_per_node=8 visiontransformer_ddp_mlflow.py
+'
+```
+
+And switch the tracking URI back to SQLite in `visiontransformer_ddp_mlflow.py`:
+
+```python
+mlflow.set_tracking_uri("sqlite:///" + os.environ["PWD"] + "/mlruns.db")
+```
 
 ## Weights & Biases
 
