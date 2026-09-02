@@ -34,6 +34,7 @@ release cannot change behaviour under you. Newer images appear in
 ## Further reading
 
 - [LUMI Documentation](https://docs.lumi-supercomputer.eu/)
+- [Data-Aware AI on LUMI](https://github.com/aniskhan25/data-aware-ai)
 - [Scaling-Aware AI on LUMI](https://github.com/aniskhan25/scaling-aware-ai)
 - [Container extension guide](https://github.com/aniskhan25/Extending-containers-on-LUMI/blob/main/README.org)
 - [LUMI AI workshop materials](https://lumi-supercomputer.github.io/LUMI-training-materials/ai-20240529/)

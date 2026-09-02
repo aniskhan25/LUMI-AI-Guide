@@ -61,6 +61,10 @@ cat slurm-<jobid>.out
 
 The script copies data into `/tmp`, runs training, then copies the model checkpoint out before the job ends. See `run_ramfs.sh` for the pattern.
 
+## What does your data layout cost?
+
+The tables above give defaults; they do not tell you what your own dataset costs to read. [Data-Aware AI on LUMI](https://github.com/aniskhan25/data-aware-ai) measures that — dataset inspection, a loose-file baseline, loose files vs. SquashFS vs. WebDataset on the same samples, `num_workers` tuning, scratch vs. flash vs. `/tmp` placement, and a check that distributed ranks read unique and balanced data.
+
 ## Next
 
 [3. Multi-GPU and Multi-Node Training](../3-multi-gpu-and-node/README.md)
