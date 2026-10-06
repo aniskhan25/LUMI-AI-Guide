@@ -7,7 +7,7 @@ A practical guide for running AI training on LUMI, built around a runnable Visio
 The official container for all lessons:
 
 ```
-/appl/local/laifs/containers/lumi-multitorch-u24r70f21m50t210-20260807_115122/lumi-multitorch-full-u24r70f21m50t210-20260807_115122.sif
+/appl/local/laifs/containers/lumi-multitorch-u24r72f21m50t211-20260929_104918/lumi-multitorch-full-u24r72f21m50t211-20260929_104918.sif
 ```
 
 This is a pinned, date-stamped image rather than a `latest` symlink, so a new container

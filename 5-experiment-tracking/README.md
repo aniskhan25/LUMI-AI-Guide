@@ -49,7 +49,7 @@ To visualise, go to **Apps → MLflow** in the LUMI web interface and point it a
 /scratch/project_462000131/<username>/LUMI-AI-Guide/5-experiment-tracking/mlruns
 ```
 
-File-based tracking avoids the MLflow schema version mismatch between the container (MLflow 3.15.1) and the LUMI dashboard (MLflow 3.11.1). File-based tracking is also preferred over SQLite on Lustre filesystems, where many small random writes perform poorly.
+File-based tracking avoids the MLflow schema version mismatch between the container (MLflow 3.16.1) and the LUMI dashboard (MLflow 3.11.1). File-based tracking is also preferred over SQLite on Lustre filesystems, where many small random writes perform poorly.
 
 Check what your container ships before assuming the versions above still hold:
 

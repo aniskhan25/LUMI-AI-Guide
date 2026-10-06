@@ -8,7 +8,7 @@ export PROJECT_ACCOUNT="${PROJECT_ACCOUNT:-project_462000131}"
 # Pinned to a specific date-stamped image rather than a `latest` symlink, so a new
 # container release cannot change behaviour under you. Look in
 # /appl/local/laifs/containers/ for newer images and update this line deliberately.
-export CONTAINER="${CONTAINER:-/appl/local/laifs/containers/lumi-multitorch-u24r70f21m50t210-20260807_115122/lumi-multitorch-full-u24r70f21m50t210-20260807_115122.sif}"
+export CONTAINER="${CONTAINER:-/appl/local/laifs/containers/lumi-multitorch-u24r72f21m50t211-20260929_104918/lumi-multitorch-full-u24r72f21m50t211-20260929_104918.sif}"
 export SCRATCH_ROOT="${SCRATCH_ROOT:-/scratch/${PROJECT_ACCOUNT}/${USER}}"
 
 # --- Modules ---
@@ -28,6 +28,12 @@ if [ -n "${SLURM_JOB_ID:-}" ]; then
 else
   mkdir -p "$MIOPEN_CUSTOM_CACHE_DIR" "$MIOPEN_USER_DB_PATH"
 fi
+
+# --- Slingshot (multi-node) ---
+# The container sets libfabric's memory registration cache monitor to kdreg2, which
+# avoids the RCCL hangs that the older memhooks default caused, so nothing is needed
+# here. A plain `export FI_MR_CACHE_MONITOR=...` does not reach the container; to
+# override it, use: export SINGULARITYENV_FI_MR_CACHE_MONITOR=userfaultfd
 
 # --- Framework caches ---
 # Keep downloaded models off $HOME, whose file-count quota they will otherwise exhaust.
